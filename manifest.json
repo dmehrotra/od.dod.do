@@ -10,9 +10,11 @@
    "default_popup": "popup.html"
   },
 
-  // "background": {
-  //   "scripts": ["./background/jquery.min.js","./background/background.js"]
-  // },
+  "content_scripts": [{
+    "css":["css/style.css"],
+    "js": ["js/jquery.min.js","js/colors.js"],
+    "matches": ["https://www.defense.gov/News/Contracts/Contract-View/Article/*"]
+  }],
 
   "permissions": [
       "storage"

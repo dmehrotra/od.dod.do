@@ -1,0 +1,23 @@
+.amount{
+	background:red;
+	color:white;
+	font-weight: 900;
+}
+.name{
+	background:yellow;
+	color:black;
+	font-weight: 900;
+}
+.wrk{
+	background:blue;
+	color:white;
+	font-weight: 900;
+}
+input{
+	width:100%;
+}
+.form{
+	padding:20px;
+	box-sizing:border-box;
+	border: 1px 1px 1px 1px;
+}
