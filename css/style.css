@@ -13,6 +13,22 @@
 	color:white;
 	font-weight: 900;
 }
+.prp{
+	background:purple;
+	color:white;
+	font-weight: 900;
+}
+.matches{
+	background:green;
+	color:white;
+	font-weight: 900;
+}
+.auth{
+	background:black;
+	color:white;
+	font-weight: 900;
+}
+
 input{
 	width:100%;
 }
