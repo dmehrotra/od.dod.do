@@ -7,6 +7,12 @@ Every day contracts valued at $7 million are announced by the Department of Defe
   - navigate to chrome://extensions
   - click load unpacked extension and click the department-of-defense-contracts folder
 
+## Cypher Viz
+- ![You should see something like this](./1.png "Logo Title Text 1")
+- ![You should see something like this](./2.png "Logo Title Text 1")
+- ![You should see something like this](./3.png "Logo Title Text 1")
+
+
 ## How to
    - ask me for a key.  
    - go to: https://www.defense.gov/News/Contracts/
