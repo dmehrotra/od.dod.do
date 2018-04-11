@@ -1,6 +1,6 @@
 <template>
   <div id="selectioBoardWrapper" :style="{height: (parentHeight/2)+'px'}">
-    <div id='headline' >
+    <div id='headline' v-if="selection.length>0">
       <p><b>Selected Nodes:</b></p>
     </div>
 
