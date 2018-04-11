@@ -1,10 +1,11 @@
 <template>
-  <div id="vizWrapper">
-    <p><b>Viz</b></p>
-    <p>I got {{data.length}} data points, yo!</p>
-    <a @click="unfixPositions">Unfix the Positions, would you?</a>
-    <div>
-    <svg xmlns="http://www.w3.org/2000/svg" :width="width+'px'" :height="height+'px'" v-if="true">
+  <div id="vizWrapper" :style="{ width: width+'px', flexGrow: flex, height: height+'px'}">
+    <!--<p><b>Viz</b></p>-->
+    <!--<p>I got {{data.length}} data points, yo!</p>-->
+    <!--<a @click="unfixPositions">Unfix the Positions, would you?</a>-->
+    <!--<div>-->
+    <!--<svg xmlns="http://www.w3.org/2000/svg" :width="width+'px'" :height="height+'px'" v-if="true">-->
+    <svg xmlns="http://www.w3.org/2000/svg" v-if="true">
     </svg>
     </div>
 
@@ -14,14 +15,16 @@
 <script>
 import * as d3 from 'd3';
 import {mapGetters, mapActions} from 'vuex';
+import {TweenMax} from "gsap";
 
 export default {
   name: 'Viz',
   data () {
     return {
-      width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0)*0.6,
+      flex: 1,
+      width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
+      height: Math.max(document.documentElement.clientHeight, window.innerHeight || 0)-80,
       chartRadius: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-      height: 800,
       d: {
         nodes: [],
         links: []
@@ -43,6 +46,11 @@ export default {
   props:[
     'data'
   ],
+	computed: {
+    ...mapGetters([
+      'selection'
+    ]),
+  },
 	watch: {
     '$props.data':{
       //making some changes
@@ -112,9 +120,13 @@ export default {
 
     let svg = d3.select("svg");
     this.chart = svg.append("g");
-    this.zoom = svg.call(d3.zoom().on("zoom", () => {
+    this.zoom = d3.zoom().on("zoom", () => {
         this.chart.attr("transform", d3.event.transform); 
-      }))
+      });
+    svg.call(this.zoom);
+    //this is to get the scale out later when selecting... pretty sketchy
+    this.chart.attr("transform", "translate(0,0) scale(1)");
+
     this.linksLayer = this.chart.append("g");
     this.nodesLayer = this.chart.append("g");
 
@@ -123,7 +135,7 @@ export default {
             .attr("cx", 0)
             .attr("cy", 0)
             .attr("r", this.boundingRadius)
-            .attr("stroke", "red")
+            .attr("stroke", "#232323")
             .attr("stroke-width", "8")
             .attr("fill", "none")
     ;
@@ -145,10 +157,28 @@ export default {
 
 		this.unwatchStoreForSelection = this.$store.watch(this.$store.getters.currentSelectionWatcher, selection => {
       this.processNewSelection(selection);
+      if(selection.length > 0){
+        let newWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) *0.5;
+        console.log(this.chart.attr("transform"));
+        // // posponing this part
+        //console.log(Number(this.chart.attr("transform").split(" ")[1].split("(")[1].split(")")[0]));
+        //let currentScale = Number(this.chart.attr("transform").split(" ")[1].split("(")[1].split(")")[0]);
+        //let currentTransformX = Number(this.chart.attr("transform").split(" ")[0].split("(")[1].split(")")[0].split(",")[0]);
+        //let currentTransformY = Number(this.chart.attr("transform").split(" ")[0].split("(")[1].split(")")[0].split(",")[1]);
+        //console.log(currentTransformX, currentTransformX);
+        //this.chart.attr("transform", "translate("+ (currentTransformX - newWidth/2)  +","+currentTransformY+") scale("+currentScale+")"); 
+        TweenLite.to(this.$data, 1.0, { flex: 0.5, width: newWidth });
+        //this.chart.attr("transform", "scale(0.5)"); 
+      }else{
+         TweenLite.to(this.$data, 1.0, { flex: 1.0, width: 0.0 });
+      }
     })
+    window.addEventListener('resize', this.handleResize)
+    //this.handleResize();
   },
   beforeDestroy: function () {
     this.unwatchStoreForSelection();
+    window.removeEventListener('resize', this.handleResize)
   },
   methods:{
     ...mapActions([
@@ -355,7 +385,14 @@ export default {
       });
       this.simulation.alpha(1).restart();
     },
-
+    handleResize(){
+      if(this.selection.length > 0){
+        this.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) * 0.5;
+      }else{
+        this.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      }
+      this.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0) - 80;
+    },
 
   }
   //data () {
@@ -370,9 +407,16 @@ export default {
 <style scoped>
   svg{
     background-color: black;
+    
+    width:100%;
+    height:100%;
   }
   #vizWrapper{
+    /*
     display: inline-block;
     float:left;
+
+    flex-grow:0.4;
+    */
   }
 </style>
