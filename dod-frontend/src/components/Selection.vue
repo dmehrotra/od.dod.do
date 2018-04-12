@@ -1,11 +1,11 @@
 <template>
-  <div id="selectioBoardWrapper" :style="{height: (parentHeight/2)+'px'}">
+  <div id="selectioBoardWrapper" :style="{height: (parentHeight/2)+'px'}" @click="scrollToTop">
     <div id='headline' v-if="selection.length>0">
       <p><b>Selected Nodes:</b></p>
     </div>
 
-    <transition-group name="slide" id="selectionWrapper" tag="div" :style="{height: (parentHeight/2-57)+'px'}">
-      <selectedItem class="slide-item" v-for="(node, i) in selection"
+    <transition-group :ref="'containerScroll'" name="slide" id="selectionWrapper" tag="div" :style="{height: (parentHeight/2-57)+'px'}">
+      <selectedItem  class="slide-item" v-for="(node, i) in selection"
 
         :data=node
         :key=node.selected.name
@@ -17,26 +17,42 @@
 <script>
 import {mapGetters, mapActions} from 'vuex';
 import SelectedItem from '@/components/SelectedItem'
+
 export default {
   name: 'Selection',
   components: {
     SelectedItem
   },
+  data () {
+    return {
+      unwatchStoreForSelection: undefined,
+      len: 0
+    }
+  },
   props: [
     'parentHeight'
   ],
+  mounted(){
+		this.unwatchStoreForSelection = this.$store.watch(this.$store.getters.currentSelectionWatcher, (selection,i) => {
+      if(selection.length> this.len){
+        this.len = selection.length;
+        this.scrollToTop();
+      }
+    })
+  },
+  beforeDestroy: function () {
+    this.unwatchStoreForSelection();
+  },
   methods:{
+    scrollToTop(){
+      this.$refs.containerScroll.$el.scrollTop = 0;
+    }
   },
 	computed: {
     ...mapGetters([
       'selection'
     ]),
   },
-  //data () {
-  //  return {
-  //    msg: ''
-  //  }
-  //}
 }
 </script>
 
