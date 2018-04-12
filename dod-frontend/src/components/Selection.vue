@@ -5,10 +5,10 @@
     </div>
 
     <transition-group name="slide" id="selectionWrapper" tag="div" :style="{height: (parentHeight/2-57)+'px'}">
-      <selectedItem v-for="(node, i) in selection"
+      <selectedItem class="slide-item" v-for="(node, i) in selection"
 
         :data=node
-        :key=i
+        :key=node.selected.name
       />
     </transition-group>
   </div>
@@ -31,7 +31,7 @@ export default {
     ...mapGetters([
       'selection'
     ]),
-  }
+  },
   //data () {
   //  return {
   //    msg: ''
@@ -70,9 +70,12 @@ export default {
   background-color:grey;
   */
 }
+  .slide-item{
+    transition: 0.2s;
+  }
   .slide-enter-active,
   .slide-leave-active{
-    transition: 0.2s;
+    transition-delay: 0.2s;
   }
   .slide-enter {
     transform: translate(-100%, 0);

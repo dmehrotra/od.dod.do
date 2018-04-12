@@ -22,7 +22,7 @@ const mutations = {
     state.selection = [];
   },
   [types.ADD_TO_SELECTION] (state, data) {
-    state.selection.push(data);
+    state.selection.unshift(data);
   },
 }
 
