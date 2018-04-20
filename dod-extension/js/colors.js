@@ -47,7 +47,6 @@ function number(el){
         }
     }catch(err){console.log(err)}
     if (match == undefined){
-        debugger;
     }
     return match
     
@@ -114,7 +113,6 @@ function work(el){
     }catch(err){console.log(err)}
     
   if (wrk == undefined){
-    debugger;
   }
    
     
@@ -170,11 +168,11 @@ function createContract(el,department){
         
         var html = "<div class='form' style='color:black'>";
         html += "<label>Who is the contractor?</label>"
-        html += "<input id='contractor_name' type='text' name='contractor_name' value='"+contract.contractor_name+" '/>"
+        html += "<input id='contractor_name' type='text' name='contractor_name' value='"+contract.contractor_name.trim()+" '/>"
         html += "<label>Which Department Issued this contract?</label>"
         html += "<input id='department_name' type='text' name='department_name' value='"+department+"'/>"
         html += "<label>The Date the Contract was issued</label>"
-        html += "<input id='contract_date'type='text' name='contract_date' value='"+new Date($('.date').html().split("<br>")[1].replace("        ",'')).toISOString().split('T')[0]+"' />"
+        html += "<input id='contract_date'type='text' name='contract_date' value='"+new Date($('.date').html().split("<br>")[1].replace("        ",'')).toISOString().split('T')[0].trim()+"' />"
         html += "<label>How much money?</label>"
         html += "<input id='amount' type='text' name='amount' value='"+contract.amount+"'>"
         html += "<label>What is the contract for?</label>"
@@ -182,11 +180,13 @@ function createContract(el,department){
         html += "<label>Where is the work performed?</label>"
         html += "<input id='where'type='text' name='where' value='"+formatWork(contract.work)+"'/>"
         html += "<label>Contract Number</label>"
-        html += "<input id='contract_number'type='text' name='contract_number' value='"+contract.number.replace('(','').replace(')','').replace('.','')+"'/>"
+        html += "<input id='contract_number'type='text' name='contract_number' value='"+contract.number.replace('(','').replace(')','').replace('.','').trim()+"'/>"
         html += "<label>Contracting Activity</label>"
-        html += "<input id='contracting_activity' type='text' name='contracting_activity' value='"+formatActivity(contract.authority)+"' />"
+        html += "<input id='contracting_activity' type='text' name='contracting_activity' value='"+formatActivity(contract.authority).trim()+"' />"
         html += "<label>Does this contract involve another country?</label>"
         html += "<input id='foreign' type='text' name='foreign' value='"+contract.foreign+"' />"
+        html += "<label>which country?</label>"
+        html += "<input id='another-country' type='text' name='another_country' value='' />"
         html += "<button class='submit'>sup</button>"
         html += " </div>"
         $(el).append(html)
@@ -241,7 +241,8 @@ function sendForm(sibs){
         "place_of_work": sibs[5].value,
         "contract_number": sibs[6].value,
         "contracting_activity": sibs[7].value.replace(',',' '),
-        "foreign": sibs[8].value
+        "foreign": sibs[8].value,
+        "another_country": sibs[9].value
 
     }
     $.post('https://javantiger.club:3002/contracts', obj, function(returnedData){
