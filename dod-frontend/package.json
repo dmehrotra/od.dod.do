@@ -12,11 +12,13 @@
   },
   "dependencies": {
     "d3": "^5.0.0",
+    "gsap": "^1.20.4",
     "lodash": "^4.17.5",
     "vue": "^2.5.2",
     "vue-lodash": "^2.0.0",
     "vue-resource": "^1.5.0",
     "vue-router": "^3.0.1",
+    "vue-scrollto": "^2.11.0",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
@@ -63,7 +65,7 @@
     "vue-template-compiler": "^2.5.2",
     "webpack": "^3.6.0",
     "webpack-bundle-analyzer": "^2.9.0",
-    "webpack-dev-server": "^2.9.1",
+    "webpack-dev-server": "^2.11.2",
     "webpack-merge": "^4.1.0"
   },
   "engines": {

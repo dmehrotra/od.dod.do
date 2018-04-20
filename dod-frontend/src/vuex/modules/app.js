@@ -24,6 +24,9 @@ const mutations = {
   [types.ADD_TO_SELECTION] (state, data) {
     state.selection.unshift(data);
   },
+  [types.REMOVE_FROM_SELECTION] (state, uindex) {
+    state.selection = state.selection.filter(d=>d.selected.uindex!=uindex);
+  },
 }
 
 const actions = {
@@ -37,6 +40,9 @@ const actions = {
       if(d.selected.uindex==newSelection.selected.uindex) selectedAlready = true;
     });
     if(!selectedAlready) commit(types.ADD_TO_SELECTION, newSelection);	
+  },
+  removeFromSelection ({commit, state}, uindex) {
+    commit(types.REMOVE_FROM_SELECTION, uindex);	
   },
 }
 export default {

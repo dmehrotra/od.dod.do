@@ -4,13 +4,15 @@
       <p><b>Selected Nodes:</b></p>
     </div>
 
-    <transition-group :ref="'containerScroll'" name="slide" id="selectionWrapper" tag="div" :style="{height: (parentHeight/2-57)+'px'}">
-      <selectedItem  class="slide-item" v-for="(node, i) in selection"
+    <div :ref="'containerScroll'" id="scrollContainer">
+      <transition-group name="slide" id="selectionWrapper" tag="div" :style="{height: (parentHeight/2-57)+'px'}">
+        <selectedItem  class="slide-item" v-for="(node, i) in selection"
 
-        :data=node
-        :key=node.selected.name
-      />
-    </transition-group>
+          :data=node
+          :key=node.selected.name
+        />
+      </transition-group>
+    </div>
   </div>
 </template>
 
@@ -34,16 +36,22 @@ export default {
   ],
   mounted(){
 		this.unwatchStoreForSelection = this.$store.watch(this.$store.getters.currentSelectionWatcher, (selection,i) => {
-      if(selection.length> this.len){
-        this.len = selection.length;
-        this.scrollToTop();
-      }
-    })
+
+      //  console.log(this.$refs.containerScroll.$el);
+      //if(selection.length > this.len){
+      //  console.log("up");
+      //  this.scrollToTop();
+      //}
+      //this.len = selection.length;
+    });
   },
   beforeDestroy: function () {
     this.unwatchStoreForSelection();
   },
   methods:{
+    ...mapActions([
+      'removeFromSelection'
+    ]),
     scrollToTop(){
       this.$refs.containerScroll.$el.scrollTop = 0;
     }
@@ -81,16 +89,18 @@ export default {
   display:inline-block;
 }
 #selectionWrapper{
-  overflow:scroll;
   /*
+  overflow:scroll;
   background-color:grey;
   */
+}
+#scrollContainer{
+  overflow: scroll;
 }
   .slide-item{
     transition: 0.2s;
   }
-  .slide-enter-active,
-  .slide-leave-active{
+  .slide-enter-active{
     transition-delay: 0.2s;
   }
   .slide-enter {

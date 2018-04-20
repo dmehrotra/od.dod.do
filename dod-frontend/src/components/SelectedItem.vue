@@ -1,6 +1,7 @@
 <template>
   <div id="">
-    <div id="innerWrapper">
+    <div id="innerWrapper" @click="removeFromSelection(data.selected.uindex)">
+    <!--<div id="innerWrapper" >-->
       <p><b>{{data.selected.name}}</b></p>
     </div>
       
@@ -16,8 +17,14 @@ export default {
     'data'
   ],
   methods:{
+    ...mapActions([
+      'removeFromSelection'
+    ]),
   },
 	computed: {
+  },
+  mounted(){
+    console.log(this.data);
   }
   //data () {
   //  return {
