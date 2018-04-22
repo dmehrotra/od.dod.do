@@ -5,7 +5,9 @@ import * as types from '../mutation-types'
 
 const state = {
   //departments: [],
-  selection: []
+  selection: [],
+  deepSelection: undefined
+
 }
 
 const getters = {
@@ -13,6 +15,9 @@ const getters = {
   //graphNodesWatcher: state => () => state.graph.nodes,
   selection: state => state.selection,
   currentSelectionWatcher: state => () => state.selection,
+
+  deepSelection: state => state.deepSelection,
+  
 
 
 }
@@ -26,6 +31,12 @@ const mutations = {
   },
   [types.REMOVE_FROM_SELECTION] (state, uindex) {
     state.selection = state.selection.filter(d=>d.selected.uindex!=uindex);
+  },
+  [types.CHANGE_DEEP_SELECTION] (state, deepSelection) {
+    state.deepSelection = deepSelection;
+  },
+  [types.CLEAR_DEEP_SELECTION] (state) {
+    state.deepSelection = undefined;
   },
 }
 
@@ -43,6 +54,18 @@ const actions = {
   },
   removeFromSelection ({commit, state}, uindex) {
     commit(types.REMOVE_FROM_SELECTION, uindex);	
+  },
+  deepSelect({commit, state}, uindex) {
+    state.selection.forEach(d=>{
+      if(d.selected.uindex== uindex){
+        console.log(d);
+        commit(types.CHANGE_DEEP_SELECTION, d);	
+
+      }
+    });
+  },
+  clearDeepSelection ({commit, state}) {
+    commit(types.CLEAR_DEEP_SELECTION);	
   },
 }
 export default {

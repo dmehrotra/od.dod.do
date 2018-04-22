@@ -26,16 +26,10 @@ export default {
       api.get(domain)
         .then((response) => {
           this.$emit('input', response.body.data );
-          //console.log(response);
         })
         .catch((error) => console.log('API_FAILURE'));
     }
   }
-  //data () {
-  //  return {
-  //    msg: ''
-  //  }
-  //}
 }
 </script>
 
@@ -46,7 +40,7 @@ export default {
     flex-grow:1;
     */
     height: 80px;
-    border: black solid 1px;
+    border-bottom: black solid 1px;
     display:flex;
   }
   .menu-box{

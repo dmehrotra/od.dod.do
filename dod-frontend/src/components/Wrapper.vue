@@ -7,8 +7,10 @@
       <transition name="slide">
         <Board v-if="selection.length > -1"/>
       </transition>
-      <Viz
+      <Viz v-show="deepSelection == undefined"
         :data="data" 
+      />
+      <deep-selection v-if="deepSelection"
       />
     </div>
   </div>
@@ -19,6 +21,7 @@ import {mapGetters} from 'vuex';
 import Manager from '@/components/Manager'
 import Viz from '@/components/Viz'
 import Board from '@/components/Board'
+import DeepSelection from '@/components/DeepSelection'
 
 
 export default {
@@ -26,7 +29,8 @@ export default {
   components: {
     Manager,
     Viz,
-    Board
+    Board,
+    DeepSelection
   },
   data () {
     return {
@@ -37,7 +41,8 @@ export default {
   },
 	computed: {
     ...mapGetters([
-      'selection'
+      'selection',
+      'deepSelection'
     ]),
   },
   mounted(){

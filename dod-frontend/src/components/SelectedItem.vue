@@ -1,8 +1,11 @@
 <template>
   <div id="">
-    <div id="innerWrapper" @click="removeFromSelection(data.selected.uindex)">
+    <!-- this is how to remove from selection -->
+    <!--<div id="innerWrapper" @click="removeFromSelection(data.selected.uindex)">-->
+    <div id="innerWrapper" @click="deepSelect(data.selected.uindex)" :style="{backgroundColor: isDeepSelection?'blue':'black'}">
     <!--<div id="innerWrapper" >-->
       <p><b>{{data.selected.name}}</b></p>
+      <a href="#" @click="close">close</a>
     </div>
       
   </div>
@@ -18,10 +21,32 @@ export default {
   ],
   methods:{
     ...mapActions([
-      'removeFromSelection'
+      'removeFromSelection',
+      'deepSelect',
+      'clearDeepSelection'
     ]),
+    close(){
+      if(this.isDeepSelection){
+        this.clearDeepSelection();
+
+      }
+      this.removeFromSelection(this.data.selected.uindex)
+
+    }
   },
 	computed: {
+    ...mapGetters([
+      'deepSelection'
+    ]),
+    isDeepSelection(){
+      if(this.deepSelection == undefined){
+        return false;
+      }else if(this.deepSelection.selected.uindex == this.data.selected.uindex){
+        return true;
+      }else{
+        return false;
+      }
+    }
   },
   mounted(){
     console.log(this.data);
@@ -44,9 +69,10 @@ div{
   */
   min-height:70px;
   margin-bottom:5px;
-  background-color:black;
   border-radius:5px;
   /*
+
+  background-color:black;
   padding-left:10px;
   padding-top:2px;
   */

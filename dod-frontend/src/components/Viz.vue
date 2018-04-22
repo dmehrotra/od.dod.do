@@ -174,7 +174,7 @@ export default {
       }
     })
     window.addEventListener('resize', this.handleResize)
-    //this.handleResize();
+    this.handleResize();
   },
   beforeDestroy: function () {
     this.unwatchStoreForSelection();
@@ -306,9 +306,9 @@ export default {
       // to uniquify by value.metadata.id
       console.log(nodes);
       nodes =  _(nodes)
-                      .groupBy(d => d.uindex)
-                      .map(objs => _.assignWith({}, ...objs, (val1, val2) => val1 || val2))
-                      .value();
+                .groupBy(d => d.uindex)
+                .map(objs => _.assignWith({}, ...objs, (val1, val2) => val1 || val2))
+                .value();
       console.log(nodes);
       return {nodes: nodes, links: links, maxStrength: maxStrength}
     },

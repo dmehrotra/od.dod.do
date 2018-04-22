@@ -53,7 +53,7 @@ export default {
       'removeFromSelection'
     ]),
     scrollToTop(){
-      this.$refs.containerScroll.$el.scrollTop = 0;
+      //this.$refs.containerScroll.$el.scrollTop = 0;
     }
   },
 	computed: {
