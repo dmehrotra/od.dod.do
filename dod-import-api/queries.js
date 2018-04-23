@@ -27,6 +27,11 @@ function createContract(req, res, next) {
 
 	  
 	 createMeta(contractor, department, function(obj){
+		if (req.body.another_country){
+			another_country = req.body.another_country
+		}else{
+			another_country = "United States"
+		}
 		insertion = {
 			'contract_number': req.body.contract_number,
 			'for_what': req.body.for_what,
@@ -36,9 +41,11 @@ function createContract(req, res, next) {
 			'amount':parseFloat(req.body.amount.replace(/,/g, '')),
 			'contract_date':new Date(req.body.contract_date),
 			'contracting_activity':req.body.contracting_activity,
-			'foreign':req.body.foreign
+			'foreign':req.body.foreign,
+			'another_country':another_country
 		}
-	        db.none('insert into contract (contract_number,for_what,contractor_id,department_id,place_of_work,amount,contract_date,contracting_activity,"foreign")' + 'VALUES (${contract_number}, ${for_what}, ${contractor_id}, ${department_id},${place_of_work},${amount},${contract_date},${contracting_activity},${foreign})', insertion)
+		 console.log(another_country)
+	        db.none('insert into contract (contract_number,for_what,contractor_id,department_id,place_of_work,amount,contract_date,contracting_activity,"foreign","another_country")' + 'VALUES (${contract_number}, ${for_what}, ${contractor_id}, ${department_id},${place_of_work},${amount},${contract_date},${contracting_activity},${foreign},${another_country})', insertion)
 			 .then(function () {
 				 res.status(200).json({
 					status: 'success',
