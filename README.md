@@ -30,3 +30,6 @@ The DOD-Semantics folder is a semantic analysis of the purposes of each contract
    - ![You should see something like this](./ext.png "Logo Title Text 1")
    - submit the form after making sure the fields are correct. 
 
+## Who do dis?
+
+Dhruv Mehrotra and Leon Eckert
