@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Wrapper from '@/components/Wrapper'
+import Wrapper from '@/components/layouts/Wrapper'
 
 Vue.use(Router)
 

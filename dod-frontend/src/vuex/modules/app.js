@@ -38,6 +38,14 @@ const mutations = {
   [types.CLEAR_DEEP_SELECTION] (state) {
     state.deepSelection = undefined;
   },
+  
+  [types.TOGGLE_TEST_SELECTION] (state) {
+    if(state.selection.length < 1){
+      state.selection = [1];
+    }else{
+      state.selection = [];
+    }
+  },
 }
 
 const actions = {
@@ -66,6 +74,10 @@ const actions = {
   },
   clearDeepSelection ({commit, state}) {
     commit(types.CLEAR_DEEP_SELECTION);	
+  },
+
+  toggleSelection ({commit, state}) {
+    commit(types.TOGGLE_TEST_SELECTION);	
   },
 }
 export default {
