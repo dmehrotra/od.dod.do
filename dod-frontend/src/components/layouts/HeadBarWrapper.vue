@@ -1,7 +1,14 @@
 <template>
   <div id="headBarWrapper" :style="{ width: width+'px', height: headBarHeight + 'px' }">
-    <head-line-wrapper/>
-    <head-line-wrapper/>
+    <head-line-wrapper
+      :width="width"
+      :height="headBarHeight"
+    />
+    <head-controls-wrapper
+      :width="width"
+      :height="headBarHeight"
+      v-on:input="sendUp(arguments)"
+    />
   </div>
 </template>
 
@@ -11,14 +18,13 @@ import HeadControlsWrapper from '@/components/layouts/HeadControlsWrapper'
 
 
 export default {
-  name: 'Wrapper',
+  name: 'HeadBarWrapper',
   components: {
     HeadLineWrapper,
     HeadControlsWrapper
   },
   data () {
     return {
-      data: [],
       width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
     }
   },
@@ -34,6 +40,9 @@ export default {
   methods: {
     handleResize(){
       this.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    },
+    sendUp(args){
+      this.$emit('input', args[0] );
     }
   }
 }

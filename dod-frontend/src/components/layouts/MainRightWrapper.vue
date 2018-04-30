@@ -1,13 +1,12 @@
 <template>
   <div id="mainRightWrapper" :style="{ width: width+'px', height: height + 'px' }">
     <viz id="viz"
-      :height="height"
       :width="width"
-      />
+      :height="height"
+      :graphData="graphData"
+    />
     <deep-selection id="deepSelection" v-show="false"
-      :height="height"
-      :width="width"
-      />
+    />
   </div>
 </template>
 
@@ -30,6 +29,7 @@ export default {
   props:[
     'height',
     'width',
+    'graphData'
   ],
   mounted(){
   },

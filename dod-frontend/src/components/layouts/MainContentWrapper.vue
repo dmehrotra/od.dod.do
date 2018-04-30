@@ -7,6 +7,7 @@
     <main-right-wrapper
       :height="height"
       :width="widthRight"
+      :graphData="graphData"
     />
   </div>
 </template>
@@ -35,7 +36,9 @@ export default {
     }
   },
   props:[
-    'headBarHeight'
+    'headBarHeight',
+    'graphData'
+
   ],
   computed: {
     height: function(){

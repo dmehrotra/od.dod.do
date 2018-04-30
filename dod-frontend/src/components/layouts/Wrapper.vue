@@ -2,10 +2,12 @@
   <div id="wrapper" :style="{ width: width+'px', height: height + 'px' }">
     <head-bar-wrapper
       :headBarHeight="headBarHeight"
-      />
+      v-on:input="gotData(arguments)"
+    />
     <main-content-wrapper
       :headBarHeight="headBarHeight"
-      />
+      :graphData="graphData"
+    />
   </div>
 </template>
 
@@ -22,10 +24,10 @@ export default {
   },
   data () {
     return {
-      data: [],
       width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
       height: Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
       headBarHeight: 80,
+      graphData: [],
     }
   },
   mounted(){
@@ -38,6 +40,18 @@ export default {
     handleResize(){
       this.width =  Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
       this.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    },
+    gotData(args){
+      let data = args[0];
+
+      console.log("WRAPPER got data!", data);
+      if(data.type == "graphData"){
+        this.graphData = data.data;
+      
+      }
+      
+
+    
     }
   }
 }

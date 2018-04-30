@@ -1,5 +1,5 @@
 <template>
-  <div id="deepSelection" :style="{ width: width+'px', height: height + 'px' }">
+  <div id="deepSelection" :style="">
     <p>The deep selection is here</p>
   </div>
 </template>
@@ -20,8 +20,6 @@ export default {
     }
   },
   props:[
-    'height',
-    'width',
   ],
   mounted(){
   },
@@ -37,5 +35,7 @@ export default {
   #deepSelection{
     background-color:red;
     opacity:0.5;
+    width:100%;
+    height:100%;
   }
 </style>
