@@ -5,6 +5,7 @@
 
 <script>
 import * as d3 from 'd3';
+import {mapActions, mapGetters} from 'vuex';
 
 export default {
   name: 'Viz',
@@ -19,13 +20,17 @@ export default {
       node: undefined,
       link: undefined,
       chart: undefined,
+      tooltip: undefined,
+      tooltipBg: undefined,
       nodesLayer: undefined,
       linksLayer: undefined,
+      tooltipLayer: undefined,
       strokeWidthScale: undefined,
       strokeColorScale: undefined,
       strokeLengthScale: undefined,
       boundingRadius: 1000,
       zoom: undefined,
+      unwatchStoreForSelection: undefined,
     }
   },
   props:[
@@ -33,13 +38,17 @@ export default {
     'height',
     'graphData'
   ],
+	computed: {
+    ...mapGetters([
+      'selection'
+    ]),
+  },
 	watch: {
    
     '$props.width':{
       handler: function (val, oldVal) { 
         this.centerGraph();
       },
-      
       deep: true
     },
     '$props.graphData':{
@@ -52,8 +61,7 @@ export default {
       deep: true
     }
   },
-  mounted(){
-    this.svg = d3.select("svg");
+  mounted(){ this.svg = d3.select("svg");
     this.chart = this.svg.append("g");
     
 
@@ -67,7 +75,36 @@ export default {
     
     this.linksLayer = this.chart.append("g");
     this.nodesLayer = this.chart.append("g");
+    this.tooltipLayer = this.chart.append("g");
 
+    this.tooltipLayer                          
+         .attr("transform", "translate(-20000,-20000)")
+        .attr("opacity", "0")
+    ;
+    this.tooltipBg = this.tooltipLayer.append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("rx", 4)
+                .attr("ry", 4)
+                .attr("width", 10)
+                .attr("height", 50)
+                .attr("fill", "black")
+                .attr("opacity", 0.7)
+                .attr("transform", "translate(-10, -40)")
+    ;
+    this.tooltip = this.tooltipLayer
+                      .append("text")
+                      .text("hello")
+                      .attr("font-family", "sans-serif")
+                      .attr("font-size", "40px")
+                      .attr("fill", "red")
+    ;
+    this.tooltipBg.attr("width", () => {
+                      return this.tooltip.node().getComputedTextLength() + 20;
+                  });
+    ;
+
+    
     //// boundaries cricle:
     this.linksLayer.append("circle")
             .attr("cx", 0)
@@ -91,7 +128,6 @@ export default {
         
         }))
         .force("collide", d3.forceCollide(8))
-        //.force("center", d3.forceCenter(this.chartWidth / 2, this.chartHeight / 2))
         .force("center", d3.forceCenter(0,0))
         .on("tick", this.ticked)
     ;
@@ -100,11 +136,17 @@ export default {
     this.update();
 
 
+		this.unwatchStoreForSelection = this.$store.watch(this.$store.getters.currentSelectionWatcher, selection => {
+      this.processNewSelection(selection);
+    })
 
   },
   beforeDestroy: function () {
   },
   methods: {
+    ...mapActions([
+      'addToSelection'
+    ]),
     update(){
       let t = d3.transition()
                     .duration(200)
@@ -116,10 +158,6 @@ export default {
           });
       }, 200);
       this.node = this.nodesLayer.selectAll("circle").data(this.componentGraphData.nodes, d=>d.uindex);
-      this.node
-        //.attr("fill", "red")
-      ;
-
 
       this.node.exit()
         .transition(t)
@@ -134,13 +172,10 @@ export default {
                   if(d.type == "Contractor") return 6;
                   else if(d.type == "Department") return 8;
                 })
-
                 .attr("fill", d=>{
                   if(d.type == "Contractor") return "white";
                   else if(d.type == "Department") return "blue";
                 })
-                //.attr("stroke-width", 1)
-                //.attr("stroke", "black")
                 .merge(this.node)
                 .call(d3.drag()
                   .on("start", this.dragstarted)
@@ -155,20 +190,76 @@ export default {
                                       return d1.source==d?d1.target:d1.source;
                                     })
                   ;
-                  //connections.push(d.uindex);
-                  //this.node.attr("fill", d1=>{
-                  //  if(connections.includes(d1.uindex)){
-                  //    return "#ff00ef";
-                  //  }else{
-                  //    if(d1.type == "Contractor") return "white";
-                  //    else if(d1.type == "Department") return "blue";
-                  //  }
-                  //});
                   let selection = {"selected": d, "connections": connections};
                   this.addToSelection(selection);
-
                   console.log(connections);
-                });
+                })
+                .on("mouseover", (d, i, nodes)=>{
+                    d3.select(nodes[i]).attr("stroke", "red");
+
+                    let tr = d3.zoomTransform(this.svg.node()).k;
+                    let fsize = 20*(0.7/tr);
+                    let mouseX = d3.mouse(this.svg.node())[0];
+                    let mouseY = d3.mouse(this.svg.node())[1];
+                    let svgW = Number(this.svg.style("width").slice(0,-2));
+                    let svgH = Number(this.svg.style("width").slice(0,-2));
+                    let third = mouseX/svgW;
+                    let offsetFactor = 1;
+                    if(third < 0.33){
+                      offsetFactor = 0;
+                    }else if(third < 0.66){
+                      offsetFactor = 0.5;
+                    }else{
+                      offsetFactor = 1;
+                    }
+                    let yOffsetFactor = 1;
+                    if(mouseY/svgH < 0.2){
+                      yOffsetFactor = -1
+                    }
+
+                    this.tooltip
+                       .text(d.name)
+                       .attr("font-size", fsize)
+                    ;
+                    this.tooltipBg
+                          .attr("height", fsize*1.25)
+                          .attr("width", () => {
+                            return this.tooltip.node().getComputedTextLength() + fsize*0.5;
+                          })
+                          .attr("transform", "translate(-"+fsize*0.25+", -"+fsize+")")
+                          .attr("rx", fsize*0.1)
+                          .attr("ry", fsize*0.1)
+                    ;
+                  
+                    this.tooltipLayer
+                          .attr("opacity", "1")
+                          .attr("transform", "translate("+(d.x - offsetFactor*this.tooltip.node().getComputedTextLength()  )+","+(d.y-yOffsetFactor*fsize*2)+")")
+                    ;
+                    
+
+                })
+                .on("mouseout", (d, i, nodes)=>{
+                    this.tooltipLayer                          
+                         .attr("transform", "translate(-20000,-20000)")
+                        .attr("opacity", "0")
+                    ;
+
+                    let selectedNodes = this.selection.map(d=>{return d.selected.uindex;});
+
+                    d3.select(nodes[i]).attr("stroke", d1=>{
+                                if(selectedNodes.includes(d1.uindex)){
+                                  return "red";
+                                }else{
+                                  return "none"
+                                }
+                              })
+                    ;
+                    
+
+                })
+
+      ;
+
 
       ;
       this.link = this.linksLayer.selectAll("line").data(this.componentGraphData.links, d=>d.uindex);
@@ -214,32 +305,6 @@ export default {
           .attr("y1", (d) => {return d.source.y})
           .attr("x2", (d) => {return d.target.x})
           .attr("y2", (d) => {return d.target.y})
-
-      //this.node
-      //    .attr("cx", (d) => {return d.type=="Department"?d.x=Math.max(0, Math.min(this.chartWidth, d.x)):d.x;})
-      //    .attr("cy", (d) => {return d.y = Math.max(0, Math.min(this.chartHeight, d.y));})
-
-      //this.link
-      //    .attr("x1", (d) => {return Math.max(0, Math.min(this.chartWidth, d.source.x));})
-      //    .attr("y1", (d) => {return Math.max(0, Math.min(this.chartHeight, d.source.y));})
-      //    .attr("x2", (d) => {return Math.max(0, Math.min(this.chartWidth, d.target.x));})
-      //    .attr("y2", (d) => {return Math.max(0, Math.min(this.chartHeight, d.target.y));})
-
-      //this.node
-      //    .attr("cx", (d) => {
-      //       return d.x = this.pythag(8, d.y, d.x, this.width); 
-      //        //return d.type=="Department"?d.x=Math.max(0, Math.min(this.chartWidth, d.x)):d.x;
-      //    })
-      //    .attr("cy", (d) => {
-      //      return d.y = this.pythag(8, d.x, d.y, this.width);
-      //      //return d.y = Math.max(0, Math.min(this.chartHeight, d.y));
-      //    })
-
-      //this.link
-      //    .attr("x1", (d) => {return Math.max(0, Math.min(this.width*2, d.source.x));})
-      //    .attr("y1", (d) => {return Math.max(0, Math.min(this.height*2, d.source.y));})
-      //    .attr("x2", (d) => {return Math.max(0, Math.min(this.width*2, d.target.x));})
-      //    .attr("y2", (d) => {return Math.max(0, Math.min(this.height*2, d.target.y));})
     },
     dragstarted(d) {
       if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
@@ -327,7 +392,39 @@ export default {
         this.svg.transition()
                   .duration(500)
                   .call(this.zoom.transform, d3.zoomIdentity.translate(this.width/2,this.height/2).scale(newScale));
-    }
+    },
+    processNewSelection(selection){
+      let selectedNodes = selection.map(d=>{return d.selected.uindex;});
+      console.log("s", selectedNodes);
+      let connectedNodes = selection.reduce((accumulator, d) => {
+        d.connections.forEach(d1=>{
+          accumulator.push(d1.uindex);
+        })
+        return accumulator;
+      }, []);
+
+      this.node.attr("stroke", d1=>{
+                if(selectedNodes.includes(d1.uindex)){
+                  return "red";
+                }else{
+                  return "none"
+                }
+              }).attr("stroke-width", d1=>{
+                if(selectedNodes.includes(d1.uindex)){
+                  return "6";
+                } 
+              }).attr("r", d1=>{
+                if(selectedNodes.includes(d1.uindex)){
+                  if(d1.type == "Contractor") return "9";
+                  else if(d1.type == "Department") return "11";
+                }else{
+                  if(d1.type == "Contractor") return "6";
+                  else if(d1.type == "Department") return "8";
+                }
+              })
+      ;
+
+    },
   }
 }
 </script>

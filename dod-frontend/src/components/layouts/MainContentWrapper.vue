@@ -1,5 +1,5 @@
 <template>
-  <div id="mainContentWrapper" :style="{ width: width+'px', height: height + 'px' }" @click="toggleSelection">
+  <div id="mainContentWrapper" :style="{ width: width+'px', height: height + 'px' }" @click="">
     <main-left-wrapper
       :height="height"
       :width="widthLeft"
