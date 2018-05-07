@@ -45,6 +45,12 @@ export default {
   },
 	watch: {
    
+    '$props.height':{
+      handler: function (val, oldVal) { 
+        this.centerGraph();
+      },
+      deep: true
+    },
     '$props.width':{
       handler: function (val, oldVal) { 
         this.centerGraph();

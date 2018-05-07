@@ -5,16 +5,10 @@
 </template>
 
 <script>
-//import MainRightWrapper from '@/components/layouts/MainRightWrapper'
-///import MainContentWrapper from '@/components/layouts/MainContentWrapper'
 import api from '@/vuex/api'
 
 export default {
   name: 'headControls',
-//  components: {
-//    HeadBarWrapper,
-//    MainContentWrapper
-//  },
   data () {
     return {
     }
@@ -33,7 +27,9 @@ export default {
         .then((response) => {
           this.$emit('input', {type: "graphData", data: response.body.data} );
         })
-        .catch((error) => console.log('API_FAILURE'));
+        .catch((error) => {
+          this.$emit('input', {type: "error", data: "apifailure"} );
+        });
     }
   }
 }

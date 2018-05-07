@@ -1,50 +1,19 @@
 <template>
   <div id="headBarWrapper" :style="{ width: width+'px', height: headBarHeight + 'px' }">
-    <head-line-wrapper
-      :width="width"
-      :height="headBarHeight"
-    />
-    <head-controls-wrapper
-      :width="width"
-      :height="headBarHeight"
-      v-on:input="sendUp(arguments)"
-    />
+    <slot/>
   </div>
 </template>
 
 <script>
-import HeadLineWrapper from '@/components/layouts/HeadLineWrapper'
-import HeadControlsWrapper from '@/components/layouts/HeadControlsWrapper'
-
 
 export default {
   name: 'HeadBarWrapper',
   components: {
-    HeadLineWrapper,
-    HeadControlsWrapper
-  },
-  data () {
-    return {
-      width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-    }
   },
   props:[
-    'headBarHeight'
+    'headBarHeight',
+    'width'
   ],
-  mounted(){
-    window.addEventListener('resize', this.handleResize)
-  },
-  beforeDestroy: function () {
-    window.removeEventListener('resize', this.handleResize)
-  },
-  methods: {
-    handleResize(){
-      this.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    },
-    sendUp(args){
-      this.$emit('input', args[0] );
-    }
-  }
 }
 </script>
 
