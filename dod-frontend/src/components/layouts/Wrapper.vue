@@ -18,12 +18,17 @@
     <main-content-wrapper :width="width" :height="height-headBarHeight">
 
       <main-half-wrapper :height="height - headBarHeight" :width="windowSplit*width" id="leftWrapper">
+
         <main-left-half-wrapper :height="(height-headBarHeight)*0.5" :width="windowSplit*width">
-          wd
+          <selection :height="(height-headBarHeight)*0.5">
+          </selection> 
+         
         </main-left-half-wrapper>
+
         <main-left-half-wrapper :height="(height-headBarHeight)*0.5" :width="windowSplit*width">
-          aed
+
         </main-left-half-wrapper>
+
       </main-half-wrapper>
 
       <main-half-wrapper :height="height - headBarHeight" :width="(1.0-windowSplit)*width" id="rightWrapper">
@@ -51,6 +56,7 @@ import MainLeftHalfWrapper from '@/components/layouts/MainLeftHalfWrapper'
 import HeadControls from '@/components/content/HeadControls'
 import Viz from '@/components/content/Viz'
 import DeepSelection from '@/components/content/DeepSelection'
+import Selection from '@/components/content/Selection'
 
 import {TweenMax} from "gsap";
 
@@ -65,7 +71,8 @@ export default {
 
     HeadControls,
     Viz,
-    DeepSelection
+    DeepSelection,
+    Selection,
   },
   data () {
     return {
@@ -116,8 +123,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   #wrapper{
+    /*
     outline: solid 3px black;
     outline-offset: -3px;
+    */
     display: flex;
     flex-direction: column;
   }

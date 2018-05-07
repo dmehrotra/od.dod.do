@@ -1,6 +1,9 @@
 <template>
-    <svg xmlns="http://www.w3.org/2000/svg">
-    </svg>
+    <div :style="{width: width+'px', height: height+'px'}">
+      <svg xmlns="http://www.w3.org/2000/svg">
+      </svg>
+      <a @click="centerGraph()">center graph</a>
+    </div>
 </template>
 
 <script>
@@ -30,6 +33,7 @@ export default {
       strokeLengthScale: undefined,
       boundingRadius: 1000,
       zoom: undefined,
+      centered: true,
       unwatchStoreForSelection: undefined,
     }
   },
@@ -71,7 +75,10 @@ export default {
     this.chart = this.svg.append("g");
     
 
-    this.zoom = d3.zoom().on("zoom", () => {
+    this.zoom = d3.zoom()
+      .scaleExtent([0.1, 5])
+      //.translateExtent([[-4000,5000], [-4000, 5000]])
+      .on("zoom", () => {
         this.chart.attr("transform", d3.event.transform); 
      });
     // this allows to drag and scrool to zoom and navigate
@@ -112,7 +119,7 @@ export default {
 
     
     //// boundaries cricle:
-    this.linksLayer.append("circle")
+    let outlineCircle = this.linksLayer.append("circle")
             .attr("cx", 0)
             .attr("cy", 0)
             .attr("r", this.boundingRadius)
@@ -120,6 +127,8 @@ export default {
             .attr("stroke-width", "8")
             .attr("fill", "none")
     ;
+    outlineCircle.attr("stroke", "none");
+    
 
 		this.simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id((d) => { 
@@ -398,6 +407,7 @@ export default {
         this.svg.transition()
                   .duration(500)
                   .call(this.zoom.transform, d3.zoomIdentity.translate(this.width/2,this.height/2).scale(newScale));
+
     },
     processNewSelection(selection){
       let selectedNodes = selection.map(d=>{return d.selected.uindex;});
@@ -437,9 +447,23 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  div{
+  }
   svg{
     background-color: black;
     width:100%;
     height:100%;
+    position:absolute;
+  }
+  a{
+    position:absolute;
+    color: red;
+    opacity:0.4;
+    top:10px;
+    right:10px;
+    cursor: pointer;
+  }
+  a:hover{
+    opacity:1;
   }
 </style>
