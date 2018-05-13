@@ -22,8 +22,11 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   #mainContentWrapper{
+    /*
     outline: solid 3px green;
     outline-offset: -6px;
+    /*
+    */
     display: flex;
     flex-direction: row;
   }
