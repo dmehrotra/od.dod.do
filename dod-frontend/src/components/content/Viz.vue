@@ -2,7 +2,8 @@
     <div :style="{width: width+'px', height: height+'px'}">
       <svg xmlns="http://www.w3.org/2000/svg">
       </svg>
-      <a @click="centerGraph()">center graph</a>
+      <a class="buttons center" @click="centerGraph()">center graph</a>
+      <a v-show="fixed" class="buttons unfix" @click="unfixPositions()">unfix nodes</a>
     </div>
 </template>
 
@@ -33,7 +34,7 @@ export default {
       strokeLengthScale: undefined,
       boundingRadius: 1000,
       zoom: undefined,
-      centered: true,
+      fixed: false,
       unwatchStoreForSelection: undefined,
     }
   },
@@ -157,6 +158,7 @@ export default {
 
   },
   beforeDestroy: function () {
+    this.unwatchStoreForSelection();
   },
   methods: {
     ...mapActions([
@@ -325,6 +327,7 @@ export default {
       if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
       d.fy = d.y;
+      this.fixed = true;
     },
     dragged(d) {
       d.fx = d3.event.x;
@@ -335,13 +338,6 @@ export default {
       // comment next two lines to fix nodes after dragging
       //d.fx = null;
       //d.fy = null;
-    },
-    unfixPositions(){
-      _.each(this.d.nodes, function(d) {
-        d.fx = null;
-        d.fy = null;
-      });
-      this.simulation.alpha(1).restart();
     },
     processData(data){
       let nodes = [];
@@ -409,6 +405,14 @@ export default {
                   .call(this.zoom.transform, d3.zoomIdentity.translate(this.width/2,this.height/2).scale(newScale));
 
     },
+    unfixPositions(){
+      _.each(this.componentGraphData.nodes, function(d) {
+        d.fx = null;
+        d.fy = null;
+      });
+      this.fixed = false;
+      this.simulation.alpha(1).restart();
+    },
     processNewSelection(selection){
       let selectedNodes = selection.map(d=>{return d.selected.uindex;});
       console.log("s", selectedNodes);
@@ -455,13 +459,18 @@ export default {
     height:100%;
     position:absolute;
   }
-  a{
+  .buttons{
     position:absolute;
     color: red;
     opacity:0.4;
-    top:10px;
     right:10px;
     cursor: pointer;
+  }
+  .center{
+    top:10px;
+  }
+  .unfix{
+    top:30px;
   }
   a:hover{
     opacity:1;

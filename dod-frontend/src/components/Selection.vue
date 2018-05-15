@@ -8,6 +8,7 @@
       <transition-group name="slide" id="selectionWrapper" tag="div" :style="{height: (parentHeight/2-57)+'px'}">
         <selectedItem  class="slide-item" v-for="(node, i) in selection"
 
+
           :data=node
           :key=node.selected.name
         />

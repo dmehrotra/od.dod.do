@@ -20,7 +20,7 @@
       <main-half-wrapper :height="height - headBarHeight" :width="windowSplit*width" id="leftWrapper">
 
         <main-left-half-wrapper :height="(height-headBarHeight)*0.5" :width="windowSplit*width">
-          <selection :height="(height-headBarHeight)*0.5">
+          <selection :height="(height-headBarHeight)*0.5" :width="windowSplit*width">
           </selection> 
          
         </main-left-half-wrapper>
