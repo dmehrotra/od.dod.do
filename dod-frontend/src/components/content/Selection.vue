@@ -97,7 +97,7 @@ export default {
     transition-delay: 0.3s;
   }
   .slide-enter {
-    transform: translate(-100%, 0);
+    transform: translate(-120%, 0);
   }
   .slide-leave-active {
     animation: leave 0.5s;
@@ -107,15 +107,15 @@ export default {
       transform: translateX(0%);
     }
     30% {
-      transform: translateX(-100%);
+      transform: translateX(-120%);
       height: 70px;
     }
     60% {
-      transform: translateX(-100%);
+      transform: translateX(-120%);
       height: 70px;
     }
     100% {
-      transform: translateX(-100%);
+      transform: translateX(-120%);
       height: 0px;
     }
   }

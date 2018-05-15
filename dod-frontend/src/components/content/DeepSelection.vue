@@ -16,7 +16,10 @@
           <p v-else>...issued contracts to:</p>
         </div>
         <div id="connectedToList" :style="{height: (height-(closeHeight+titleHeight+connectedHeaderHeight+footerHeight) )+'px'}">
-          <p v-for="(node, i) in deepSelection.connections">{{node.name}}</p>
+          <div v-for="(node, i) in deepSelection.connections">
+            <p >{{node.strength}} - {{node.name}}  </p>
+            <a href="#" @click="fetchContracts(deepSelection.selected, node)">fetch contracts</a>
+          </div>
         </div>
       </div>
     </div>
@@ -28,6 +31,7 @@
 ///import MainContentWrapper from '@/components/layouts/MainContentWrapper'
 
 import {mapGetters, mapActions} from 'vuex';
+import api from '@/vuex/api'
 
 export default {
   name: 'deepSelection',
@@ -60,6 +64,20 @@ export default {
     ...mapActions([
       'clearDeepSelection'
     ]),
+    fetchContracts(node1, node2){
+      let dept = node1.type == "Department"?node1.uindex:node2.uindex;
+      let cont = node1.type == "Department"?node2.uindex:node1.uindex;
+      
+      let req = "http://javantiger.club:3232/c/"+dept+"/"+cont;
+
+      api.get(req)
+        .then((response) => {
+          console.log("CONTRACTS!", response);
+        })
+        .catch((error) => {
+          console.log("couldnt get contracts");
+        });
+    }
   }
 }
 </script>
@@ -117,10 +135,10 @@ export default {
     /**/
     width: 20px;
     height: 20px;
-    opacity: 0.5;
+    opacity: 1;
   }
   .close:hover {
-    opacity: 1;
+    opacity: 0.7;
   }
   .close:before, .close:after {
     position: absolute;
@@ -131,7 +149,7 @@ export default {
     content: ' ';
     height: 25px;
     width: 4px;
-    background-color: white;
+    background-color: red;
     border-radius: 4px;
   }
   .close:before {

@@ -88,7 +88,7 @@ export default {
     outline: 2px solid black;
     /**/
     border-radius: 10px;
-    margin:4px;
+    margin:4px 8px;
     display: flex;
     flex-direction: row;
     background-color:black;
