@@ -1,0 +1,11 @@
+{
+  "development": {
+    "username": "Mehrotra",
+    "password": null,
+    "database": "dod_filings",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "dialect": "postgres"
+  }
+
+}
