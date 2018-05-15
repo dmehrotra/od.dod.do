@@ -1,9 +1,34 @@
+function numbers(el){
+    var match = []
+    var t = $(el).text().split(' ');
+    try{
+        for (var i = 1; i < t.length; i++) {  
+            if (t[i].split('-').length > 2){
+                number_span = $(el).html().replace(t[i], '<span class="matches">'+t[i]+'</span>');
+                $(el).html(number_span)
+                if(t[i] != 'indefinitely-delivery/indefinite-quantity,' && t[i] != 'indefinitely-delivery/indefinite-quantity' && t[i] != "cost-plus-incentive-fee" && t[i] != 'firm-fixed-price' && t[i] != 'firm-fixed-price,' && t[i] != "cost-plus-incentive-fee," && t[i] != "cost-plus-fixed-fee" && t[i] != 'firm-fixed-price' && t[i] != 'firm-fixed-price' && t[i] != "indefinite-delivery/indefinite-quantity" && t[i]!= 'indefinite-delivery/indefinite-quantity,' && t[i] != 'time-and-materials'){
+                    match.push(t[i].replace("(",'').replace(")",'').replace(".",'').replace(";",'').replace(",",''))
+                }
+                
+
+                
+            }    
+
+        }
+    }catch(err){console.log(err)}
+    if (match == undefined){
+    }
+    return match
+    
+
+}
 
 function getDetails(el,callback){
         
         var contract = {}
         contract.el = el
         contract.amount = $.trim(amount(el));
+        contract.numbers = $.trim(numbers(el));
         callback(contract)
 }
 
@@ -21,12 +46,14 @@ function createContract(el,department){
         html += "<input id='amount' type='text' name='amount' value='"+contract.amount+"'>"
         html += "<label>Full Text</label>"
         html += "<input id='fulltext'type='textarea' name='full_text' value='"+$(el).text()+"'/>"
+        html += "<label>Contract Numbers</label>"
+        html += "<input id='contract_numbers' type='text' name='contract_numbers' value='"+contract.numbers+"'>"
         html += "<input id='key'type='hidden' name='key' value='blue32blue32'/>"
         html += "<button class='submit'>Submit</button>"
         html += " </div>"
         $(el).append(html)
 
-       console.log(contract)
+      
     })    
 }
 
@@ -50,15 +77,15 @@ $('.submit').click(function(){
 })
 
 function sendForm(sibs){
-    console.log(sibs)
     var obj = {
         "department_name": sibs[0].value,
         "filing_date": sibs[1].value,
         "amount": sibs[2].value,
         "full_text": sibs[3].value,
-        "key": sibs[4].value
+        "contract_numbers": sibs[4].value,
+        "key": sibs[5].value
     }
-    $.post('localhost:8000/api/filing', obj, function(returnedData){         
+    $.post('https://quagga.club/api/filing', obj, function(returnedData){         
          console.log(returnedData);
     });
 
