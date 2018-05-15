@@ -1,7 +1,7 @@
 module.exports = function(sequelize, DataTypes){
   const Filing = sequelize.define('Filing', {
     full_text: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     amount: {

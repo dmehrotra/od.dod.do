@@ -19,7 +19,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   div{
+    /*
     outline: solid 3px red;
     outline-offset: -9px;
+    /**/
   }
 </style>

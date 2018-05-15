@@ -18,6 +18,7 @@ export default {
     //'width',
   ],
   mounted(){
+    this.request('http://javantiger.club:3232/ww/0/0')
   },
   beforeDestroy: function () {
   },

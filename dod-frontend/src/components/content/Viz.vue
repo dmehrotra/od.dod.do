@@ -204,6 +204,9 @@ export default {
                   let connections = this.componentGraphData.links.filter(d1=>{
                                       return d1.source==d||d1.target==d;
                                     }).map(d1=>{
+                                      console.log("D!", d1);
+                                      d1.target.strength = d1.strength;
+                                      d1.source.strength = d1.strength;
                                       return d1.source==d?d1.target:d1.source;
                                     })
                   ;
@@ -467,10 +470,10 @@ export default {
     cursor: pointer;
   }
   .center{
-    top:10px;
+    bottom:10px;
   }
   .unfix{
-    top:30px;
+    bottom:30px;
   }
   a:hover{
     opacity:1;

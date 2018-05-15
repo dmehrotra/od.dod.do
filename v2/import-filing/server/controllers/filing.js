@@ -3,6 +3,7 @@ const Department = require('../models').Department;
 const Contract = require('../models').Contract;
 _ = require('underscore')
 function create(req,res){
+	console.log(req.body)
 	find_department(req.body.department_name)
 		.then(function(department){
 			Filing.create({
@@ -20,7 +21,10 @@ function create(req,res){
 				})
 			})
 			.then(function(){ res.status(201).send("Success")})
-			.catch(error => res.status(400).send(error));	
+			.catch(function(error){
+				console.log(error)
+				res.status(400).send(error);
+			})
 		})
 
 }
