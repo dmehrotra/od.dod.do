@@ -13,7 +13,7 @@ module.exports = {
         type: Sequelize.FLOAT
       },
       full_text: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       createdAt: {
         allowNull: false,
