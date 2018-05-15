@@ -467,10 +467,10 @@ export default {
     cursor: pointer;
   }
   .center{
-    top:10px;
+    bottom:10px;
   }
   .unfix{
-    top:30px;
+    bottom:30px;
   }
   a:hover{
     opacity:1;

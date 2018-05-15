@@ -7,7 +7,7 @@
         <selection-item  class="slide-item" ref="selections" v-for="(node, i) in selection"
           :data=node
           :width=width
-          :height=50 
+          :height=70 
           :key=node.selected.name
         />
 
@@ -75,11 +75,15 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   #selection{
-    outline: 10px solid black;
+    
+    outline: 2px solid black;
+    outline-offset: -2px;
+    /**/
   }
   #headline p{
     margin:0;
-    line-height: 2;
+    margin-left:20px;
+    line-height: 3;
   }
   #selectionContainer{
     overflow: scroll;
@@ -94,8 +98,6 @@ export default {
   }
   .slide-enter {
     transform: translate(-100%, 0);
-  }
-  .slide-leave-to {
   }
   .slide-leave-active {
     animation: leave 0.5s;

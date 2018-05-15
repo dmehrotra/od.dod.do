@@ -37,7 +37,9 @@
           :height="height - headBarHeight"
           :graphData="graphData"
         />
-        <deep-selection id="deepSelection" v-show="false"
+        <deep-selection id="deepSelection" v-show="deepSelection != undefined"
+          :width="(1.0-windowSplit)*width"
+          :height="height - headBarHeight"
         />
       </main-half-wrapper>
 
@@ -58,6 +60,7 @@ import Viz from '@/components/content/Viz'
 import DeepSelection from '@/components/content/DeepSelection'
 import Selection from '@/components/content/Selection'
 
+import {mapGetters} from 'vuex';
 import {TweenMax} from "gsap";
 
 export default {
@@ -84,12 +87,17 @@ export default {
       unwatchStoreForSelection: undefined,
     }
   },
+	computed: {
+    ...mapGetters([
+      'deepSelection'
+    ]),
+  },
   mounted(){
 		this.unwatchStoreForSelection = this.$store.watch(this.$store.getters.currentSelectionWatcher, selection => {
       if(selection.length > 0){
-        TweenLite.to(this.$data, 1.0, { windowSplit: 0.5 });
+        TweenLite.to(this.$data, 0.4, { windowSplit: 0.5 });
       }else{
-         TweenLite.to(this.$data, 1.0, { windowSplit: 0.0 });
+         TweenLite.to(this.$data, 0.4, { windowSplit: 0.0 });
       }
     });
     window.addEventListener('resize', this.handleResize)
