@@ -1,0 +1,51 @@
+.amount{
+	background:red;
+	color:white;
+	font-weight: 900;
+}
+.name{
+	background:yellow;
+	color:black;
+	font-weight: 900;
+}
+.wrk{
+	background:blue;
+	color:white;
+	font-weight: 900;
+}
+.prp{
+	background:purple;
+	color:white;
+	font-weight: 900;
+}
+.matches{
+	background:green;
+	color:white;
+	font-weight: 900;
+}
+.auth{
+	background:black;
+	color:white;
+	font-weight: 900;
+}
+label{
+	color: #1B3440;
+	margin-top:10px;
+    font-size: 25px;
+}
+input{
+	width:100%;
+}
+.form{
+	color: #1B3440;
+	background:#B4D6C6;
+	padding:20px;
+	box-sizing:border-box;
+	border: 1px 1px 1px 1px;
+}
+submit{
+    background: #F2845C;
+    padding: 10px;
+    margin-top: 10px;
+
+}
