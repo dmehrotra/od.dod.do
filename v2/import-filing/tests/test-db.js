@@ -80,8 +80,6 @@ describe("Project", function (done) {
     });
 })
 describe("Relationship", function (done) {
-
-
     it("should create a new Relationship", function () {
 
         db.Relationship.create(RelationshipData).then(function (r) {
@@ -101,15 +99,12 @@ describe("Relationship", function (done) {
 })
 
 describe("Relationships", function (done) {
-
-
     it("should create new Relationships", function () {
     	db.Department.create(DepartmentData).then(function(department){
     		db.Project.create(ProjectData).then(function(project){
                 department.addProject(project)
                 db.Relationship.create(RelationshipData).then(function (relationship) {
-                    project.addRelationship(relationship)
-                    
+                    project.addRelationship(relationship)     
                     db.Project.create(ProjectTwoData).then(function(project_two){
                         department.addProject(project_two)
                         project_two.addRelationship(relationship).then(function(r){
@@ -125,9 +120,7 @@ describe("Relationships", function (done) {
                     })
                 })
     		})
-    	})
-
-    
+    	})    
 
     });
 })
