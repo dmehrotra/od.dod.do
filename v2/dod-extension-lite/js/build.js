@@ -41,7 +41,7 @@ function createContract(el,department){
         html += "<label>Department</label>"
         html += "<input id='department_name' type='text' name='department_name' value='"+department+"'/>"
         html += "<label>Date</label>"
-        html += "<input id='contract_date'type='text' name='contract_date' value='"+new Date($('.date').html().split("<br>")[1].replace("        ",'')).toISOString().split('T')[0].trim()+"' />"
+        html += "<input id='filing_date'type='text' name='contract_date' value='"+new Date($('.date').html().split("<br>")[1].replace("        ",'')).toISOString().split('T')[0].trim()+"' />"
         html += "<label>Amount</label>"
         html += "<input id='amount' type='text' name='amount' value='"+contract.amount+"'>"
         html += "<label>Full Text</label>"

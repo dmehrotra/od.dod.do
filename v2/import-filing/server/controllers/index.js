@@ -1,5 +1,5 @@
-const filing = require('./filing');
+const project = require('./project');
 
 module.exports = {
-  filing,
+  project,
 };

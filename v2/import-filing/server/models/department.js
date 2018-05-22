@@ -7,9 +7,8 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Department.associate = (models) => {
-    Department.hasMany(models.Filing, {
-      foreignKey: 'department_id',
-      as: 'department',
+    Department.hasMany(models.Project, {
+      foreignKey: 'DepartmentId'
     });
   };
 
