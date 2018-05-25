@@ -22,8 +22,7 @@ module.exports = {
         defaultValue: false
       },
       contract_numbers: {
-        type: Sequelize.TEXT,
-        allowNull: false
+        type: Sequelize.TEXT
       },
 
       DepartmentId: {

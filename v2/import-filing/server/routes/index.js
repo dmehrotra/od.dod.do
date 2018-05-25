@@ -5,5 +5,5 @@ module.exports = (app) => {
     message: 'This is the department of defense 5pm filings api',
   }));
 
-  app.get('/api/project', ProjectController.create);
+  app.post('/api/project', ProjectController.create);
 };

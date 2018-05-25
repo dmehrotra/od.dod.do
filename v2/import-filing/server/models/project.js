@@ -6,8 +6,7 @@ module.exports = function(sequelize, DataTypes){
       allowNull: false,
     },
     contract_numbers: {
-      type: DataTypes.TEXT,
-      allowNull: false,
+      type: DataTypes.TEXT
     },
     amount: {
         type: DataTypes.FLOAT
