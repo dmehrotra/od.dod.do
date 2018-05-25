@@ -6,4 +6,5 @@ module.exports = (app) => {
   }));
 
   app.post('/api/project', ProjectController.create);
+  app.get('/api/test', ProjectController.test);
 };

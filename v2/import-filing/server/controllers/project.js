@@ -1,6 +1,7 @@
 const Project = require('../models').Project;
 const Department = require('../models').Department;
 const Relationship = require('../models').Relationship;
+var Sequelize = require('sequelize');
 
 _ = require('underscore')
 
@@ -27,13 +28,20 @@ function create(req,res){
 		})
 
 }
-
+function test(req,res){
+	Project.findAll({where: {checked: true}}).then(function(p){
+		p[0].getRelationships().then(function(r){
+			res.status(201).send(r)
+		})
+	})
+}
 function find_department(dn){
 	return Department.findOrCreate({
 		where: {name: dn}
 		})
 }
 module.exports = {
-	create: create
+	create: create,
+	test: test
 };
 

@@ -6,7 +6,7 @@ function numbers(el){
             if (t[i].split('-').length > 2){
                 number_span = $(el).html().replace(t[i], '<span class="matches">'+t[i]+'</span>');
                 $(el).html(number_span)
-                if(t[i] != 'indefinitely-delivery/indefinite-quantity,' && t[i] != 'indefinitely-delivery/indefinite-quantity' && t[i] != "cost-plus-incentive-fee" && t[i] != 'firm-fixed-price' && t[i] != 'firm-fixed-price,' && t[i] != "cost-plus-incentive-fee," && t[i] != "cost-plus-fixed-fee" && t[i] != 'firm-fixed-price' && t[i] != 'firm-fixed-price' && t[i] != "indefinite-delivery/indefinite-quantity" && t[i]!= 'indefinite-delivery/indefinite-quantity,' && t[i] != 'time-and-materials'){
+                if( t[i] != "fixed-price-incentive-firm," && t[i]!= "cost-plus-fixed-fee," && t[i] != "cost-plus-incentive-fee" && t[i] != "fixed-price-incentive-firm" && t[i] != 'indefinitely-delivery/indefinite-quantity,' && t[i] != 'indefinitely-delivery/indefinite-quantity' && t[i] != "cost-plus-incentive-fee" && t[i] != 'firm-fixed-price' && t[i] != 'firm-fixed-price,' && t[i] != "cost-plus-incentive-fee," && t[i] != "cost-plus-fixed-fee" && t[i] != 'firm-fixed-price' && t[i] != 'firm-fixed-price' && t[i] != "indefinite-delivery/indefinite-quantity" && t[i]!= 'indefinite-delivery/indefinite-quantity,' && t[i] != 'time-and-materials'){
                     match.push(t[i].replace("(",'').replace(")",'').replace(".",'').replace(";",'').replace(",",''))
                 }
                 
@@ -85,7 +85,7 @@ function sendForm(sibs){
         "contract_numbers": sibs[4].value,
         "key": sibs[5].value
     }
-    $.post('https://quagga.club/api/filing', obj, function(returnedData){         
+    $.post('https://quagga.club/api/project', obj, function(returnedData){         
          console.log(returnedData);
     });
 
