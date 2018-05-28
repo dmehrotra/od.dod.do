@@ -24,7 +24,6 @@ db.Project.findAll({
             },
             json: true
         };
-        console.log(p.dataValues.full_text)
         rp(options)
         .then(function (parsedBody) {
             _.each(parsedBody, function(v,k,i){
@@ -38,12 +37,7 @@ db.Project.findAll({
                         cr(p,v._typeGroup,v.name)
                     }
                     if (v._typeGroup == "industry"){
-                        if (v.relevance > 0.2){
-                            cr(p,v._typeGroup,v.name)
-                        }else{
-                            console.log("irrelevant industry?" + ": "+ v.name)
-                        }
-                        
+                            cr(p,v._typeGroup,v.name)            
                     }
                     if (v._typeGroup == "entities"){
                         cr(p,v._type,v.name)
@@ -64,14 +58,29 @@ function cr(project,type,name){
         title: name,
         info: ""
     }
-    db.Relationship.create(RelationshipData).then(function (relationship) {
-        project.addRelationship(relationship).then(function(r){
+    db.Relationship.find({where:RelationshipData}).then(function (relationship) {
+        
+        if (relationship){
+            console.log("REPEAT RELATIONSHIP")
+            project.addRelationship(relationship).then(function(r){
                 project.updateAttributes({
                     checked: true
                 }).then(function(r){
 
                 });
-        });
+            });
+        }else{
+            db.Relationship.create(RelationshipData).then(function (relationship) {
+                project.addRelationship(relationship).then(function(r){
+                    project.updateAttributes({
+                        checked: true
+                    }).then(function(r){});
+                });
+            }).then(function(d){});
+
+
+        }
+
     }).then(function(d){
 
     });
@@ -80,7 +89,7 @@ function cr(project,type,name){
 }
 
 
-setTimeout(function() {db.sequelize.close();}, 30000);
+setTimeout(function() {db.sequelize.close();}, 10000);
 
 
 
