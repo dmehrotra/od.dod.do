@@ -41,19 +41,19 @@ function connected(req,res){
 				target = node[0]
 
 				if (target.constructor.name == 'Department' || target.constructor.name == 'Relationship'){
-					projects = target.getProjects()
+					projects = target.getProjects({include: [{model: Relationship}]})
 					Promise.all([projects]).then(function(v){
 						obj = {}
 						obj.sourceType = target.constructor.name
 						obj.source = target
 						obj.connections = v
-						
-					
 						res.send(JSON.stringify(obj));
+
+						
 					})
 
 				}else{
-					relationships = target.getRelationships()
+					relationships = target.getRelationships({include: [{model: Project}]})
 					Promise.all([relationships]).then(function(v){
 						obj = {}
 						obj.sourceType = target.constructor.name
@@ -76,6 +76,9 @@ function connected(req,res){
 	
 
 }
+
+
+
 function getDepartment(uuid){
 	return Department.findOne({ where: {
 	    id: {
@@ -121,10 +124,8 @@ function uuid(req,res){
 
 
 function test(req,res){
-	Project.findAll({where: {checked: true}}).then(function(p){
-		p[0].getRelationships().then(function(r){
-			res.status(201).send(r)
-		})
+	Relationship.findAll().then(function(p){
+		
 	})
 }
 function find_department(dn){
