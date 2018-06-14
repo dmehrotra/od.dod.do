@@ -16,9 +16,16 @@
           <p v-else>...issued contracts to:</p>
         </div>
         <div id="connectedToList" :style="{height: (height-(closeHeight+titleHeight+connectedHeaderHeight+footerHeight) )+'px'}">
-          <div v-for="(node, i) in deepSelection.connections">
-            <p >{{node.strength}} - {{node.name}}  </p>
-            <a href="#" @click="fetchContracts(deepSelection.selected, node)">fetch contracts</a>
+          <div id="connectedListDescription" :style="{height: 20+'px', width: (width-40)+ 'px' }">
+            <p :style="{width: 40+'px', textAlign: 'right'}">COUNT</p>
+            <p :style="{width: (width-20-20-40-50-5)+'px', textAlign: 'left', overflowX: 'scroll', overflowY: 'hidden',  whiteSpace: 'nowrap', marginRight: 5 +'px'}">NAME</p>
+            <a :style="{width: 50+'px'}" href="#" @click="fetchContracts(deepSelection.selected, node)">fetch</a>
+
+          </div>
+          <div id="connectedToItem" v-for="(node, i) in deepSelection.connections" :style="{height: 20+'px', width: (width-40)+ 'px' }">
+            <p :style="{width: 40+'px', textAlign: 'right'}">{{node.strength}}</p>
+            <p :style="{width: (width-20-20-40-50-5)+'px', textAlign: 'left', overflowX: 'scroll', overflowY: 'hidden',  whiteSpace: 'nowrap', marginRight: 5 +'px'}">{{node.name}}</p>
+            <a :style="{width: 50+'px'}" href="#" @click="fetchContracts(deepSelection.selected, node)">fetch</a>
           </div>
         </div>
       </div>
@@ -119,6 +126,12 @@ export default {
   }
   #connectedToList{
     overflow: scroll;
+  }
+  #connectedToItem{
+    display: flex;
+  }
+  #connectedListDescription{
+    display: flex;
   }
   #closeWrapper{
     /*   
