@@ -1,1 +1,1 @@
-//export const CLEAR_SELECTION = 'CLEAR_SELECTION'
+export const FIRST_THROW = 'FIRST_THROW'

@@ -5,21 +5,23 @@ import * as types from '../mutation-types'
 
 const state = {
   //departments: [],
+  firstThrow: undefined,
 
 }
 
 const getters = {
   //origGraph: state => state.graph,
   //graphNodesWatcher: state => () => state.graph.nodes,
+  firstThrow: state => state.firstThrow,
   
 
 
 }
 
 const mutations = {
-  //[types.CLEAR_SELECTION] (state) {
-    //state.selection = [];
-  //},
+  [types.FIRST_THROW] (state, data) {
+    state.firstThrow = data;
+  },
   //[types.CHANGE_DEEP_SELECTION] (state, deepSelection) {
     //state.deepSelection = deepSelection;
   //},
@@ -34,6 +36,9 @@ const actions = {
     //});
     //if(!selectedAlready) commit(types.ADD_TO_SELECTION, newSelection);	
   //},
+  setFirstThrow ({commit}, data) {
+    commit(types.FIRST_THROW, data);	
+  },
 }
 export default {
   state,
