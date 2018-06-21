@@ -22,9 +22,16 @@ const mutations = {
   [types.FIRST_THROW] (state, data) {
     state.firstThrow = data;
   },
-  //[types.CHANGE_DEEP_SELECTION] (state, deepSelection) {
-    //state.deepSelection = deepSelection;
-  //},
+  [types.TOGGLE_PROJECT_SELECTION] (state, id) {
+    state.firstThrow.connections[0].filter(d=>d.id==id).forEach(d=>{
+      d.selected = !d.selected;
+    })
+  },
+  [types.CHANGE_ALL_PROJECT_SELECTION] (state, flag){
+    state.firstThrow.connections[0].forEach(d=>{
+      d.selected = flag;
+    })
+  },
 }
 
 const actions = {
@@ -37,8 +44,17 @@ const actions = {
     //if(!selectedAlready) commit(types.ADD_TO_SELECTION, newSelection);	
   //},
   setFirstThrow ({commit}, data) {
+    data.connections[0].forEach(d=>{
+      d.selected = false;
+    });
     commit(types.FIRST_THROW, data);	
   },
+  toggleProjectSelection({commit}, id){
+    commit(types.TOGGLE_PROJECT_SELECTION, id);
+  },
+  changeAllProjectSelection({commit}, flag){
+    commit(types.CHANGE_ALL_PROJECT_SELECTION, flag);
+  }
 }
 export default {
   state,

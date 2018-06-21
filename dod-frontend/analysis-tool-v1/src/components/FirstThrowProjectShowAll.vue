@@ -17,13 +17,6 @@
       <div id="headlineWrapper" :style="{height: headlineWrapperHeight + 'px'}">
         <h2 :style="{lineHeight: headlineWrapperHeight +'px'}">{{headline}}</h2>
       </div>
-      <div id="infoWrapper" :style="{width: (width-checkboxWrapperWidth)+'px'}" v-if="project">
-        <div id="fullText" :style="{width: 0.7*(width-checkboxWrapperWidth)+'px', height: (height-headlineWrapperHeight-22) +'px'}" v-if="project">
-
-
-          <p>{{project.full_text}}</p>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -37,32 +30,31 @@ export default {
     return {
       checkboxWrapperWidth: 50,
       headlineWrapperHeight: 50,
+      checked: false,
     }
   },
   props:[
     'width',
     'height',
     'headline',
-    'project',
   ],
   computed:{
     ...mapGetters([
       'firstThrow'
     ]),
-    checked(){
-      return this.project.selected;
-    }
   },
   mounted(){
     window.addEventListener('resize', this.handleResize)
   },
   methods: {
     ...mapActions([
-      'toggleProjectSelection'
+      'changeAllProjectSelection'
     ]),
     clicked(){
-      console.log(this.project);  
-      this.toggleProjectSelection(this.project.id);
+      console.log("all");  
+      this.checked = !this.checked;
+      this.changeAllProjectSelection(this.checked);
+
     },
   }
 }

@@ -1,17 +1,16 @@
 <template>
-  <div id="firstThrowDisplay" :style="{width: width + 'px', height: height + 'px'}">
+  <div id="firstThrowDisplay" :style="{width: width + 'px', height: height + 'px', display: 'inline-block', float: 'left'}">
       <div id="headlineWrapper" :style="{width: width + 'px', height: headlineWrapperHeight+'px'}">
         <h3>"first throw projects"</h3>
       </div>
 
       <div id="checkAllWrapper" :style="{width: width + 'px', height: (checkAllWrapperHeight)+'px'}">
 
-        <first-throw-project
+        <first-throw-project-show-all
            :width="width"
            :height="checkAllWrapperHeight"
            :headline="'un/check all projects'"
-           :project="undefined"
-        ></first-throw-project>
+        ></first-throw-project-show-all>
       </div>
       <div id="firstThrowProjectsList" :style="{width: width + 'px', height: (height-checkAllWrapperHeight-headlineWrapperHeight-12)+'px'}">
         <first-throw-project v-for="project in firstThrow.connections[0]"
@@ -28,11 +27,13 @@
 import {mapGetters, mapActions} from 'vuex';
 
 import FirstThrowProject from '@/components/FirstThrowProject'
+import FirstThrowProjectShowAll from '@/components/FirstThrowProjectShowAll'
 
 export default {
   name: 'firstThrowDisplay',
   components: {
     FirstThrowProject,
+    FirstThrowProjectShowAll,
   },
   data () {
     return {
@@ -63,6 +64,8 @@ export default {
 <style scoped>
 #firstThrowDisplay{
   background-color: white;
+  display: inline-block;
+  float:left;
 }
 #firstThrowRequester p{
   margin: 0; 

@@ -1,5 +1,5 @@
 <template>
-  <div :style="{width: width+'px', height: height+'px'}">
+  <div id="vizWrapper" :style="{width: width+'px', height: height+'px', display: 'inline-block', float: 'left'}">
     <svg xmlns="http://www.w3.org/2000/svg">
     </svg>
   </div>
@@ -10,6 +10,8 @@ import * as d3 from 'd3';
 
 export default {
   name: 'viz',
+  components:{
+  },
   data () {
     return {
       svg: undefined,
@@ -23,12 +25,16 @@ export default {
       node: undefined, 
       label: undefined,
       link: undefined,
+      
+      toolTipX: 20,
+      toolTipY: 20,
+      toolTipTypes: [],
+      toolTipId:0,
     }
   },
   props:[
     'width',
     'height',
-    'graphData',
   ],
 	watch: {
    
@@ -50,7 +56,7 @@ export default {
       handler: function (val, oldVal) { 
         console.log("[Viz] graphData changed");
         console.log(val);
-        this.processNewData(val.connections[0]);
+        this.processNewData(val.connections[0].slice(0,50));
       },
       deep: true
     }
@@ -63,14 +69,30 @@ export default {
     this.nodeLayer = this.chart.append("g");
     this.labelLayer = this.chart.append("g");
 
-    var attractForce = d3.forceManyBody().strength(0.1).distanceMax(400).distanceMin(70);
-    var repelForce = d3.forceManyBody().strength(-200).distanceMax(70).distanceMin(4);
+    var attractForce = d3.forceManyBody().strength(d=>{
+      console.log(d);
+      if(d.type == "project"){
+        return 0.1;
+      }else{
+        return -5000;
+      }
+    }).distanceMax(1000).distanceMin(200);
+    var repelForce = d3.forceManyBody().strength(d=>{
+      console.log(d);
+      if(d.type == "project"){
+        return -70;
+      }else{
+        return -5000;
+      }
+    }).distanceMax(200).distanceMin(4);
+
 
     this.simulation = d3.forceSimulation()
-      .force("attract", attractForce)
-      .force("repell", repelForce)
+        //.force("attract", attractForce)
+        //.force("repell", repelForce)
+        .force("specific", d3.forceManyBody().strength(-90))
         .force("center", d3.forceCenter(this.width / 2, this.height / 2))
-        .force("link", d3.forceLink().id(d=> d.data.id))
+        .force("link", d3.forceLink().id(d=> d.id))
         .on("tick", this.ticked)
     ;
 
@@ -80,40 +102,72 @@ export default {
 
   },
   methods: {
+    getNode(id){
+      return this.root.filter(d=>d.id==id)[0];
+    },
     flatten(root) {
-      var nodes = [];
-      var links = [];
+      var nodes = []; var links = [];
       let ids = [];
-      function recurse(node, parentNode) {
-        console.log(node.data.id, parentNode);
-        if (node.children) node.children.forEach(d => recurse(d, node.data.id));
-        if (parentNode){
-          links.push({source: parentNode, target: node.data.id});
+      
+      let that = this;
+
+      function recurse(node, parentNode){
+        if(node.Relationships){
+          //node.Relationships.filter(d => (d.display && d.type == "ProvinceOrState" && (d.title == "California" || d.title == "New York"))).forEach(d => recurse(d, node.id));
+          node.Relationships.filter(d => (d.display)).forEach(d => recurse(d, node.id));
         }
-        if(node.data.type != 'origin' && !ids.includes(node.data.id)){
+
+
+        if(!ids.includes(node.id)){
+          if(parentNode){
+            console.log("NODE", node.x);
+            if(node.x == undefined){
+              let parent = that.getNode(parentNode);
+              node.x = parent.x;
+              node.y = parent.y;
+            }
+            node.parents = [parentNode];
+          }
           nodes.push(node);
-          ids.push(node.data.id);
+          ids.push(node.id);
+        }else{
+          let existing = nodes.filter(d=>d.id==node.id)[0];
+          existing.parents.push(parentNode);
+          console.log("pushing")
         }
-      }
-      recurse(root, null);
-      //console.log('links', links);
+        if(parentNode){
+          links.push({source: parentNode, target: node.id});
+        }
+
+
+      };
+
+      root.forEach(d => recurse(d, null));
       return {nodes:nodes, links: links};
+
+
     },
     updateGraph(){
       let nodeslinks = this.flatten(this.root)
       let nodes = nodeslinks.nodes;
-      //nodes = [nodes[0], nodes[1]];
+      console.log("[Viz] nodes to display");
+      console.log(nodes);
+
+    //  let nodeslinks = this.flatten(this.root)
+    //  let nodes = nodeslinks.nodes;
+    //  //nodes = [nodes[0], nodes[1]];
       let links = nodeslinks.links;
-      console.log("nodes", nodes);
+      console.log("[Viz] links to display");
+      console.log(links);
 
-      
-      this.simulation.nodes(nodes, d=>d.data.id);
+    //  
+      this.simulation.nodes(nodes, d => d.id);
       this.simulation.force("link").links(links);
-      //
+    //  //
       // Update the links…
-      this.link = this.link.data(links, function(d) { return d.target.data.id; });
+      this.link = this.link.data(links, function(d) { return d.target.id; });
 
-      // Exit any old links.
+    //  // Exit any old links.
       this.link.exit().remove();
 
       // Enter any new links.
@@ -127,7 +181,7 @@ export default {
           .merge(this.link)
       ;
 
-      this.node = this.node.data(nodes, d=>d.data.id);
+      this.node = this.node.data(nodes, d=>d.id);
       this.node.exit().remove();
       this.node = this.node.enter().append("circle")
           .attr("class", "node")
@@ -136,7 +190,7 @@ export default {
           .attr("r", d => {
             //console.log(d);
             //console.log(d.data.type);
-            if(d.data.Relationships){
+            if(d.type == "project"){
               return 10;
             }else{
               return 4;
@@ -144,10 +198,28 @@ export default {
           })
           .attr("fill", "white")
           .on("click", this.click)
+          .on("mouseover", d=>{
+            console.log(d, d3.event.pageX);
+            this.toolTipX = d3.event.pageX;
+            this.toolTipY = d3.event.pageY- 100;
+            this.toolTipTypes = [];
+            if(d.Relationships){
+              this.toolTipTypes = d.Relationships.reduce( function(acc, dd){
+                let t = dd.type;
+                console.log("d", dd);
+                console.log("acc", acc);
+                if(!acc.includes(t)){
+                  acc.push(t);
+                }
+                return acc;
+              }, []);
+            }
+            this.toolTipId = d.id;
+          })
           .merge(this.node)
       ;
 
-      this.label = this.label.data(nodes, d=>d.data.id);
+      this.label = this.label.data(nodes, d=>d.id);
       this.label.exit().remove();
       this.label = this.label.enter().append("text")
           .attr("class", "label")
@@ -155,15 +227,23 @@ export default {
           .attr("y", function(d) { return d.y+20; })
           .attr("fill", "red")
           .style("font-size", "12px")
-          .text(d=>{
-            if(d.data.type){
-
-            console.log(d)
-              return d.data.type;
+          .text((d, i)=>{
+            if(d.type){
+              console.log(d)
+              if(d.type == "project"){
+                return ""
+                return (String(i) + " " + d.type);
+              }else{
+                if(d.parents.length > 1){
+                  console.log("DD");
+                 
+                  return d.type + "  " + d.title;
+                }
+                return ""
+              }
             }else{
               return "";
             }
-            //return "$" + d.data.amount;
           })
           .merge(this.label)
       ;
@@ -193,15 +273,30 @@ export default {
     click(d) {
       console.log(d);
       if (!d3.event.defaultPrevented) {
-        if (d.children) {
-          d._children = d.children;
-          d.children = null;
-        } else {
-          d.children = d._children;
-          d._children = null;
-        }
+        //d.fx = d.x;
+        //d.fy = d.y;
+        d.Relationships.forEach(d => {
+          d.display = true;
+        });
+        //if (d.children) {
+        //  d._children = d.children;
+        //  d.children = null;
+        //} else {
+        //  d.children = d._children;
+        //  d._children = null;
+        //}
         this.updateGraph();
        }
+    },
+    unfoldAll(type){
+      this.root.forEach(d=>{
+        d.Relationships.forEach(r=>{
+          if(r.type == type){
+            r.display = true;
+          }
+        })
+      });
+        this.updateGraph();
     },
     processNewData(newData){
       console.log("[Viz] processing new data");
@@ -216,6 +311,7 @@ export default {
         delete d.updatedAt;
         delete d.amount;
         delete d.DepartmentId;
+        d.display = true;
         d.type = "project";
         // // and I'll also delete some in their Relationships
         d.Relationships.forEach(r => {
@@ -223,8 +319,15 @@ export default {
           delete r.createdAt;
           delete r.updatedAt;
           r.display = false;
+          //r.parents = [d.id];
         });
       });
+      this.root = newData;
+
+      this.updateGraph();
+
+
+
       console.log(newData[0]);
       //this.root = d3.hierarchy({type:'origin', Relationships: newData}, d=> d.Relationships);
       //this.root.descendants().filter(d => d.data.id)
@@ -239,6 +342,22 @@ export default {
       //this.updateGraph();
 
     },
+    toolTipEvent(args){
+      console.log("tooltipevent", args);
+      let data = args[0];
+      if(data.type = "unfold"){
+        console.log("unfold", data.data);
+        this.root.filter(d => d.id == data.data.id).forEach(d=>{
+          d.Relationships.forEach(r=>{
+            if(r.type == data.data.type){
+              r.display = true;
+            }
+          })
+        });
+        this.updateGraph();
+      }
+      
+    }
 
   }
   
@@ -248,12 +367,14 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  div{
-
+  #vizWrapper{
+    display: inline-block;
+    float:left;
   }
   svg{
-    background-color: grey;
+    background-color: black;
     width:100%;
     height:100%;
+   
   }
 </style>

@@ -9,13 +9,18 @@
        :width="width/2"
        :height="height"
     ></first-throw-display>
+    <viz v-if="firstThrow"
+       :width="width/2"
+       :height="height"
+     ></viz>
   </div>
 </template>
 
 <script>
+
 import FirstThrowRequester from '@/components/FirstThrowRequester'
 import FirstThrowDisplay from '@/components/FirstThrowDisplay'
-//import Viz from '@/components/Viz'
+import Viz from '@/components/Viz'
 
 import {mapGetters, mapActions} from 'vuex';
 
@@ -23,7 +28,8 @@ export default {
   name: 'mainContent',
   components: {
     FirstThrowRequester,
-    FirstThrowDisplay
+    FirstThrowDisplay,
+    Viz
   },
   data () {
     return {
