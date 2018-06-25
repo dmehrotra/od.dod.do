@@ -1,0 +1,66 @@
+<html>
+  <head>
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <script>
+      let data = {
+          type:'origin',
+          connections:[
+            {
+              id: 1,
+              type: 'project',
+              connections: [
+                {
+                  id: 4,
+                  type: 'place'
+                },
+                {
+                  id: 5,
+                  type: 'person'
+                }
+              ]
+            },
+            {
+              id: 2,
+              type: 'project',
+              connections: [
+                {
+                  id: 4,
+                  type: 'place'
+                },
+                {
+                  id: 5,
+                  type: 'person'
+                },
+                {
+                  id: 6,
+                  type: 'person'
+                }
+              ]
+            },
+            {
+              id: 3,
+              type: 'project',
+              connections: [
+                {
+                  id: 4,
+                  type: 'place'
+                },
+                {
+                  id: 6,
+                  type: 'person'
+                },
+                {
+                  id: 7,
+                  type: 'place'
+                }
+              ]
+            },
+        ]
+      };
+    </script>
+  </head>
+  <body>
+    <script src="script.js"></script>
+  </body>
+</html>
+
