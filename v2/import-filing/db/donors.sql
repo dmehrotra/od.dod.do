@@ -1,0 +1,30 @@
+
+CREATE TABLE "donors" (
+    "Name" text,
+    "Salutation" text,
+    "First Name" text,
+    "Last Name" text,
+    "Letter Entry" text,
+    "Street Address - Line 1" text,
+    "Street Address - Line 2" text,
+    "City" text,
+    "State" text,
+    "Zip Code" text,
+    "Phone Number" text,
+    "Phone Number - Secondary" text,
+    "Email Address" text,
+    "Email Address - Secondary" text,
+    "Company" text,
+    "Date of Last Sent Email" text,
+    "Date of Last Received Email" text,
+    "Date Created" text,
+    "Date Last Updated" text,
+    "Stage" text,
+    "Assigned To" text,
+    "Notes" text,
+    "Donor Tag" text,
+    "Donation Amount" double precision,
+    "Donation Date" timestamp with time zone,
+    "Donor Classification" text 
+);
+

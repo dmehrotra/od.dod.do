@@ -23,7 +23,7 @@ CREATE (:Relationship {type: row.type, title: row.title, psql_id: row.id});
 USING PERIODIC COMMIT
 LOAD CSV WITH HEADERS FROM "file:/Users/Mehrotra/projects/department-of-defense-contracts/cypher2.0/data/Projects.csv" AS row
 MATCH (c:Project {psql_id: row.id})
-MATCH (d:Department {psql_id: row.departmentId})
+MATCH (d:Department {psql_id: row.DepartmentId})
 CREATE (d)-[:Issued {department_id:id(d), project_id:id(c)}]->(c);
 
 // Create Connections between Projects and Relationships

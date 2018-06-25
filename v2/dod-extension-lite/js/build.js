@@ -22,13 +22,55 @@ function numbers(el){
     
 
 }
+function contractor_name(el){
+   var name;
+   try{
+    
+        name = $(el).text().split(",")[0].replace("<span>", "").replace('<span class="body>"',' ')
+        name_span = $(el).html().replace(name, '<span class="name">'+name+'</span>');
+        $(el).html(name_span)
+        
+    }catch(err){console.log(err)}
+    return name;
+}
+
+function purpose(el){
+   var prp;
+   try{
+        prp = $(el).html().split("for ")[1].split(".")[0]
+        prp_span = $(el).html().replace(prp, '<span class="prp">'+prp+'</span>');
+        $(el).html(prp_span)
+        
+    }catch(err){console.log(err)}
+    
+    if ( prp == undefined) {
+        try{
+            prp = $(el).html().split("for the")[1].split(".")[0]
+            prp_span = $(el).html().replace(prp, '<span class="prp">'+prp+'</span>');
+            $(el).html(prp_span)
+        
+        }catch(err){console.log(err)}
+    }
+    if ( prp == undefined) {
+        try{
+            prp = $(el).html().split("to ")[1].split(".")[0]
+            prp_span = $(el).html().replace(prp, '<span class="prp">'+prp+'</span>');
+            $(el).html(prp_span)
+        
+        }catch(err){console.log(err)}
+    }
+    return prp;
+
+}
 
 function getDetails(el,callback){
         
         var contract = {}
         contract.el = el
+        contract.purpose = $.trim(purpose(el));
         contract.amount = $.trim(amount(el));
         contract.numbers = $.trim(numbers(el));
+        contract.contractor_name = $.trim(contractor_name(el));
         callback(contract)
 }
 
@@ -41,7 +83,7 @@ function createContract(el,department){
         html += "<label>Department</label>"
         html += "<input id='department_name' type='text' name='department_name' value='"+department+"'/>"
         html += "<label>Date</label>"
-        html += "<input id='filing_date'type='text' name='contract_date' value='"+new Date($('.date').html().split("<br>")[1].replace("        ",'')).toISOString().split('T')[0].trim()+"' />"
+        html += "<input id='filing_date'type='text' name='contract_date' value='"+new Date($('time').html()).toISOString().split('T')[0].trim()+"' />"
         html += "<label>Amount</label>"
         html += "<input id='amount' type='text' name='amount' value='"+contract.amount+"'>"
         html += "<label>Full Text</label>"
@@ -57,16 +99,16 @@ function createContract(el,department){
     })    
 }
 
-for ( i = 0; i < $('span.text p').length; i++) { 	 
+for ( i = 0; i < $('.article-body p').length; i++) { 	 
     var department;
-    el = $('span.text p')[i]
+    el = $('.article-body p')[i]
     first_child = $(el).children()[0]
     if ($(first_child).is("strong") && $(first_child).text().length > 1){
         department = $(first_child).text()
     }
-    if ( $($('span.text p')[i]).html().length > 100 ){
+    if ( $($('.article-body p')[i]).html().length > 100 ){
             
-            createContract($('span.text p')[i],department)
+            createContract($('.article-body p')[i],department)
 	}
 
 }
