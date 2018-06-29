@@ -45,9 +45,10 @@ function connected(req,res){
 					Promise.all([projects]).then(function(v){
 						obj = {}
 						obj.sourceType = target.constructor.name
-						obj.source = target
-						obj.connections = v
-						res.send(JSON.stringify(obj));
+						obj.data = target.dataValues
+						obj.data.projects = clean_array(v[0],"P")
+						obj = _.omit(obj.data, ['createdAt','updatedAt',"DepartmentId",'ProjectRelationship']);
+						res.json(obj);
 
 						
 					})
@@ -57,11 +58,10 @@ function connected(req,res){
 					Promise.all([relationships]).then(function(v){
 						obj = {}
 						obj.sourceType = target.constructor.name
-						obj.source = target
-						obj.connections = v
-			
-					
-						res.send(JSON.stringify(obj));
+						obj.data = target.dataValues
+						obj.data.relationships = clean_array(v[0],"DR")
+						obj = _.omit(obj.data, ['createdAt','updatedAt',"DepartmentId",'ProjectRelationship']);					
+						res.json(obj);
 					})
 				}
 
@@ -78,7 +78,43 @@ function connected(req,res){
 }
 
 
+function clean_array(o,type){
+ 	if (type == "DR"){
+ 		return _.map(o, function(d, key){ 
+			clean = _.omit(d.dataValues, ['createdAt','updatedAt','ProjectRelationship',"DepartmentId"]);
+			keys = _.map(clean, function(v,k){ return k.toLowerCase()})
+			values = _.values(clean)
+			clean = _.object(keys, values);
+			clean.projects = _.map(clean.projects,function(c,key){
+				data = _.omit(c.dataValues, ['createdAt','updatedAt','ProjectRelationship',"DepartmentId"]);
+				dk = _.map(data, function(v,k){ return k.toLowerCase()})
+				dv = _.values(data)
+				data = _.object(dk, dv);
+				return data
+	 			
+			})
+			return clean
+		});
+ 	}else{
+ 		 return _.map(o, function(d, key){ 
+			clean = _.omit(d.dataValues, ['createdAt','updatedAt','ProjectRelationship',"DepartmentId"]);
+			keys = _.map(clean, function(v,k){ return k.toLowerCase()})
+			values = _.values(clean)
+			clean = _.object(keys, values);
+			clean.relationships = _.map(clean.relationships,function(c,key){
+				
+				data = _.omit(c.dataValues, ['createdAt','updatedAt','ProjectRelationship',"DepartmentId"]);
+				dk = _.map(data, function(v,k){ return k.toLowerCase()})
+				dv = _.values(data)
+				
+				return _.object(dk, dv);
+	 			
+			})
+			return clean
+		});
+ 	}
 
+}
 function getDepartment(uuid){
 	return Department.findOne({ where: {
 	    id: {
@@ -105,23 +141,6 @@ function getRelationship(uuid){
 }
 
 
-function uuid(req,res){
-	eval(require('locus'))
-	type = req.params.type
-	uuid = req.parms.uuid
-	if (type == "d"){
-		Department.findAll({where:{id:uuid}}).then(function(department){
-			
-		})
-	}
-	if (type == "p"){
-
-	}
-	if (type == "r"){
-
-	}
-}
-
 
 function test(req,res){
 	Relationship.findAll().then(function(p){
@@ -136,7 +155,6 @@ function find_department(dn){
 module.exports = {
 	create: create,
 	test: test,
-	uuid: uuid,
 	connected: connected
 };
 
