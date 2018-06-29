@@ -6,7 +6,6 @@ module.exports = (app) => {
   }));
 
   app.post('/api/project', ProjectController.create);
-  app.get('/api/test', ProjectController.test);
   app.get('/api/connected/:uuid', ProjectController.connected)
-
+  app.get('/api/search/:query', ProjectController.search);
 };
