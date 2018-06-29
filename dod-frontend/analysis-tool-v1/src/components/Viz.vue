@@ -1,5 +1,6 @@
 <template>
-  <div id="vizWrapper" :style="{width: width+'px', height: height+'px', display: 'inline-block', float: 'left'}">
+  <!--<div id="vizWrapper" :style="{width: width+'px', height: height+'px', display: 'inline-block', float: 'left'}">-->
+  <div id="viz" :style="{height:height+'px'}">
     <svg xmlns="http://www.w3.org/2000/svg">
     </svg>
   </div>
@@ -7,6 +8,8 @@
 
 <script>
 import * as d3 from 'd3';
+
+import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'viz',
@@ -25,235 +28,126 @@ export default {
       node: undefined, 
       label: undefined,
       link: undefined,
-      
-      toolTipX: 20,
-      toolTipY: 20,
-      toolTipTypes: [],
-      toolTipId:0,
+
+      data: {
+        nodes:[],
+        links:[]
+      },
     }
   },
   props:[
+    'nodeData',
     'width',
     'height',
+    'setActiveNode',
+    'activeNode',
+    'requestRelatedToId',
+
+
   ],
+  computed:{
+    ...mapGetters([
+    ]),
+    dataIds: function(){
+      return this.data.map(d=>d.id);
+    }
+  },
 	watch: {
    
-    '$props.height':{
+    '$props.nodeData':{
       handler: function (val, oldVal) { 
-        console.log("[Viz] height changed");
+        console.log("[Viz] nodeData changed");
         console.log(val);
+        this.integrateChanges(val);
       },
       deep: true
     },
-    '$props.width':{
+    '$props.activeNode':{
       handler: function (val, oldVal) { 
-        console.log("[Viz] width changed");
+        console.log("[Viz] activeNode changed");
         console.log(val);
+        this.node.selectAll(".activeRing")
+          .attr("stroke", d=>{
+            if(d.id==val){ 
+              return 'red';
+            }else{
+              return 'none';
+            }
+          })
+        ;
       },
       deep: true
     },
-    '$props.graphData':{
-      handler: function (val, oldVal) { 
-        console.log("[Viz] graphData changed");
-        console.log(val);
-        this.processNewData(val.connections[0].slice(0,50));
-      },
-      deep: true
-    }
   },
   mounted(){
     this.svg = d3.select("svg");
-    this.chart = this.svg.append("g");
+    this.chart = this.svg.append("g").attr("class", "chart");
 
-    this.linkLayer = this.chart.append("g");
-    this.nodeLayer = this.chart.append("g");
-    this.labelLayer = this.chart.append("g");
+    this.linkLayer = this.chart.append("g").attr("class", "linkLayer");
+    this.nodeLayer = this.chart.append("g").attr("class", "nodeLayer");
+    this.labelLayer = this.chart.append("g").attr("class", "labelLayer");
 
-    var attractForce = d3.forceManyBody().strength(d=>{
-      console.log(d);
-      if(d.type == "project"){
-        return 0.1;
-      }else{
-        return -5000;
-      }
-    }).distanceMax(1000).distanceMin(200);
-    var repelForce = d3.forceManyBody().strength(d=>{
-      console.log(d);
-      if(d.type == "project"){
-        return -70;
-      }else{
-        return -5000;
-      }
-    }).distanceMax(200).distanceMin(4);
+    //var attractForce = d3.forceManyBody().strength(d=>{
+    //  console.log(d);
+    //  if(d.type == "project"){
+    //    return 0.1;
+    //  }else{
+    //    return -5000;
+    //  }
+    //}).distanceMax(1000).distanceMin(200);
+    //var repelForce = d3.forceManyBody().strength(d=>{
+    //  console.log(d);
+    //  if(d.type == "project"){
+    //    return -70;
+    //  }else{
+    //    return -5000;
+    //  }
+    //}).distanceMax(200).distanceMin(4);
 
 
     this.simulation = d3.forceSimulation()
         //.force("attract", attractForce)
         //.force("repell", repelForce)
-        .force("specific", d3.forceManyBody().strength(-90))
-        .force("center", d3.forceCenter(this.width / 2, this.height / 2))
+        //.force("specific", d3.forceManyBody().strength(-50))
+        .force("specific", d3.forceManyBody().strength(d=>{
+             if(d.type == "project"){
+              console.log(d); 
+               if(d.subnodes.length > 0){
+                 console.log("long");
+                 return -2000;
+               }else{
+                 return -100;
+               }
+             }else{
+               return -10;
+             }
+        }))
+        //.force("x", d3.forceX().strength(0.002))
+        //.force("y", d3.forceY().strength(0.002))
+        .force("center", d3.forceCenter(this.width/2, this.height/2))
+        .force("collide", d3.forceCollide().radius(20).iterations(2))
         .force("link", d3.forceLink().id(d=> d.id))
         .on("tick", this.ticked)
     ;
 
     this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
     this.link = this.linkLayer.selectAll(".link").attr("class", "link");
-    this.label = this.labelLayer.selectAll(".label").attr("class", "label");
+    //this.label = this.labelLayer.selectAll(".label").attr("class", "label");
 
+		//this.unwatchSelection = this.$store.watch(this.$store.getters.selectionWatcher, n => {
+    //  console.log("todo", n);
+    //  
+
+    //  this.processNewData(n.map(id => this.getProjectById(id)));
+    //})
   },
   methods: {
-    getNode(id){
-      return this.root.filter(d=>d.id==id)[0];
-    },
-    flatten(root) {
-      var nodes = []; var links = [];
-      let ids = [];
-      
-      let that = this;
-
-      function recurse(node, parentNode){
-        if(node.Relationships){
-          //node.Relationships.filter(d => (d.display && d.type == "ProvinceOrState" && (d.title == "California" || d.title == "New York"))).forEach(d => recurse(d, node.id));
-          node.Relationships.filter(d => (d.display)).forEach(d => recurse(d, node.id));
-        }
-
-
-        if(!ids.includes(node.id)){
-          if(parentNode){
-            console.log("NODE", node.x);
-            if(node.x == undefined){
-              let parent = that.getNode(parentNode);
-              node.x = parent.x;
-              node.y = parent.y;
-            }
-            node.parents = [parentNode];
-          }
-          nodes.push(node);
-          ids.push(node.id);
-        }else{
-          let existing = nodes.filter(d=>d.id==node.id)[0];
-          existing.parents.push(parentNode);
-          console.log("pushing")
-        }
-        if(parentNode){
-          links.push({source: parentNode, target: node.id});
-        }
-
-
-      };
-
-      root.forEach(d => recurse(d, null));
-      return {nodes:nodes, links: links};
-
-
-    },
-    updateGraph(){
-      let nodeslinks = this.flatten(this.root)
-      let nodes = nodeslinks.nodes;
-      console.log("[Viz] nodes to display");
-      console.log(nodes);
-
-    //  let nodeslinks = this.flatten(this.root)
-    //  let nodes = nodeslinks.nodes;
-    //  //nodes = [nodes[0], nodes[1]];
-      let links = nodeslinks.links;
-      console.log("[Viz] links to display");
-      console.log(links);
-
-    //  
-      this.simulation.nodes(nodes, d => d.id);
-      this.simulation.force("link").links(links);
-    //  //
-      // Update the links…
-      this.link = this.link.data(links, function(d) { return d.target.id; });
-
-    //  // Exit any old links.
-      this.link.exit().remove();
-
-      // Enter any new links.
-      this.link = this.link.enter().insert("line", ".node")
-          .attr("class", "link")
-          .attr("stroke", "white")
-          .attr("x1", function(d) { return d.source.x; })
-          .attr("y1", function(d) { return d.source.y; })
-          .attr("x2", function(d) { return d.target.x; })
-          .attr("y2", function(d) { return d.target.y; })
-          .merge(this.link)
-      ;
-
-      this.node = this.node.data(nodes, d=>d.id);
-      this.node.exit().remove();
-      this.node = this.node.enter().append("circle")
-          .attr("class", "node")
-          .attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; })
-          .attr("r", d => {
-            //console.log(d);
-            //console.log(d.data.type);
-            if(d.type == "project"){
-              return 10;
-            }else{
-              return 4;
-            }
-          })
-          .attr("fill", "white")
-          .on("click", this.click)
-          .on("mouseover", d=>{
-            console.log(d, d3.event.pageX);
-            this.toolTipX = d3.event.pageX;
-            this.toolTipY = d3.event.pageY- 100;
-            this.toolTipTypes = [];
-            if(d.Relationships){
-              this.toolTipTypes = d.Relationships.reduce( function(acc, dd){
-                let t = dd.type;
-                console.log("d", dd);
-                console.log("acc", acc);
-                if(!acc.includes(t)){
-                  acc.push(t);
-                }
-                return acc;
-              }, []);
-            }
-            this.toolTipId = d.id;
-          })
-          .merge(this.node)
-      ;
-
-      this.label = this.label.data(nodes, d=>d.id);
-      this.label.exit().remove();
-      this.label = this.label.enter().append("text")
-          .attr("class", "label")
-          .attr("x", function(d) { return d.x+20; })
-          .attr("y", function(d) { return d.y+20; })
-          .attr("fill", "red")
-          .style("font-size", "12px")
-          .text((d, i)=>{
-            if(d.type){
-              console.log(d)
-              if(d.type == "project"){
-                return ""
-                return (String(i) + " " + d.type);
-              }else{
-                if(d.parents.length > 1){
-                  console.log("DD");
-                 
-                  return d.type + "  " + d.title;
-                }
-                return ""
-              }
-            }else{
-              return "";
-            }
-          })
-          .merge(this.label)
-      ;
-      this.simulation.alpha(1).restart();
-
-    },
     ticked() {
 
-      let margin =40;
+      let margin =10;
       let radius = 10;
+      let w = 300;
+      let height = 300;
 
       this.link
           .attr("x1", function(d) { return d.source.x; })
@@ -261,120 +155,266 @@ export default {
           .attr("x2", function(d) { return d.target.x; })
           .attr("y2", function(d) { return d.target.y; });
 
-        this.node
-          .attr("cx", d => { return d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x)); })
-          .attr("cy", d => { return d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y)); });
+      this.node
+        //.attr("x", d => { return d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x)); })
+        //.attr("y", d => { return d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y)); });
+        .attr("transform", d=>{
+          d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x));
+          d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y));
+          return "translate("+d.x+","+d.y+")";
 
-      this.label
-          .attr("x", function(d) { return 10+d.x; })
-          .attr("y", function(d) { return 10+d.y; });
+        })
+      ;
+
+      //this.label
+      //    .attr("x", function(d) { return 10+d.x; })
+      //    .attr("y", function(d) { return 10+d.y; });
       
     },
-    click(d) {
-      console.log(d);
-      if (!d3.event.defaultPrevented) {
-        //d.fx = d.x;
-        //d.fy = d.y;
-        d.Relationships.forEach(d => {
-          d.display = true;
-        });
-        //if (d.children) {
-        //  d._children = d.children;
-        //  d.children = null;
-        //} else {
-        //  d.children = d._children;
-        //  d._children = null;
-        //}
-        this.updateGraph();
-       }
+    updateGraph(){
+      this.simulation.nodes(this.data.nodes, d => d.id);
+      this.simulation.force("link").links(this.data.links);
+
+      this.link = this.link.data(this.data.links, function(d) { return d.target.id; });
+
+    //  // Exit any old links.
+      this.link.exit().remove();
+
+      // Enter any new links.
+      this.link = this.link.enter().insert("line", ".node")
+          .attr("class", "link")
+          .attr("stroke", "grey")
+          .attr("x1", function(d) { return d.source.x; })
+          .attr("y1", function(d) { return d.source.y; })
+          .attr("x2", function(d) { return d.target.x; })
+          .attr("y2", function(d) { return d.target.y; })
+          .merge(this.link)
+      ;
+
+      this.node = this.node.data(this.data.nodes, d=>d.id);
+      
+      this.node.exit().remove();
+        
+      this.nodeIn = this.node.enter().append("g").attr("class", "node")
+                    //.attr("x", 200)
+                    //.attr("y", 200)
+                    .attr("translate", d=>"transform("+d.x+","+d.y+")")
+                .call(d3.drag()
+                  .on("start", this.dragstarted)
+                  .on("drag", this.dragged)
+                  .on("end", this.dragended)
+                )
+      ;
+      
+
+      this.nodeIn
+                .append("circle")
+                .attr("class", "main")
+                .attr("cx", 0)
+                .attr("cy", 0)
+                .attr("r", d=>{
+                  if(d.type=='project'){
+                    return 15;
+                  }else{
+                    return 6;
+                  }
+                })
+                .attr("fill", d=>{
+
+                  if(d.type=='project'){
+                    return 'white';
+                  }else{
+                    return 'blue';
+                  }
+
+                })
+
+                .on('mouseover', (d,i,nodes)=>{
+                  this.setActiveNode(d.id, true);
+                  //d3.select(nodes[i]).select(".main").attr("fill","red");
+                })
+                .on('mouseout', (d,i,nodes)=>{
+                  this.setActiveNode(d.id, false);
+                  //if(d.type=='project'){
+                  //d3.select(nodes[i]).select(".main").attr("fill","white");
+                  //}else{
+                  //d3.select(nodes[i]).select(".main").attr("fill","blue");
+                  //}
+                })
+                .on('click', (d,i,nodes)=>{
+                  if(d.type!='project'){
+                    console.log("clicked", d.id);
+                    this.requestRelatedToId('node', d.id);
+                  }
+                })
+      ;
+      this.nodeIn
+                .append("circle")
+                .attr("class", "activeRing")
+                .attr("cx", 0)
+                .attr("cy", 0)
+                .attr("r", d=>{
+                  if(d.type=='project'){
+                    return 15 + 4;
+                  }else{
+                    return 6 + 4;
+                  }
+                })
+                .attr("fill", "none")
+                .attr("stroke", d=>{
+                  if(d.type=='project'){
+                    return 'red'; // this assumes the incoming node is always currently hovered (in the pane)
+                  }else{
+                    return 'none';
+                  }
+                  //if(d.id==this.activeNode){ 
+                  //  return 'red';
+                  //}else{
+                  //  return 'none';
+                  //}
+                })
+                .attr("stroke-width", 3);
+      ;
+      this.node = this.nodeIn.merge(this.node);
+
+
+      //this.node = this.node.enter().append("circle")
+      //    .attr("class", "node")
+      //    .attr("cx", function(d) { return d.x; })
+      //    .attr("cy", function(d) { return d.y; })
+      //    .attr("r", d => {
+      //      if(d.type=='project'){
+      //        return 15;
+      //      }else{
+      //        return 6;
+      //      }
+      //    })
+      //    .attr("fill", d=>{
+      //      if(d.active){
+      //        return 'red';
+      //      }
+      //       
+      //      if(d.type=='project'){
+      //        return 'white';
+      //      }else{
+      //        return 'blue';
+      //      }
+      //    })
+      //    .call(d3.drag()
+      //      .on("start", this.dragstarted)
+      //      .on("drag", this.dragged)
+      //      .on("end", this.dragended)
+      //    )
+      //    .on('mouseover', d=>{
+      //      this.setActiveNode(d.id, true);
+
+      //    })
+      //    .merge(this.node)
+      //;
+      this.simulation.alpha(1).restart();
+
     },
-    unfoldAll(type){
-      this.root.forEach(d=>{
-        d.Relationships.forEach(r=>{
-          if(r.type == type){
-            r.display = true;
+    flatten(nestedData){
+      let keys = [];
+      let out = [];
+      //nestedData.forEach(d=>{
+      //  if
+      //});
+      let o = nestedData.reduce((acc, d)=>{
+        if(!acc.map(node=>node.id).includes(d.id)){
+          console.log("checking", d);
+          acc.push(d); 
+        }
+        d.subnodes.forEach(subnode=>{
+          if(!acc.map(node=>node.id).includes(subnode.id)){
+            acc.push(subnode); 
+          }
+        });
+        return acc;
+
+      }, []);
+      return o;
+
+      
+    },
+    integrateChanges(newData){
+      console.log("latest", newData);
+      
+      //this.data = newData;
+
+
+      let allVisibleSubnodeIds = [];
+      newData = newData.map(node=>{
+        //let links = []; 
+
+        // go over subnodes here
+
+        let subnodes = node.relationships.filter(subnode=>subnode.visible).map(subnode=>{
+          //links.push({source: node.id, target: subnode.id});
+          if(!allVisibleSubnodeIds.includes(subnode.id)){
+            allVisibleSubnodeIds.push(subnode.id);
+          }
+
+          if(this.data.nodes.map(d=>d.id).includes(subnode.id)){
+            return this.data.nodes.find(d=>d.id==subnode.id);
+          }else{
+            return subnode;
           }
         })
+
+        if(this.data.nodes.map(d=>d.id).includes(node.id)){
+          let n = this.data.nodes.find(d=>d.id==node.id);
+          n.subnodes = subnodes;
+          //n.links = links;
+          return n;
+        }else{
+          node.x = this.width*0.5;
+          node.y = this.height*0.5;
+          node.subnodes = subnodes;
+          node.type = 'project';
+          //node.links = links;
+          return node;
+        }
       });
-        this.updateGraph();
-    },
-    processNewData(newData){
-      console.log("[Viz] processing new data");
-      console.log(newData);
-      // // just for my sanity I delete some keys here
-      newData.forEach(d => {
-        delete d.checked;
-        delete d.contract_numbers;
-        delete d.full_text;
-        delete d.createdAt;
-        delete d.filing_date;
-        delete d.updatedAt;
-        delete d.amount;
-        delete d.DepartmentId;
-        d.display = true;
-        d.type = "project";
-        // // and I'll also delete some in their Relationships
-        d.Relationships.forEach(r => {
-          delete r.ProjectRelationship;
-          delete r.createdAt;
-          delete r.updatedAt;
-          r.display = false;
-          //r.parents = [d.id];
+
+      //now create links. the reason i am not doing this within the loops above is that need links even if a node
+      // has no subnodes unfolded as long as a subnode that it WOULD be connected to is currently on display.
+      this.data.links = [];
+      newData.forEach(node=>{
+        node.relationships.forEach(d=>{
+          if(allVisibleSubnodeIds.includes(d.id)){
+            this.data.links.push({source:node.id, target:d.id, id: [node.id,d.id].join("-")});
+          }
         });
       });
-      this.root = newData;
 
+      this.data.nodes = this.flatten(newData);
       this.updateGraph();
-
-
-
-      console.log(newData[0]);
-      //this.root = d3.hierarchy({type:'origin', Relationships: newData}, d=> d.Relationships);
-      //this.root.descendants().filter(d => d.data.id)
-      //      .forEach(d=>{
-      //        if(d.children){
-      //          d._children = d.children;
-      //          d.children = null;
-      //        }
-      //        return d;
-      //      });
-      //console.log('root',this.root);
-      //this.updateGraph();
-
     },
-    toolTipEvent(args){
-      console.log("tooltipevent", args);
-      let data = args[0];
-      if(data.type = "unfold"){
-        console.log("unfold", data.data);
-        this.root.filter(d => d.id == data.data.id).forEach(d=>{
-          d.Relationships.forEach(r=>{
-            if(r.type == data.data.type){
-              r.display = true;
-            }
-          })
-        });
-        this.updateGraph();
-      }
-      
+    dragstarted(d) {
+      if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    },
+    dragged(d) {
+      d.fx = d3.event.x;
+      d.fy = d3.event.y;
+    },
+    dragended(d) {
+      if (!d3.event.active) this.simulation.alphaTarget(0);
+      // comment next two lines to fix nodes after dragging
+      d.fx = null;
+      d.fy = null;
     }
-
   }
-  
-
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-  #vizWrapper{
-    display: inline-block;
-    float:left;
-  }
   svg{
     background-color: black;
     width:100%;
     height:100%;
-   
   }
 </style>
