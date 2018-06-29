@@ -19,7 +19,11 @@ module.exports = function(sequelize, DataTypes){
     filing_date:{
       type: DataTypes.DATE,
       allowNull: false
+    },
+    tsv:{
+      type: DataTypes.TEXT
     }
+
   });
 
 

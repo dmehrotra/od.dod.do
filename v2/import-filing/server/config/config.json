@@ -1,4 +1,7 @@
 {
+  "define": {
+    "tsv": "tsv"
+  }, 
   "development": {
     "username": "Mehrotra",
     "password": null,
