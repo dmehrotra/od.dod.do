@@ -12,6 +12,7 @@
          :toggleSelect=toggleSelect
          :setAllSubnodes=setAllSubnodes
          :setActiveNode=setActiveNode
+         :markProject=markProject
          >
       </pane>
 
@@ -25,6 +26,8 @@
          :setActiveNode=setActiveNode
          :activeNode=activeNode
          :requestRelatedToId=requestRelatedToId
+         :unfoldSharedRelationsByDefault=unfoldSharedRelationsByDefault
+         :toggleUnfoldSharedRelationsByDefault=toggleUnfoldSharedRelationsByDefault
       >
       </viz>
     </div>
@@ -60,6 +63,7 @@ export default {
       //nodes: [{id:"ill stay"}, {id:"d5ac3158-8c3b-430a-88af-97acc36083b3"}, {id:"69fabee7-0a3e-4dea-8e91-4107c0d6cddf"}, {id:"66b45a0d-707a-4f14-bb3f-63fbf5e7f9f5"}, {id:"me too"}],
       nodes: [],
       activeNode: undefined,
+      unfoldSharedRelationsByDefault: true,
       
     }
   },
@@ -120,13 +124,11 @@ export default {
       
       let del = [];
       newNodes = newNodes.map(node=>{
-        console.log(node);
         
         // keeping track of how each node got into the data
         node["requestSource"] = [requestSource];
         //node.relationships.forEach(d=>d.visible = false);
         let activeSubnodes = this.activeSubnodeIds;
-        console.log("active subnodes", activeSubnodes);
         // this is so that incoming nodes have there relationships subnodes already visible if they are displayed so far.
         node.relationships.forEach(d=>{
           if(activeSubnodes.includes(d.id)){
@@ -138,9 +140,9 @@ export default {
 
         node.selected = selectedDefault;
         node.active = false;
+        node.marked = 'none';
 
         this.nodes.find((d, i)=>{
-          console.log('Visited index ' + i + ' with value ' + d);
 
           if(d.id == node.id){
             // if node exists already, then we use the one that alreadt in the array (since it might have position values alrady)
@@ -171,30 +173,52 @@ export default {
 
     },
     requestRelatedToId(requestSource, id){
-      console.log("REQUUU");
       let domain = "https://quagga.club/api/connected/" + id;
-      console.log(domain);
       api.get(domain)
         .then((response) => {
-          if(requestSource == "search"){
-            console.log(response.body);
-            this.integrateNewNodes(response.body.projects, false, requestSource);
-          }else{
-            this.integrateNewNodes(response.body.projects, true, requestSource);
-          }
+          this.integrateNewNodes(response.body.projects, true, requestSource);
         })
         .catch((error) => {
           console.log("ERROR with API", error); 
         });
     },
     searchRequest(query){
-      console.log("I would do a query search for:", query);
-      console.log("but for now I'll just request data connected to saudi arabia");
-      this.requestRelatedToId("search",'a49f1502-df09-48b7-adb6-e61ea3098523'); 
+      let domain = "https://quagga.club/api/search/" + encodeURIComponent(query);
+      api.get(domain)
+        .then((response) => {
+          this.integrateNewNodes(response.body, false, {type: 'search', value: query});
+        })
+        .catch((error) => {
+          console.log("ERROR with API", error); 
+        });
+
     },
     toggleSelect(id){
       this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;
+      
+      if(this.unfoldSharedRelationsByDefault){
+        let sharedSubnodes = this.nodes.reduce((acc, d)=>{
+          if(d.selected){
+            d.relationships.forEach(subnode=>{
+              if(!subnode.active && acc[subnode.id] != true){
+                if(acc[subnode.id] == undefined){
+                  acc[subnode.id] = false;
+                }else{
+                  acc[subnode.id] = true;
+                }
+              }
+            })
+          }
+          return acc;
+        }, {});
+        Object.keys(sharedSubnodes).forEach(d=>{
+          if(sharedSubnodes[d] == true){
+            this.setSubnode(d, true);
+          }
+        });
+      }
     },
+
     toggleSubnode(id){
 
     },
@@ -211,7 +235,6 @@ export default {
       this.nodes.find(d=>d.id==id).relationships.forEach(d=>this.setSubnode(d.id, flag));
     },
     setActiveNode(id, flag){
-      console.log("JHEY");
       if(flag){
         this.activeNode = id;
       }else{
@@ -232,7 +255,18 @@ export default {
       //  }
       //  if(b) break;
       //}
+    },
+    markProject(id, color){
+      let project = this.nodes.find(d=>d.id==id);
+      if(project){
+        project.marked = color
+      }
+    },
+    toggleUnfoldSharedRelationsByDefault(){
+      this.unfoldSharedRelationsByDefault = !this.unfoldSharedRelationsByDefault;
+
     }
+
   }
 }
 </script>

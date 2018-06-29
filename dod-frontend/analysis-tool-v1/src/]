@@ -2,7 +2,7 @@
   <!--<div id="vizWrapper" :style="{width: width+'px', height: height+'px', display: 'inline-block', float: 'left'}">-->
   <div id="viz" :style="{height:height+'px'}">
     <div id="vizControl">
-      <p>show shared relations by default</p><input type="checkbox" checked=unfoldSharedRelationsByDefault @click=toggleUnfoldSharedRelationsByDefault ></input>
+      <p>show shared relations by default</p><input type="checkbox"></input>
     </div>
     <svg xmlns="http://www.w3.org/2000/svg">
     </svg>
@@ -46,7 +46,6 @@ export default {
     'activeNode',
     'requestRelatedToId',
     'unfoldSharedRelationsByDefault',
-    'toggleUnfoldSharedRelationsByDefault',
 
 
   ],
@@ -77,16 +76,6 @@ export default {
               return 'red';
             }else{
               return 'none';
-            }
-          })
-        ;
-        this.link
-          .attr("stroke", d=>{
-            console.log("link", d);
-            if(d.target.id == val || d.source.id == val){
-              return 'red'
-            }else{
-              return 'grey'
             }
           })
         ;
@@ -207,12 +196,6 @@ export default {
       ;
 
       this.node = this.node.data(this.data.nodes, d=>d.id);
-      this.node.selectAll(".markedRing")
-                .attr("stroke", d=>{
-                    return d.marked; // this assumes the incoming node is always currently hovered (in the pane)
-                })
-      ;
-
       
       this.node.exit().remove();
         
@@ -276,9 +259,9 @@ export default {
                 .attr("cy", 0)
                 .attr("r", d=>{
                   if(d.type=='project'){
-                    return 15 + 8;
+                    return 15 + 4;
                   }else{
-                    return 6 + 8;
+                    return 6 + 4;
                   }
                 })
                 .attr("fill", "none")
@@ -288,26 +271,13 @@ export default {
                   }else{
                     return 'none';
                   }
+                  //if(d.id==this.activeNode){ 
+                  //  return 'red';
+                  //}else{
+                  //  return 'none';
+                  //}
                 })
                 .attr("stroke-width", 3);
-      ;
-      this.nodeIn
-                .append("circle")
-                .attr("class", "markedRing")
-                .attr("cx", 0)
-                .attr("cy", 0)
-                .attr("r", d=>{
-                  if(d.type=='project'){
-                    return 15 + 2;
-                  }else{
-                    return 6 + 2;
-                  }
-                })
-                .attr("fill", "none")
-                .attr("stroke", d=>{
-                    return d.marked; // this assumes the incoming node is always currently hovered (in the pane)
-                })
-                .attr("stroke-width", 2);
       ;
       this.node = this.nodeIn.merge(this.node);
 

@@ -1,6 +1,6 @@
 <template>
   <div id="search" :style="{height: height +'px'}">
-    <input ref="searchBar"></input>
+    <input ref="searchBar" value='missile egypt'></input>
     <button @click="searchRequest">Search</button>
   </div>
 </template>

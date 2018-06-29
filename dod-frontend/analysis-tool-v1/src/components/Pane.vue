@@ -5,6 +5,7 @@
       :toggleSelect=toggleSelect
       :setAllSubnodes=setAllSubnodes
       :setActiveNode=setActiveNode
+      :markProject=markProject
     >
     </pane-node>
   </div>
@@ -36,7 +37,8 @@ export default {
     'height',
     'toggleSelect',
     'setAllSubnodes',
-    'setActiveNode'
+    'setActiveNode',
+    'markProject',
   ],
   computed:{
   },

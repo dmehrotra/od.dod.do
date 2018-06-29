@@ -5,6 +5,13 @@
     <p>source: <span v-for="source in data.requestSource">{{source}}</span></p>
     <p><a href="#" @click="setAllSubnodes(data.id, true)">unfold</a></p>
     <p><a href="#" @click="setAllSubnodes(data.id, false)">fold in</a></p>
+    <p>mark 
+      <a href="#" @click="markProject(data.id, 'green')">green</a>
+      <a href="#" @click="markProject(data.id, 'yellow')">yellow</a>
+      <a href="#" @click="markProject(data.id, 'red')">red</a>
+      <a href="#" @click="markProject(data.id, 'none')">none</a>
+    
+    </p>
     <p v-if="data.selected" :style="{backgroundColor: 'blue', color:'white'}">currently {{data.relationships.filter(d=>d.visible).length}}/{{data.relationships.length}} subnodes are unfolded</p>
 
   </div>
@@ -33,7 +40,8 @@ export default {
     'data',
     'toggleSelect',
     'setAllSubnodes',
-    'setActiveNode'
+    'setActiveNode',
+    'markProject',
   ],
   computed:{
   },
