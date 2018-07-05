@@ -81,6 +81,13 @@ export default {
           })
         ;
         this.link
+          .attr("stroke-width", d=>{
+            if(d.target.id == val || d.source.id == val){
+              return 2;
+            }else{
+              return 1;
+            }
+          })
           .attr("stroke", d=>{
             console.log("link", d);
             if(d.target.id == val || d.source.id == val){
@@ -199,6 +206,7 @@ export default {
       this.link = this.link.enter().insert("line", ".node")
           .attr("class", "link")
           .attr("stroke", "grey")
+          .attr("stroke-width", 1)
           .attr("x1", function(d) { return d.source.x; })
           .attr("y1", function(d) { return d.source.y; })
           .attr("x2", function(d) { return d.target.x; })
@@ -252,6 +260,7 @@ export default {
 
                 .on('mouseover', (d,i,nodes)=>{
                   this.setActiveNode(d.id, true);
+                  console.log(d);
                   //d3.select(nodes[i]).select(".main").attr("fill","red");
                 })
                 .on('mouseout', (d,i,nodes)=>{

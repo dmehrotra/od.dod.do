@@ -44,4 +44,8 @@ todo:
 - zoom in and out and increase canvas size if there is more nodes
 
 
+- i need to sdistinguish between graph updates that make the graph move (new node) and ones that only enhance (eg tagging a node)
 
+- default shared relaations should only disolay the nodes that are connected to ALL project on display
+
+- documentation

@@ -5,6 +5,7 @@
     <p>source: <span v-for="source in data.requestSource">{{source}}</span></p>
     <p><a href="#" @click="setAllSubnodes(data.id, true)">unfold</a></p>
     <p><a href="#" @click="setAllSubnodes(data.id, false)">fold in</a></p>
+    <p>{{data.full_text}}</p>
     <p>mark 
       <a href="#" @click="markProject(data.id, 'green')">green</a>
       <a href="#" @click="markProject(data.id, 'yellow')">yellow</a>
