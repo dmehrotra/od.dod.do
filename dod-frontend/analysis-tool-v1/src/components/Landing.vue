@@ -1,24 +1,22 @@
 <template>
-  <div id="search" :style="{height: height +'px'}">
-    <input ref="searchBar" value='egypt'></input>
-    <button @click="searchRequest">Search</button>
+  <div id="pane" :style="{height:height+'px'}">
+    this is the landing page with explanation and stuff
+     <p>
+      <router-link to="/app">Go to Foo</router-link>
+    </p>
   </div>
 </template>
 
 <script>
-
 export default {
-  name: 'search',
+  name: 'Landing',
   components: {
- //   FirstThrowRequester,
   },
   data () {
     return {
     }
   },
   props:[
-    'letMotherSearch',
-    'height'
   ],
   computed:{
   },
@@ -27,13 +25,17 @@ export default {
   beforeDestroy: function () {
   },
   methods: {
-    searchRequest(){
-      this.letMotherSearch(this.$refs.searchBar.value);
-    }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+div{
+  outline: 1px solid black;
+}
+#pane{
+  overflow: scroll;
+}
+
 </style>
