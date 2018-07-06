@@ -49,3 +49,7 @@ todo:
 - default shared relaations should only disolay the nodes that are connected to ALL project on display
 
 - documentation
+
+- display names of subnodes in graph if they are connected to whatevers is active (hovered), what is active itself will be having the tooltip
+
+- export option

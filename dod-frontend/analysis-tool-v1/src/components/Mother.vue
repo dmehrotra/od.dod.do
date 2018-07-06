@@ -196,6 +196,9 @@ export default {
     toggleSelect(id){
       this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;
       
+
+
+
       if(this.unfoldSharedRelationsByDefault){
         let sharedSubnodes = this.nodes.reduce((acc, d)=>{
           if(d.selected){
@@ -217,6 +220,7 @@ export default {
           }
         });
       }
+
     },
 
     toggleSubnode(id){
@@ -284,4 +288,11 @@ div{
 .halfWidth{
   width: 50%;
 }
+.twoThirdWidth{
+  width: 66%;
+}
+.thirdWidth{
+  width: 33%;
+}
+
 </style>

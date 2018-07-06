@@ -4,6 +4,10 @@
     <div id="vizControl">
       <p>show shared relations by default</p><input type="checkbox" checked=unfoldSharedRelationsByDefault @click=toggleUnfoldSharedRelationsByDefault ></input>
     </div>
+    <div id="currentNode" v-if=currentNode>
+      <p v-if="currentNode.type=='project'">{{currentNode.id}}</p>
+      <p v-else>{{currentNode.title}}</p>
+    </div>
     <svg xmlns="http://www.w3.org/2000/svg">
     </svg>
   </div>
@@ -36,6 +40,8 @@ export default {
         nodes:[],
         links:[]
       },
+
+      currentNode: undefined,
     }
   },
   props:[
@@ -260,7 +266,7 @@ export default {
 
                 .on('mouseover', (d,i,nodes)=>{
                   this.setActiveNode(d.id, true);
-                  console.log(d);
+                  this.currentNode = d;
                   //d3.select(nodes[i]).select(".main").attr("fill","red");
                 })
                 .on('mouseout', (d,i,nodes)=>{
@@ -446,8 +452,8 @@ export default {
     dragended(d) {
       if (!d3.event.active) this.simulation.alphaTarget(0);
       // comment next two lines to fix nodes after dragging
-      d.fx = null;
-      d.fy = null;
+      //d.fx = null;
+      //d.fy = null;
     }
   }
 }
@@ -467,6 +473,18 @@ export default {
     position: absolute;
   }
   #vizControl p{
+    color: white;
+    font-family: sans-serif;
+    display: inline-block;
+    margin:0;
+    margin-right:10px;
+  }
+
+  #currentNode{
+    position: absolute;
+    top: 20px;
+  }
+  #currentNode p{
     color: white;
     font-family: sans-serif;
     display: inline-block;
