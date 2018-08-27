@@ -53,7 +53,7 @@ export default {
     Pane, 
  //   FirstThrowRequester,
  //   FirstThrowDisplay,
-    Viz
+    Viz,
   },
   data () {
     return {

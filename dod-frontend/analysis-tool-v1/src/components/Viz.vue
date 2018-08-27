@@ -4,23 +4,33 @@
     <div id="vizControl">
       <p>show shared relations by default</p><input type="checkbox" checked=unfoldSharedRelationsByDefault @click=toggleUnfoldSharedRelationsByDefault ></input>
     </div>
-    <div id="currentNode" v-if=currentNode>
-      <p v-if="currentNode.type=='project'">{{currentNode.id}}</p>
-      <p v-else>{{currentNode.title}}</p>
-    </div>
+    <!--<div id="currentNode" v-if=currentNode>-->
+      <!--<p v-if="currentNode.type=='project'">{{currentNode.id}}</p>-->
+      <!--<p v-else>{{currentNode.title}}</p>-->
+    <!--</div>-->
+    <tooltip
+      :xPos=tooltipX
+      :yPos=tooltipY
+      :fullactive=tooltipFullactive
+      :setActiveNode=setActiveNode
+      :currentNode=currentNode
+
+    >
+    </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg">
     </svg>
   </div>
-</template>
-
+</template> 
 <script>
 import * as d3 from 'd3';
+import Tooltip from '@/components/Tooltip'
 
 import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'viz',
   components:{
+    Tooltip
   },
   data () {
     return {
@@ -42,6 +52,10 @@ export default {
       },
 
       currentNode: undefined,
+
+      tooltipX: -500,
+      tooltipY: -500,
+      tooltipFullactive: false,
     }
   },
   props:[
@@ -95,7 +109,6 @@ export default {
             }
           })
           .attr("stroke", d=>{
-            console.log("link", d);
             if(d.target.id == val || d.source.id == val){
               return 'red'
             }else{
@@ -267,6 +280,10 @@ export default {
                 .on('mouseover', (d,i,nodes)=>{
                   this.setActiveNode(d.id, true);
                   this.currentNode = d;
+                  this.tooltipX = d.x + 20;
+                  this.tooltipY = d.y - 110;
+                  this.tooltipFullactive = true;
+
                   //d3.select(nodes[i]).select(".main").attr("fill","red");
                 })
                 .on('mouseout', (d,i,nodes)=>{
@@ -276,6 +293,10 @@ export default {
                   //}else{
                   //d3.select(nodes[i]).select(".main").attr("fill","blue");
                   //}
+                  //this.hideTooltip();
+                  this.tooltipX = null;
+                  this.tooltipY = null;
+                  this.tooltipFullactive = false;
                 })
                 .on('click', (d,i,nodes)=>{
                   if(d.type!='project'){
@@ -454,6 +475,10 @@ export default {
       // comment next two lines to fix nodes after dragging
       //d.fx = null;
       //d.fy = null;
+    },
+    hideTooltip(){
+      this.tooltipX = -500;
+      this.tooltipY = -500;
     }
   }
 }
