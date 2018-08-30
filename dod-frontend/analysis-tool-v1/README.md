@@ -30,6 +30,8 @@ todo:
   - to unfold subnodes
   - to make a request related to it (subnode)
   - maybe also to fix nodes in space
+  - different tooltips for project and connection
+  - on connection toggle name to be visible in graph
 
 
 - display where nodes in the pane come from and allow to close in batch

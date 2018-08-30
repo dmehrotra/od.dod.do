@@ -1,23 +1,41 @@
 <template>
   <div id="tooltip" 
-       :style="{left: xPosition +'px', top: yPosition + 'px', opacity: opacity}"
+       :style="{left: xPosition +'px', top: yPosition + 'px', opacity:opacity}"
        v-on:mouseover="mouseOver"
        v-on:mouseout="mouseOut"
-    
     >
-      <p v-if="currentNode.type=='project'">{{currentNode.id}}</p>
-      <p v-else>{{currentNode.title}}</p>
+    <div class="bg"></div>
+    <div class="tooltip-content">
+      <a href="#" class="close"></a>
+      <div class="tooltip-inner-content" v-if="currentNode != undefined">
+        <project-tooltip v-if="currentNode.type=='project'"
+          :id=currentNode.id
+          :crossOutNode=crossOutNode
+          :unselectProject=unselectProjectAndCloseTooltip
+        >
+        </project-tooltip>
+        <connection-tooltip v-else
+          :title=currentNode.title
+          :crossOutNode=crossOutNode
+        >
+        </connection-tooltip>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
 
+import ProjectTooltip from '@/components/ProjectTooltip'
+import ConnectionTooltip from '@/components/ConnectionTooltip'
 import {TweenMax} from "gsap";
 
 export default {
   name: 'tooltip',
   components: {
- //   FirstThrowRequester,
+    ProjectTooltip,
+    ConnectionTooltip,
   },
   data () {
     return {
@@ -27,6 +45,7 @@ export default {
 
       hideAnimation: undefined,
       showAnimation: undefined,
+      maxOpacity:1,
     }
   },
   props:[
@@ -35,6 +54,12 @@ export default {
     'fullactive',
     'setActiveNode',
     'currentNode',
+
+    'deleteProject',
+    'setSubnode',
+
+    'setAnimateViz',
+    'unselectProject',
   ],
   computed:{
   },
@@ -68,7 +93,7 @@ export default {
         console.log("[Tooltip] fullactive changed");
         console.log(val);
         if(val){
-          this.showAnimation = TweenLite.to(this.$data, 0.2, { opacity: 1.0 });
+          this.showAnimation = TweenLite.to(this.$data, 0.2, { opacity: this.maxOpacity });
         }else{
           this.hideTooltip();
         }
@@ -81,8 +106,12 @@ export default {
   beforeDestroy: function () {
   },
   methods: {
+    crossOutTooltip(){
+      this.opacity = 0;
+      this.xPosition = -500; 
+      this.yPosition = -500; 
+    },
     hideTooltip: function(){
-
       this.hideAnimation = TweenLite.to(this.$data, 0.5, { opacity: 0.0,
         onComplete:()=>{
           this.xPosition = -500; 
@@ -93,13 +122,35 @@ export default {
     mouseOver: function(){
       console.log("HH:");
       this.hideAnimation.kill();
-      this.opacity = 1;
+      this.opacity = this.maxOpacity;
       this.setActiveNode(this.currentNode.id, true);
     },
     mouseOut: function(){
       this.hideTooltip();
       this.setActiveNode(this.currentNode.id, false);
-    }
+    },
+    crossOutNode: function(){
+      
+      this.setAnimateViz(false);
+        //<a v-if="currentNode.type=='project'" href="#" @click="deleteProject(currentNode.id)">delete node</a>
+      if(this.currentNode.type == 'project'){
+        this.deleteProject(this.currentNode.id)
+      }else{
+        this.setSubnode(this.currentNode.id, false)
+      }
+        //<a v-else href="#" @click="setSubnode(currentNode.id, false)">fold in subnode</a>
+      this.xPosition = -500; 
+      this.yPosition = -500; 
+      this.opacity = 0.0;
+    },
+    unselectProjectAndCloseTooltip(){
+      this.unselectProject(this.currentNode.id);
+      this.xPosition = -500; 
+      this.yPosition = -500; 
+      this.opacity = 0.0;
+    },
+
+    
   }
 }
 </script>
@@ -108,8 +159,61 @@ export default {
 <style scoped>
   #tooltip{
     position: absolute;
-    width: 120px;
-    height: 100px;
-    background-color:grey;
+    width: 140px;
+    height: 230px;
+    border: 1px white solid;
+    border-radius: 4px;
+    /*
+    padding: 5px;
+    /**/
+  }
+  .bg{
+    background-color:black;
+    width:100%;
+    height:100%;
+    position:absolute;
+    border-radius: 3px;
+    opacity:0.8;
+    /*
+    margin:-5px;
+    border: 1px white solid;
+    opacity:0.4;
+    /**/
+  }
+  .tooltip-content{
+    position:absolute;
+    padding:5px;
+  }
+  .tooltip-inner-content{
+    margin-top:17px;
+  }
+  .close-wrapper{
+    position:relative;
+    height:15px;
+  }
+  .close {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 15px;
+  height: 15px;
+  opacity: 0.3;
+  }
+  .close:hover {
+    opacity: 1;
+  }
+  .close:before, .close:after {
+    position: absolute;
+    left: 7px;
+    content: ' ';
+    height: 15px;
+    width: 2px;
+    background-color: white;
+  }
+  .close:before {
+    transform: rotate(45deg);
+  }
+  .close:after {
+    transform: rotate(-45deg);
   }
 </style>

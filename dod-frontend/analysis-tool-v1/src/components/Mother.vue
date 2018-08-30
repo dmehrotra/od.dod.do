@@ -13,6 +13,8 @@
          :setAllSubnodes=setAllSubnodes
          :setActiveNode=setActiveNode
          :markProject=markProject
+         :deleteProject=deleteProject
+         :setAnimateViz=setAnimateViz
          >
       </pane>
 
@@ -28,6 +30,12 @@
          :requestRelatedToId=requestRelatedToId
          :unfoldSharedRelationsByDefault=unfoldSharedRelationsByDefault
          :toggleUnfoldSharedRelationsByDefault=toggleUnfoldSharedRelationsByDefault
+         :deleteProject=deleteProject
+         :setSubnode=setSubnode
+
+         :animateViz=animateViz
+         :setAnimateViz=setAnimateViz
+         :unselectProject=unselectProject
       >
       </viz>
     </div>
@@ -64,6 +72,8 @@ export default {
       nodes: [],
       activeNode: undefined,
       unfoldSharedRelationsByDefault: true,
+
+      animateViz:true,
       
     }
   },
@@ -196,9 +206,6 @@ export default {
     toggleSelect(id){
       this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;
       
-
-
-
       if(this.unfoldSharedRelationsByDefault){
         let sharedSubnodes = this.nodes.reduce((acc, d)=>{
           if(d.selected){
@@ -222,7 +229,9 @@ export default {
       }
 
     },
-
+    unselectProject(id){
+      this.nodes.find(d=>d.id==id).selected = false;
+    },
     toggleSubnode(id){
 
     },
@@ -261,15 +270,29 @@ export default {
       //}
     },
     markProject(id, color){
+      this.setAnimateViz(false);
       let project = this.nodes.find(d=>d.id==id);
       if(project){
         project.marked = color
       }
     },
+    deleteProject(id){
+      let projectIndex = this.nodes.findIndex(d=>d.id==id);
+      if(projectIndex > -1){
+        this.nodes.splice(projectIndex, 1);
+      }
+    },
     toggleUnfoldSharedRelationsByDefault(){
       this.unfoldSharedRelationsByDefault = !this.unfoldSharedRelationsByDefault;
 
-    }
+    },
+
+    setAnimateViz(flag){
+      this.animateViz=flag;
+    },
+
+
+
 
   }
 }

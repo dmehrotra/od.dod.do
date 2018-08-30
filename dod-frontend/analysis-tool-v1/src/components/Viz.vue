@@ -14,7 +14,11 @@
       :fullactive=tooltipFullactive
       :setActiveNode=setActiveNode
       :currentNode=currentNode
-
+      :deleteProject=deleteProject
+      :setSubnode=setSubnode
+      :setAnimateViz=setAnimateViz
+      
+      :unselectProject=unselectProject
     >
     </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg">
@@ -67,7 +71,13 @@ export default {
     'requestRelatedToId',
     'unfoldSharedRelationsByDefault',
     'toggleUnfoldSharedRelationsByDefault',
+    
+    'deleteProject',
+    'setSubnode',
 
+    'animateViz',
+    'setAnimateViz',
+    'unselectProject',
 
   ],
   computed:{
@@ -81,8 +91,6 @@ export default {
    
     '$props.nodeData':{
       handler: function (val, oldVal) { 
-        console.log("[Viz] nodeData changed");
-        console.log(val);
         this.integrateChanges(val);
       },
       deep: true
@@ -128,22 +136,6 @@ export default {
     this.nodeLayer = this.chart.append("g").attr("class", "nodeLayer");
     this.labelLayer = this.chart.append("g").attr("class", "labelLayer");
 
-    //var attractForce = d3.forceManyBody().strength(d=>{
-    //  console.log(d);
-    //  if(d.type == "project"){
-    //    return 0.1;
-    //  }else{
-    //    return -5000;
-    //  }
-    //}).distanceMax(1000).distanceMin(200);
-    //var repelForce = d3.forceManyBody().strength(d=>{
-    //  console.log(d);
-    //  if(d.type == "project"){
-    //    return -70;
-    //  }else{
-    //    return -5000;
-    //  }
-    //}).distanceMax(200).distanceMin(4);
 
 
     this.simulation = d3.forceSimulation()
@@ -348,40 +340,15 @@ export default {
       this.node = this.nodeIn.merge(this.node);
 
 
-      //this.node = this.node.enter().append("circle")
-      //    .attr("class", "node")
-      //    .attr("cx", function(d) { return d.x; })
-      //    .attr("cy", function(d) { return d.y; })
-      //    .attr("r", d => {
-      //      if(d.type=='project'){
-      //        return 15;
-      //      }else{
-      //        return 6;
-      //      }
-      //    })
-      //    .attr("fill", d=>{
-      //      if(d.active){
-      //        return 'red';
-      //      }
-      //       
-      //      if(d.type=='project'){
-      //        return 'white';
-      //      }else{
-      //        return 'blue';
-      //      }
-      //    })
-      //    .call(d3.drag()
-      //      .on("start", this.dragstarted)
-      //      .on("drag", this.dragged)
-      //      .on("end", this.dragended)
-      //    )
-      //    .on('mouseover', d=>{
-      //      this.setActiveNode(d.id, true);
+      if(!this.animateViz){
+        //this needs a solution
+        // generally how to not animate a graph like crazy??
+        this.simulation.alpha(1).restart();
+        this.setAnimateViz(true);
+      }else{
+        this.simulation.alpha(1).restart();
+      }
 
-      //    })
-      //    .merge(this.node)
-      //;
-      this.simulation.alpha(1).restart();
 
     },
     flatten(nestedData){
@@ -435,12 +402,28 @@ export default {
         if(this.data.nodes.map(d=>d.id).includes(node.id)){
           let n = this.data.nodes.find(d=>d.id==node.id);
           n.subnodes = subnodes;
+          n.subnodes.forEach(subnode=>{
+            if(subnode.x == undefined){
+              subnode.x = n.x;
+            }
+            if(subnode.y == undefined){
+              subnode.y = n.y;
+            }
+          });
           //n.links = links;
           return n;
         }else{
           node.x = this.width*0.5;
           node.y = this.height*0.5;
           node.subnodes = subnodes;
+          node.subnodes.forEach(subnode=>{
+            if(subnode.x == undefined){
+              subnode.x = node.x;
+            }
+            if(subnode.y == undefined){
+              subnode.y = node.y;
+            }
+          });
           node.type = 'project';
           //node.links = links;
           return node;

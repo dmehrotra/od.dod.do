@@ -6,6 +6,7 @@
       :setAllSubnodes=setAllSubnodes
       :setActiveNode=setActiveNode
       :markProject=markProject
+      :deleteProject=deleteProject
     >
     </pane-node>
   </div>
@@ -39,6 +40,7 @@ export default {
     'setAllSubnodes',
     'setActiveNode',
     'markProject',
+    'deleteProject',
   ],
   computed:{
   },

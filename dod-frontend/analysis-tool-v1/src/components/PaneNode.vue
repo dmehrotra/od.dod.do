@@ -13,6 +13,9 @@
       <a href="#" @click="markProject(data.id, 'none')">none</a>
     
     </p>
+    <p>
+      <a href="#" @click="deleteProject(data.id)">delete node</a>
+    </p>
     <p v-if="data.selected" :style="{backgroundColor: 'blue', color:'white'}">currently {{data.relationships.filter(d=>d.visible).length}}/{{data.relationships.length}} subnodes are unfolded</p>
 
   </div>
@@ -43,6 +46,7 @@ export default {
     'setAllSubnodes',
     'setActiveNode',
     'markProject',
+    'deleteProject',
   ],
   computed:{
   },
