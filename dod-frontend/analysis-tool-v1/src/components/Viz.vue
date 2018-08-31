@@ -395,35 +395,41 @@ export default {
           if(this.data.nodes.map(d=>d.id).includes(subnode.id)){
             return this.data.nodes.find(d=>d.id==subnode.id);
           }else{
+            if(this.data.nodes.map(d=>d.id).includes(node.id)){
+              //the idea here is that the subnode orgin in the node that it is folded out from
+              // but i am not sure if this works yet
+              subnode.x = node.x;
+              subnode.y = node.y;
+              
+              // this is experimental, freezing the mother nood in place while subndes unfold
+              // then unfreeze after timeout
+              node.fx = node.x;
+              node.fy = node.y;
+              setTimeout(function(){
+                node.fx = undefined;
+              }, 1500);
+
+            }else{
+              //the idea here is that the subnode orgin in the node that it is folded out from
+              // but i am not sure if this works yet
+              subnode.x = this.width*0.5;
+              subnode.y = this.height*0.5;
+            }
             return subnode;
           }
         })
+        console.log("subnodes", subnodes);
 
         if(this.data.nodes.map(d=>d.id).includes(node.id)){
           let n = this.data.nodes.find(d=>d.id==node.id);
+          console.log("got this node already!", n);
           n.subnodes = subnodes;
-          n.subnodes.forEach(subnode=>{
-            if(subnode.x == undefined){
-              subnode.x = n.x;
-            }
-            if(subnode.y == undefined){
-              subnode.y = n.y;
-            }
-          });
           //n.links = links;
           return n;
         }else{
           node.x = this.width*0.5;
           node.y = this.height*0.5;
           node.subnodes = subnodes;
-          node.subnodes.forEach(subnode=>{
-            if(subnode.x == undefined){
-              subnode.x = node.x;
-            }
-            if(subnode.y == undefined){
-              subnode.y = node.y;
-            }
-          });
           node.type = 'project';
           //node.links = links;
           return node;

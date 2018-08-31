@@ -1,16 +1,21 @@
 <template>
   <div class="connectionTooltip">
     <a href="#" @click="crossOutNode()">fold in</a>
-    <p>{{title}}</p>
+    <tooltip-name
+      :name=title
+    >
+    </tooltip-name>
   </div>
 </template>
 
 <script>
 
+import TooltipName from '@/components/TooltipName'
 
 export default {
   name: 'connectionTooltip',
   components: {
+    TooltipName,
   },
   data () {
     return {

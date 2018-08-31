@@ -1,8 +1,22 @@
 <template>
   <div class="projectTooltip">
-    <a href="#" @click="unselectProject(id)">unselect</a>
-    <a href="#" @click="crossOutNode()">delete</a>
-    <p>{{id}}</p>
+
+    <tooltip-name
+      :name=currentNode.id
+    >
+    </tooltip-name>
+    <tooltip-top-buttons
+      :id=currentNode.id
+      :crossOutNode=crossOutNode
+      :unselectProject=unselectProject
+    >
+    </tooltip-top-buttons>
+    <tooltip-subnodes
+      :currentNode=currentNode
+      :setSubnode=setSubnode
+    >
+    </tooltip-subnodes>
+
 
 
   </div>
@@ -11,18 +25,25 @@
 <script>
 
 
+import TooltipTopButtons from '@/components/TooltipTopButtons'
+import TooltipName from '@/components/TooltipName'
+import TooltipSubnodes from '@/components/TooltipSubnodes'
 export default {
   name: 'projectTooltip',
   components: {
+    TooltipTopButtons,
+    TooltipName,
+    TooltipSubnodes,
   },
   data () {
     return {
     }
   },
   props:[
-    'id',
+    'currentNode',
     'crossOutNode',
     'unselectProject',
+    'setSubnode',
   ],
   computed:{
   },

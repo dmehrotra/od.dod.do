@@ -1,17 +1,20 @@
 <template>
   <div id="tooltip" 
-       :style="{left: xPosition +'px', top: yPosition + 'px', opacity:opacity}"
+       :style="{left: xPosition +'px', top: yPosition + 'px', opacity:opacity, width: width+'px', height: height+'px'}"
        v-on:mouseover="mouseOver"
        v-on:mouseout="mouseOut"
     >
     <div class="bg"></div>
-    <div class="tooltip-content">
-      <a href="#" class="close"></a>
+    <div class="tooltip-content"
+      :style="{width: width-2*padding+'px', height: height-2*padding+'px'}"
+      >
+      <a href="#" class="close" @click="crossOutTooltip"></a>
       <div class="tooltip-inner-content" v-if="currentNode != undefined">
         <project-tooltip v-if="currentNode.type=='project'"
-          :id=currentNode.id
+          :currentNode=currentNode
           :crossOutNode=crossOutNode
           :unselectProject=unselectProjectAndCloseTooltip
+          :setSubnode=setSubnode
         >
         </project-tooltip>
         <connection-tooltip v-else
@@ -39,6 +42,9 @@ export default {
   },
   data () {
     return {
+      width:140,
+      height:230,
+      padding:5,
       opacity:0,
       xPosition: -500,
       yPosition: -500,
@@ -159,8 +165,6 @@ export default {
 <style scoped>
   #tooltip{
     position: absolute;
-    width: 140px;
-    height: 230px;
     border: 1px white solid;
     border-radius: 4px;
     /*
@@ -185,7 +189,7 @@ export default {
     padding:5px;
   }
   .tooltip-inner-content{
-    margin-top:17px;
+    margin-top:20px;
   }
   .close-wrapper{
     position:relative;
