@@ -12,6 +12,8 @@
 <script>
 
 
+
+
 export default {
   name: 'tooltipSubnodesListElement',
   components: {
@@ -21,12 +23,21 @@ export default {
     }
   },
   props:[
-    'id',
+    'idArray',
     'name',
-    'visible',
     'setSubnode',
+    'isVisible',
   ],
   computed:{
+    visible: function(){
+      // if a minimum of 1 subnode is hodden, 'all' will be unchecked'
+      let invisibleIndex = this.idArray.findIndex(id=>this.isVisible(id)==false)
+      if(invisibleIndex == -1){
+        return true;
+      }else{
+        return false;
+      }
+    }
   },
 	watch: {
   },
@@ -37,7 +48,8 @@ export default {
   },
   methods: {
     toggle: function(){
-      this.setSubnode(this.id, !this.visible)
+      let flag = !this.visible;
+      this.idArray.forEach(id => this.setSubnode(id, flag));
     }
   }
 }

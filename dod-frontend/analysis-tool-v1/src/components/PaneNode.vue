@@ -1,6 +1,6 @@
 <template>
   <div class="paneNode" @mouseover="mouseOver" @mouseout="mouseOut">
-    <p :style="{backgroundColor: 'black', color:'white', marginTop:'8px'}"><b>{{data.id}}</b></p>
+    <p :style="{backgroundColor: active?'red':'black', color:'white', marginTop:'8px'}"><b>{{data.id}}</b></p>
     <p :style="{backgroundColor: data.selected?'green':'white'}">selected: <a href="#" @click="toggleSelect(data.id)">{{data.selected}}</a></p>
     <p>source: <span v-for="source in data.requestSource">{{source}}</span></p>
     <p><a href="#" @click="setAllSubnodes(data.id, true)">unfold</a></p>
@@ -47,6 +47,7 @@ export default {
     'setActiveNode',
     'markProject',
     'deleteProject',
+    'active', 
   ],
   computed:{
   },

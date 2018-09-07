@@ -6,6 +6,9 @@ import router from './router'
 
 import store from './vuex'
 
+var VueScrollTo = require('vue-scrollto');
+Vue.use(VueScrollTo)
+
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

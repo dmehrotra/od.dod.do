@@ -6,19 +6,19 @@
     <div class='subnode-box'>
 
       <tooltip-subnodes-list-element
-        :id="33"
+         :idArray="currentNode.relationships.map(r=>r.id)"
         :name="'all'"
-        :visible=true
         :setSubnode=setSubnode
+        :isVisible=isVisible
       >
       </tooltip-subnodes-list-element>
 
       <tooltip-subnodes-list-element
         v-for="subnode in currentNode.relationships"
-        :id=subnode.id
+        :idArray=[subnode.id]
         :name=subnode.title
-        :visible=subnode.visible
         :setSubnode=setSubnode
+        :isVisible=isVisible
       >
       </tooltip-subnodes-list-element>
 
@@ -56,6 +56,15 @@ export default {
   beforeDestroy: function () {
   },
   methods: {
+    isVisible: function(id){
+      let relationship = this.currentNode.relationships.find(r=>r.id ==id);
+
+      if(relationship){
+        return relationship.visible;
+      }else{
+        return false;
+      }
+    }
   }
 }
 </script>

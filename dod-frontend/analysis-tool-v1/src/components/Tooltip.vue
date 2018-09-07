@@ -25,10 +25,12 @@
       </div>
     </div>
 
+
   </div>
 </template>
 
 <script>
+
 
 import ProjectTooltip from '@/components/ProjectTooltip'
 import ConnectionTooltip from '@/components/ConnectionTooltip'

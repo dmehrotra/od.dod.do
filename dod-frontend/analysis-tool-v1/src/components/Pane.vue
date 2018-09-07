@@ -7,6 +7,8 @@
       :setActiveNode=setActiveNode
       :markProject=markProject
       :deleteProject=deleteProject
+      :active="activeNode==node.id"
+      :id="'pane-node-'+node.id"
     >
     </pane-node>
   </div>
@@ -41,6 +43,7 @@ export default {
     'setActiveNode',
     'markProject',
     'deleteProject',
+    'activeNode',
   ],
   computed:{
   },

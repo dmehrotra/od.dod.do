@@ -1,6 +1,6 @@
 <template>
   <div class="tooltip-top-buttons">
-    <a href="#" @click="">show</a>
+    <a href="#" v-scroll-to="{el: '#pane-node-'+id, container: '#pane'}">show</a>
     <a href="#" @click="unselectProject(id)">unselect</a>
     <a href="#" @click="crossOutNode()">delete</a>
   </div>

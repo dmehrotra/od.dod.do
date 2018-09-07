@@ -15,6 +15,7 @@
          :markProject=markProject
          :deleteProject=deleteProject
          :setAnimateViz=setAnimateViz
+         :activeNode=activeNode
          >
       </pane>
 
