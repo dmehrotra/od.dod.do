@@ -2,7 +2,13 @@
   <!--<div id="vizWrapper" :style="{width: width+'px', height: height+'px', display: 'inline-block', float: 'left'}">-->
   <div id="viz" :style="{height:height+'px'}">
     <div id="vizControl">
-      <p>show shared relations by default</p><input type="checkbox" checked=unfoldSharedRelationsByDefault @click=toggleUnfoldSharedRelationsByDefault ></input>
+      <p>verbose note: entering contracts will ALWAYS connect to relations they share that are already on display</p>
+      <br>
+      <p>in addition we have the option of automatically folding out relation nodes if they are shared by
+      <input type="number" name="points" value=2 min=1 step="1" @change=changeThreshold>
+      or more contract nodes. Click here <input type="checkbox" checked=unfoldSharedRelationsByDefault @click=toggleUnfoldSharedRelationsByDefault ></input> to activate this behaviour by default or click <a href="#" @click="unfoldSharedRelationByThreshold">here</a> to run in just once on for the nodes on display.</p>
+
+
     </div>
     <!--<div id="currentNode" v-if=currentNode>-->
       <!--<p v-if="currentNode.type=='project'">{{currentNode.id}}</p>-->
@@ -71,6 +77,8 @@ export default {
     'requestRelatedToId',
     'unfoldSharedRelationsByDefault',
     'toggleUnfoldSharedRelationsByDefault',
+    'changeThreshold',
+    'unfoldSharedRelationByThreshold',
     
     'deleteProject',
     'setSubnode',

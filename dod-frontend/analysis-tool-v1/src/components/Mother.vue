@@ -31,6 +31,9 @@
          :requestRelatedToId=requestRelatedToId
          :unfoldSharedRelationsByDefault=unfoldSharedRelationsByDefault
          :toggleUnfoldSharedRelationsByDefault=toggleUnfoldSharedRelationsByDefault
+         :changeThreshold=changeThreshold
+         :unfoldSharedRelationByThreshold=unfoldSharedRelationByThreshold
+
          :deleteProject=deleteProject
          :setSubnode=setSubnode
 
@@ -73,8 +76,10 @@ export default {
       nodes: [],
       activeNode: undefined,
       unfoldSharedRelationsByDefault: true,
+      sharedRelationsThreshold: 2,
 
       animateViz:true,
+
       
     }
   },
@@ -178,7 +183,11 @@ export default {
       this.nodes.push.apply(this.nodes, newNodes);
 
 
+      if(this.unfoldSharedRelationsByDefault){
 
+        this.unfoldSharedRelationByThreshold();
+
+      }
 
 
 
@@ -204,29 +213,34 @@ export default {
         });
 
     },
+    unfoldSharedRelationByThreshold(){
+      let sharedSubnodes = this.nodes.reduce((acc, d)=>{
+        if(d.selected){
+          d.relationships.forEach(subnode=>{
+            if(!subnode.active && acc[subnode.id] != this.sharedRelationsThreshold){
+              if(acc[subnode.id] == undefined){
+                acc[subnode.id] = 1;
+              }else{
+                acc[subnode.id]++;
+              }
+            }
+          })
+        }
+        return acc;
+      }, {});
+      Object.keys(sharedSubnodes).forEach(d=>{
+        if(sharedSubnodes[d] >= this.sharedRelationsThreshold){
+          this.setSubnode(d, true);
+        }
+      });
+    },
     toggleSelect(id){
       this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;
       
       if(this.unfoldSharedRelationsByDefault){
-        let sharedSubnodes = this.nodes.reduce((acc, d)=>{
-          if(d.selected){
-            d.relationships.forEach(subnode=>{
-              if(!subnode.active && acc[subnode.id] != true){
-                if(acc[subnode.id] == undefined){
-                  acc[subnode.id] = false;
-                }else{
-                  acc[subnode.id] = true;
-                }
-              }
-            })
-          }
-          return acc;
-        }, {});
-        Object.keys(sharedSubnodes).forEach(d=>{
-          if(sharedSubnodes[d] == true){
-            this.setSubnode(d, true);
-          }
-        });
+
+        this.unfoldSharedRelationByThreshold();
+
       }
 
     },
@@ -285,6 +299,12 @@ export default {
     },
     toggleUnfoldSharedRelationsByDefault(){
       this.unfoldSharedRelationsByDefault = !this.unfoldSharedRelationsByDefault;
+
+    },
+    changeThreshold(e){
+      console.log(e.target.value);
+      this.sharedRelationsThreshold = parseInt(e.target.value);
+      
 
     },
 
