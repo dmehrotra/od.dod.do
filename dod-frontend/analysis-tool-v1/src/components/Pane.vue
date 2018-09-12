@@ -2,12 +2,6 @@
   <div id="pane" :style="{height:height+'px'}">
     <pane-node v-for="node in nodes" 
       :data=node
-      :toggleSelect=toggleSelect
-      :setAllSubnodes=setAllSubnodes
-      :setActiveNode=setActiveNode
-      :markProject=markProject
-      :deleteProject=deleteProject
-      :active="activeNode==node.id"
       :id="'pane-node-'+node.id"
     >
     </pane-node>
@@ -20,7 +14,6 @@
 //import FirstThrowDisplay from '@/components/FirstThrowDisplay'
 import PaneNode from '@/components/PaneNode'
 
-//import {mapGetters, mapActions} from 'vuex';
 
 
 export default {
@@ -38,12 +31,6 @@ export default {
   props:[
     'nodes',
     'height',
-    'toggleSelect',
-    'setAllSubnodes',
-    'setActiveNode',
-    'markProject',
-    'deleteProject',
-    'activeNode',
   ],
   computed:{
   },
@@ -59,13 +46,19 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 div{
-  /*
-  outline: 1px solid black;
-  /**/
 }
 #pane{
+  outline: 2px solid black;
+  /**/
+
+  background-color:white;
+  display: flex;
+  flex-flow: row wrap;
+  align-content: flex-start;
+  justify-content:center;
+  /*
+  /**/
   overflow: scroll;
-  background-color:black;
 }
 
 </style>

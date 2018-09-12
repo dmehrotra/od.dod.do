@@ -1,27 +1,26 @@
 <template>
   <div id="mother">
-    <div class="halfWidth">
+    <!--<div class="halfWidth">-->
+    <div :style="{width: paneWidthPercentage + '%'}">
       <search
         :letMotherSearch=searchRequest
-        :height=80
+        :height=searchBarHeight
       >
       </search>
       <pane
-         :nodes=nodeData
-         :height=height-80
-         :toggleSelect=toggleSelect
-         :setAllSubnodes=setAllSubnodes
-         :setActiveNode=setActiveNode
-         :markProject=markProject
-         :deleteProject=deleteProject
-         :setAnimateViz=setAnimateViz
-         :activeNode=activeNode
+         :nodes=nodesReversed
+         :height=height-searchBarHeight-currentReaderHeight
          >
       </pane>
+      <reader
+        :height=currentReaderHeight
+      >
+
+      </reader>
 
 
     </div>
-    <div class="halfWidth">
+    <div :style="{width: (100-paneWidthPercentage) + '%'}">
       <viz
          :nodeData=selectedNodeData
          :width=width*0.5
@@ -53,8 +52,9 @@
 import Viz from '@/components/Viz'
 import Search from '@/components/Search'
 import Pane from '@/components/Pane'
+import Reader from '@/components/Reader'
 
-//import {mapGetters, mapActions} from 'vuex';
+import {mapGetters, mapActions} from 'vuex';
 
 import api from '@/vuex/api'
 
@@ -66,6 +66,7 @@ export default {
  //   FirstThrowRequester,
  //   FirstThrowDisplay,
     Viz,
+    Reader,
   },
   data () {
     return {
@@ -84,7 +85,12 @@ export default {
     }
   },
   computed:{
-    nodeData: function(){
+    ...mapGetters([
+      'searchBarHeight',
+      'paneWidthPercentage',
+      'currentReaderHeight',
+    ]),
+    nodesReversed: function(){
       return this.nodes.reverse();
     },
     selectedNodeData: function(){
@@ -322,7 +328,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 div{
+  /*
   outline: 1px solid black;
+  /**/
 }
 #mother{
   width:100%;

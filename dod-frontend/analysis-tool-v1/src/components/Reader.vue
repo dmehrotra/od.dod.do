@@ -1,14 +1,15 @@
 <template>
-  <div id="search" :style="{height: height +'px'}">
-    <input ref="searchBar" value='germany'></input>
-    <button @click="searchRequest">Search</button>
+  <div id="reader" :style="{height: height +'px'}">
+    <a href="#" @click=toggleReader>close</a>
   </div>
 </template>
 
 <script>
 
+import {mapGetters, mapActions} from 'vuex';
+
 export default {
-  name: 'search',
+  name: 'reader',
   components: {
  //   FirstThrowRequester,
   },
@@ -17,7 +18,6 @@ export default {
     }
   },
   props:[
-    'letMotherSearch',
     'height'
   ],
   computed:{
@@ -27,9 +27,10 @@ export default {
   beforeDestroy: function () {
   },
   methods: {
-    searchRequest(){
-      this.letMotherSearch(this.$refs.searchBar.value);
-    }
+
+    ...mapActions([
+      'toggleReader'
+    ]),
   }
 }
 </script>

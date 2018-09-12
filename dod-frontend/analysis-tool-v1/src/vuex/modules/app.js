@@ -4,12 +4,26 @@ import * as types from '../mutation-types'
 //import api from '../api.js'
 
 const state = {
+  // layout 
+  searchBarHeight: 80,
+  paneWidthPercentage: 40,
+  readerHeight: 210,
+  currentReaderHeight: 210,
+
+  
   //departments: [],
   firstThrow: undefined,
   selection: [],
+  
 }
 
 const getters = {
+  // layout 
+  searchBarHeight: state => state.searchBarHeight,
+  paneWidthPercentage: state => state.paneWidthPercentage,
+  currentReaderHeight: state => state.currentReaderHeight,
+
+
   //origGraph: state => state.graph,
   firstThrow: state => state.firstThrow,
   selectionWatcher: state => () => state.selection,
@@ -21,6 +35,9 @@ const getters = {
 }
 
 const mutations = {
+  [types.TOGGLE_READER_HEIGHT] (state, data) {
+    state.currentReaderHeight = state.readerHeight - state.currentReaderHeight;
+  },
   [types.FIRST_THROW] (state, data) {
     state.firstThrow = data;
   },
@@ -58,6 +75,9 @@ const mutations = {
 }
 
 const actions = {
+  toggleReader ({commit}, data){
+    commit(types.TOGGLE_READER_HEIGHT);	
+  },
   //addToSelection ({commit, state}, newSelection) {
     ////this makes sure nothing is selected twice
     //let selectedAlready = false;
