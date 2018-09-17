@@ -8,11 +8,13 @@
       >
       </search>
       <pane
-         :nodes=nodesReversed
+         :nodes=nodes
          :height=height-searchBarHeight-currentReaderHeight
+         :toggleSelect=toggleSelect
+         :deleteProject=deleteProject
          >
       </pane>
-      <reader
+      <reader v-if="currentReaderHeight>0"
         :height=currentReaderHeight
       >
 

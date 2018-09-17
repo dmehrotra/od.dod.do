@@ -1,11 +1,17 @@
 <template>
-  <div id="pane" :style="{height:height+'px'}">
-    <pane-node v-for="node in nodes" 
+  <transition-group name='list' tag="div" id="pane" :style="{height:height+'px'}">
+
+    <pane-node v-for="(node, i) in nodes" 
       :data=node
+      :toggleSelect=toggleSelect
+      :deleteProject=deleteProject
+      :index="i"
+      :key=i
       :id="'pane-node-'+node.id"
     >
     </pane-node>
-  </div>
+  
+  </transition-group>
 </template>
 
 <script>
@@ -31,6 +37,8 @@ export default {
   props:[
     'nodes',
     'height',
+    'toggleSelect',
+    'deleteProject',
   ],
   computed:{
   },
@@ -45,20 +53,23 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-div{
-}
-#pane{
-  outline: 2px solid black;
-  /**/
+  div{
+  }
+  #pane{
+    outline: 2px solid black;
+    /**/
 
-  background-color:white;
-  display: flex;
-  flex-flow: row wrap;
-  align-content: flex-start;
-  justify-content:center;
-  /*
-  /**/
-  overflow: scroll;
-}
+    background-color:white;
+    display: flex;
+    flex-flow: row wrap;
+    align-content: flex-start;
+    justify-content:center;
+    /*
+    /**/
+    overflow: scroll;
+  }
+  .no-node{
+    visibility: hidden;
+  }
 
 </style>

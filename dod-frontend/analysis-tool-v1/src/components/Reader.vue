@@ -1,6 +1,7 @@
 <template>
   <div id="reader" :style="{height: height +'px'}">
     <a href="#" @click=toggleReader>close</a>
+    <p>{{readerText}}</p>
   </div>
 </template>
 
@@ -21,13 +22,15 @@ export default {
     'height'
   ],
   computed:{
+    ...mapGetters([
+      'readerText'
+    ]),
   },
   mounted(){
   },
   beforeDestroy: function () {
   },
   methods: {
-
     ...mapActions([
       'toggleReader'
     ]),

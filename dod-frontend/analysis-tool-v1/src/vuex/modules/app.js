@@ -9,6 +9,8 @@ const state = {
   paneWidthPercentage: 40,
   readerHeight: 210,
   currentReaderHeight: 210,
+  currentReaderId: '',
+  currentReaderText: '',
 
   
   //departments: [],
@@ -22,7 +24,7 @@ const getters = {
   searchBarHeight: state => state.searchBarHeight,
   paneWidthPercentage: state => state.paneWidthPercentage,
   currentReaderHeight: state => state.currentReaderHeight,
-
+  readerText: state => state.currentReaderText,
 
   //origGraph: state => state.graph,
   firstThrow: state => state.firstThrow,
@@ -37,6 +39,15 @@ const getters = {
 const mutations = {
   [types.TOGGLE_READER_HEIGHT] (state, data) {
     state.currentReaderHeight = state.readerHeight - state.currentReaderHeight;
+  },
+  [types.SET_READER_TEXT] (state, data) {
+    if(state.currentReaderId == data.id){
+      state.currentReaderHeight = 0;
+    }else{
+      state.currentReaderHeight = state.readerHeight;
+      state.currentReaderId = data.id;
+      state.currentReaderText = data.text;
+    }
   },
   [types.FIRST_THROW] (state, data) {
     state.firstThrow = data;
@@ -77,6 +88,9 @@ const mutations = {
 const actions = {
   toggleReader ({commit}, data){
     commit(types.TOGGLE_READER_HEIGHT);	
+  },
+  setReaderText ({commit}, data){
+    commit(types.SET_READER_TEXT, data);	
   },
   //addToSelection ({commit, state}, newSelection) {
     ////this makes sure nothing is selected twice
