@@ -55,3 +55,14 @@ todo:
 - display names of subnodes in graph if they are connected to whatevers is active (hovered), what is active itself will be having the tooltip
 
 - export option
+
+
+
+
+maybe in the pane, for each node and steadily updating it should displayed how many of the relation nodes on viz curretnly they share...
+
+
+
+contracts should be searchable by ID
+
+the way subnodes fold out autimatically etc should be accessible in a little settings overlay

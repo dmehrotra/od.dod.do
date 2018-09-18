@@ -5,6 +5,7 @@ import Landing from '@/components/Landing'
 
 
 import GridTest from '@/components/GridTest'
+import Layout from '@/components/Layout'
 
 Vue.use(Router)
 
@@ -22,9 +23,9 @@ export default new Router({
       component: Mother
     },
     {
-      path: '/grid',
-      name: 'GridText',
-      component: GridTest
+      path: '/layout',
+      name: 'Layout',
+      component: Layout
     }
   ]
 })

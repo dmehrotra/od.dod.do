@@ -1,5 +1,22 @@
 <template>
   <div id="mother">
+    <layout>
+      <template slot="search">
+        <h1>searching</h1>
+      </template>
+      <template slot="pane">
+        <h1>pane pane pain pane</h1>
+      </template>
+
+      <template slot="reader">
+        <h1>read</h1>
+      </template>
+
+      <template slot="viz">
+        <h1>viz b here</h1>
+      </template>
+
+    </layout>
     <!--
     <div :style="{width: paneWidthPercentage + '%'}">
       <search
@@ -49,6 +66,7 @@
 </template>
 
 <script>
+import Layout from '@/components/Layout'
 
 import Viz from '@/components/Viz'
 import Search from '@/components/Search'
@@ -62,6 +80,7 @@ import api from '@/vuex/api'
 export default {
   name: 'mother',
   components: {
+    Layout,
     Search,
     Pane, 
  //   FirstThrowRequester,
