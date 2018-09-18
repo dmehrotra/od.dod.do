@@ -3,6 +3,9 @@ import Router from 'vue-router'
 import Mother from '@/components/Mother'
 import Landing from '@/components/Landing'
 
+
+import GridTest from '@/components/GridTest'
+
 Vue.use(Router)
 
 export default new Router({
@@ -17,6 +20,11 @@ export default new Router({
       path: '/app',
       name: 'Mother',
       component: Mother
+    },
+    {
+      path: '/grid',
+      name: 'GridText',
+      component: GridTest
     }
   ]
 })

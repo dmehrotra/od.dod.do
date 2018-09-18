@@ -1,6 +1,6 @@
 <template>
   <div id="mother">
-    <!--<div class="halfWidth">-->
+    <!--
     <div :style="{width: paneWidthPercentage + '%'}">
       <search
         :letMotherSearch=searchRequest
@@ -44,13 +44,12 @@
       >
       </viz>
     </div>
+    -->
   </div>
 </template>
 
 <script>
 
-//import FirstThrowRequester from '@/components/FirstThrowRequester'
-//import FirstThrowDisplay from '@/components/FirstThrowDisplay'
 import Viz from '@/components/Viz'
 import Search from '@/components/Search'
 import Pane from '@/components/Pane'

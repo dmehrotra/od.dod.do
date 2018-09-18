@@ -15,14 +15,4 @@ export default {
         .then((response) => Promise.resolve(response))
         .catch((error) => Promise.reject(error));
     },
-    //patch(url, request) {
-        //return Vue.http.patch(url, request)
-            //.then((response) => Promise.resolve(response))
-            //.catch((error) => Promise.reject(error));
-    //},
-    //delete(url, request) {
-        //return Vue.http.delete(url, request)
-            //.then((response) => Promise.resolve(response))
-            //.catch((error) => Promise.reject(error));
-    //}
 }
