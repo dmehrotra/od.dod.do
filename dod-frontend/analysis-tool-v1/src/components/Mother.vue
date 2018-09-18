@@ -1,11 +1,18 @@
 <template>
   <div id="mother">
     <layout>
+    
       <template slot="search">
-        <h1>searching</h1>
+        <search
+          :search=search
+        >
+        </search>
       </template>
+
       <template slot="pane">
-        <h1>pane pane pain pane</h1>
+        <pane
+        >
+        </pane>
       </template>
 
       <template slot="reader">
@@ -17,6 +24,7 @@
       </template>
 
     </layout>
+
     <!--
     <div :style="{width: paneWidthPercentage + '%'}">
       <search
@@ -68,11 +76,12 @@
 <script>
 import Layout from '@/components/Layout'
 
-import Viz from '@/components/Viz'
 import Search from '@/components/Search'
+
+
+import Viz from '@/components/Viz'
 import Pane from '@/components/Pane'
 import Reader from '@/components/Reader'
-
 import {mapGetters, mapActions} from 'vuex';
 
 import api from '@/vuex/api'
@@ -141,11 +150,11 @@ export default {
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {
-    handleResize(){
-      this.width =  Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-      this.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    //handleResize(){
+    //  this.width =  Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    //  this.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 
-    },
+    //},
     //activeSubnodeIds(){
     //  let out = this.nodes.reduce((acc, d)=>{
     //    console.log(d);
@@ -160,6 +169,28 @@ export default {
     //  }, []);
     //  return out;
     //},
+    queryNodes(query, done){
+      let type = query.type; 
+      let domain;
+      if(type == 'search'){
+        domain = "https://quagga.club/api/search/" + encodeURIComponent(query.query);
+      }
+      api.get(domain)
+        .then((response) => {
+          console.log("nodes", response);
+          done(response.body.length);
+        })
+        .catch((error) => {
+          console.log("ERROR with API", error); 
+          done(null);
+        });
+    },
+    search(query, done){
+      this.queryNodes({'type': 'search', 'query': query}, (res)=>{
+        done({'res': res, 'query': query});
+      });
+    },
+
 
     integrateNewNodes(newNodes, selectedDefault, requestSource){
       //first check which nodes exist already and brng them to the top,
@@ -237,7 +268,6 @@ export default {
         .catch((error) => {
           console.log("ERROR with API", error); 
         });
-
     },
     unfoldSharedRelationByThreshold(){
       let sharedSubnodes = this.nodes.reduce((acc, d)=>{

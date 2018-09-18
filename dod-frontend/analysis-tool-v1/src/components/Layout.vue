@@ -2,8 +2,12 @@
   <div id="layout" 
     :style="{height: height+'px', width: width+'px'}">
 
+    <!--
     <div class='main-col-1 main-col'
        :style="{width: leftColPerc*width-resizeElementWidth/2+'px'}">
+    -->
+    <div class='main-col-1 main-col'
+       :style="{width: leftColWidth+'px'}">
 
       <div class='main-col-1-row-1 main-col-1-row'
          :style="{height: searchBarHeight+'px'}">
@@ -11,13 +15,12 @@
       </div>
 
       <div class='main-col-1-row-2 main-col-1-row'
-         :style="{height: height-readerHeight-searchBarHeight-resizeElementWidth/2+'px'}">
+         :style="{height: height-readerHeight-searchBarHeight-resizeElementWidth/2+'px', overflow:'scroll'}">
         <slot name="pane"></slot>
       </div>
       
       <div class='reader-resize main-col-1-row' @click="toggleReaderHeight"
          :style="{height: resizeElementWidth+'px'}">
-
         <span class="arrow-down"
               :style="{left: (leftColPerc*width)/2 - arrowWidth + 'px',
                       top: resizeElementWidth/2-arrowWidth/2 + 'px',
@@ -89,6 +92,9 @@ export default {
       'searchBarHeight',
       'readerMaxHeight',
     ]),
+    leftColWidth: function(){
+      return this.leftColPerc*this.width-this.resizeElementWidth/2;
+    }
   },
   mounted(){
     window.addEventListener('resize', this.handleResize)
@@ -165,6 +171,9 @@ export default {
   }
   .reader-resize{
     position:relative;
+  }
+  .reader-resize:hover .arrow-down{
+    border-color: transparent transparent black transparent;
   }
   .arrow-down{
     border-color: transparent transparent #bcbcbc transparent;

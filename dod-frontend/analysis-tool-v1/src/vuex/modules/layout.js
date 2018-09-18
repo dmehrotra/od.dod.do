@@ -13,6 +13,10 @@ const state = {
   //reader
   readerMaxHeight: 200,
   readerHeightGoal: 0,
+  
+  //pane
+  minPaneItemWidth: 130,
+  paneItemHeight: 60,
 
   paneWidthPercentage: 40,
   readerHeight: 210,
@@ -34,6 +38,10 @@ const getters = {
   //reader
   readerMaxHeight: state => state.readerMaxHeight,
   readerHeightGoalWatcher: state => () => state.readerHeightGoal,
+
+  //pane
+  minPaneItemWidth: state => state.minPaneItemWidth,
+  paneItemHeight: state => state.paneItemHeight,
 
   paneWidthPercentage: state => state.paneWidthPercentage,
   currentReaderHeight: state => state.currentReaderHeight,
