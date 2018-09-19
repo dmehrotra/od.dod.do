@@ -2,7 +2,7 @@
   <div ref="pane" id="pane">
         <resize-observer @notify="paneResized" />
 
-    <div class='item' v-for='(node, i) in 6'
+    <div class='item' v-for='(node, i) in nodes'
                   :style="{minWidth: minPaneItemWidth + 'px', height: paneItemHeight+'px'}">
       {{i}}
     </div>
@@ -42,11 +42,11 @@ export default {
   data () {
     return {
       minWidth: 100, 
-      nodes: [0,0,0,0, 0, 0],
       extras: 0,
     }
   },
   props:[
+    'nodes',
   ],
   computed:{
     ...mapGetters([

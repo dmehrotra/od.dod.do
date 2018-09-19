@@ -11,12 +11,16 @@
 
       <div class='main-col-1-row-1 main-col-1-row'
          :style="{height: searchBarHeight+'px'}">
+
         <slot name="search"></slot>
+
       </div>
 
       <div class='main-col-1-row-2 main-col-1-row'
          :style="{height: height-readerHeight-searchBarHeight-resizeElementWidth/2+'px', overflow:'scroll'}">
+
         <slot name="pane"></slot>
+
       </div>
       
       <div class='reader-resize main-col-1-row' @click="toggleReaderHeight"
@@ -151,6 +155,9 @@ export default {
   .main-col-resize{
     position:relative;
   }
+  .main-col-resize:hover{
+    cursor: pointer;
+  }
   .main-col-resize:hover .arrow-left{
     border-color: transparent black transparent;
   }
@@ -171,6 +178,9 @@ export default {
   }
   .reader-resize{
     position:relative;
+  }
+  .reader-resize:hover{
+    cursor: pointer;
   }
   .reader-resize:hover .arrow-down{
     border-color: transparent transparent black transparent;

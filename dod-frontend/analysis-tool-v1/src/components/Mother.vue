@@ -11,6 +11,7 @@
 
       <template slot="pane">
         <pane
+          :nodes=nodes
         >
         </pane>
       </template>
@@ -178,7 +179,9 @@ export default {
       api.get(domain)
         .then((response) => {
           console.log("nodes", response);
-          done(response.body.length);
+          let num = response.body.length;
+          this.integrateNodes(response.body, {'type': 'search', 'details': {'query': query}});
+          done(num);
         })
         .catch((error) => {
           console.log("ERROR with API", error); 
@@ -190,6 +193,47 @@ export default {
         done({'res': res, 'query': query});
       });
     },
+
+    integrateNodes(newNodes, requestSource){
+      //first check which nodes exist already and brng them to the top,
+      
+      let del = [];
+      newNodes = newNodes.map(node=>{
+        
+        // keeping track of how each node got into the data
+        node["requestSource"] = [requestSource];
+
+        node.selected = false;
+        node.active = false;
+        node.marked = 'none';
+
+        this.nodes.find((d, i)=>{
+
+          if(d.id == node.id){
+            // if node exists already, then we use the one that alreadt in the array (since it might have position values alrady)
+            node = d;
+
+            // keeping track of how each node got into the data
+            if(!node.requestSource.includes(requestSource)){
+              node.requestSource.push(requestSource);
+            }
+            // this node exists already, to make sure it comes in on top of the array, we delte the old instance and simly add it again as part of newNodes
+            del.push(i);
+          }
+
+        });
+        return node;
+      });
+      del.sort((a,b)=>a - b).reverse().forEach(i=>this.nodes.splice(i, 1));
+
+      //then fill up the new nodes
+
+      // never seen before, but from here: https://stackoverflow.com/a/9650855
+      this.nodes.push.apply(this.nodes, newNodes);
+
+    },
+
+
 
 
     integrateNewNodes(newNodes, selectedDefault, requestSource){
