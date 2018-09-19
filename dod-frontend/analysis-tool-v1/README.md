@@ -62,7 +62,12 @@ todo:
 maybe in the pane, for each node and steadily updating it should displayed how many of the relation nodes on viz curretnly they share...
 
 
+@dhruv
 
 contracts should be searchable by ID
+timeout errors for big searches like "new York" - by ID i am pretty sure they work, but text search seems to kill it
 
 the way subnodes fold out autimatically etc should be accessible in a little settings overlay
+
+
+

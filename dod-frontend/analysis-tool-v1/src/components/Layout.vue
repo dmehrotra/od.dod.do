@@ -17,7 +17,12 @@
       </div>
 
       <div class='main-col-1-row-2 main-col-1-row'
-         :style="{height: height-readerHeight-searchBarHeight-resizeElementWidth/2+'px', overflow:'scroll'}">
+         :style="{height: tabBarHeight+'px'}">
+        <slot name="tabs"></slot>
+      </div>
+
+      <div class='main-col-1-row-3 main-col-1-row'
+              :style="{height: height-readerHeight-searchBarHeight-tabBarHeight-resizeElementWidth/2+'px', overflow:'scroll'}">
 
         <slot name="pane"></slot>
 
@@ -35,7 +40,7 @@
         </span>
       </div>
 
-      <div class='main-col-1-row-3 main-col-1-row' v-show='readerHeight == readerMaxHeight'
+      <div class='main-col-1-row-4 main-col-1-row' v-show='readerHeight == readerMaxHeight'
          :style="{height: readerHeight - resizeElementWidth/2 +'px'}">
         <slot name="reader"></slot>
       </div>
@@ -95,6 +100,8 @@ export default {
       'arrowWidth', 
       'searchBarHeight',
       'readerMaxHeight',
+      'tabBarHeight',
+      'tabHeight',
     ]),
     leftColWidth: function(){
       return this.leftColPerc*this.width-this.resizeElementWidth/2;
@@ -174,10 +181,17 @@ export default {
     flex-direction: column;
   }
   .main-col-1-row{
+    /*
     outline: green 1px dotted;
+    /**/
+  }
+  .main-col-1-row-1{
+    outline: green 1px dotted;
+    /**/
   }
   .reader-resize{
     position:relative;
+    outline: green 1px dotted;
   }
   .reader-resize:hover{
     cursor: pointer;

@@ -10,6 +10,10 @@ const state = {
   //search bar
   searchBarHeight: 80,
 
+  //tab bar
+  tabBarHeight: 30,
+  tabHeight: 20,
+
   //reader
   readerMaxHeight: 200,
   readerHeightGoal: 0,
@@ -35,6 +39,10 @@ const getters = {
   arrowWidth: state => state.arrowWidth,
   //search bar
   searchBarHeight: state => state.searchBarHeight,
+  //tab bar
+  tabBarHeight: state => state.tabBarHeight,
+  tabHeight: state => state.tabHeight,
+
   //reader
   readerMaxHeight: state => state.readerMaxHeight,
   readerHeightGoalWatcher: state => () => state.readerHeightGoal,
@@ -43,9 +51,6 @@ const getters = {
   minPaneItemWidth: state => state.minPaneItemWidth,
   paneItemHeight: state => state.paneItemHeight,
 
-  paneWidthPercentage: state => state.paneWidthPercentage,
-  currentReaderHeight: state => state.currentReaderHeight,
-  readerText: state => state.currentReaderText,
 
 }
 

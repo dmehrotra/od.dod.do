@@ -1,12 +1,18 @@
 <template>
   <div id="mother">
     <layout>
-    
       <template slot="search">
         <search
           :search=search
         >
         </search>
+      </template>
+
+      <template slot="tabs">
+        <tabs
+          :tabs=requestSources
+        >
+        </tabs>
       </template>
 
       <template slot="pane">
@@ -78,10 +84,10 @@
 import Layout from '@/components/Layout'
 
 import Search from '@/components/Search'
-
+import Tabs from '@/components/Tabs'
+import Pane from '@/components/Pane'
 
 import Viz from '@/components/Viz'
-import Pane from '@/components/Pane'
 import Reader from '@/components/Reader'
 import {mapGetters, mapActions} from 'vuex';
 
@@ -93,10 +99,11 @@ export default {
     Layout,
     Search,
     Pane, 
+    Tabs,
  //   FirstThrowRequester,
  //   FirstThrowDisplay,
-    Viz,
-    Reader,
+    //Viz,
+    //Reader,
   },
   data () {
     return {
@@ -123,22 +130,22 @@ export default {
     nodesReversed: function(){
       return this.nodes.reverse();
     },
+    requestSources: function(){
+      let searchValues = [];
+      let idValues = [];
+      let sources = this.nodes.reduce((acc, node)=>{
+              //return acc.concat(node.requestSource)
+              let searchSources = node.requestSource.filter(rs=>rs.type=='search')
+              searchSources = searchSources.filter(rs=>(!searchValues.includes(rs.value)));
+              searchValues = searchValues.concat(searchSources.map(rs=>rs.value))
+              return acc.concat(searchSources);
+            }, []);
+      return sources
+    },
     selectedNodeData: function(){
       return this.nodes.filter(d=>d.selected);
     },
     activeSubnodeIds(){
-      let out = this.nodes.reduce((acc, d)=>{
-        console.log(d);
-        d.relationships.forEach(subnode=>{
-          if(subnode.visible){
-            if(!acc.includes(subnode.id)){
-              acc.push(subnode.id);
-            }
-          }
-        })
-        return acc;
-      }, []);
-      return out;
     },
   },
   mounted(){
@@ -180,7 +187,7 @@ export default {
         .then((response) => {
           console.log("nodes", response);
           let num = response.body.length;
-          this.integrateNodes(response.body, {'type': 'search', 'details': {'query': query}});
+          this.integrateNodes(response.body, {'type': 'search', 'value': query.query});
           done(num);
         })
         .catch((error) => {
@@ -206,6 +213,7 @@ export default {
         node.selected = false;
         node.active = false;
         node.marked = 'none';
+        node.type = 'node'; //(as opposed to 'extra'-nodes that are invisible, but needed for layout purposes in the pane
 
         this.nodes.find((d, i)=>{
 
@@ -213,10 +221,17 @@ export default {
             // if node exists already, then we use the one that alreadt in the array (since it might have position values alrady)
             node = d;
 
-            // keeping track of how each node got into the data
-            if(!node.requestSource.includes(requestSource)){
+            let requestSourceExists = node.requestSource.find(rs=>(rs.type==requestSource.type&&rs.value==requestSource.value));
+            console.log('requestSourceExists', requestSourceExists);
+            if(requestSourceExists==undefined){
               node.requestSource.push(requestSource);
             }
+
+            // keeping track of how each node got into the data
+            //if(!node.requestSource.includes(requestSource)){
+            //  node.requestSource.push(requestSource);
+            //}
+
             // this node exists already, to make sure it comes in on top of the array, we delte the old instance and simly add it again as part of newNodes
             del.push(i);
           }
@@ -269,6 +284,7 @@ export default {
             if(!node.requestSource.includes(requestSource)){
               node.requestSource.push(requestSource);
             }
+
             // this node exists already, to make sure it comes in on top of the array, we delte the old instance and simly add it again as part of newNodes
             del.push(i);
           }
