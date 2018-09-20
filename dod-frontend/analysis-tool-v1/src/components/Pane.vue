@@ -2,7 +2,9 @@
   <div ref="pane" id="paneWrapper">
      <!--<div id="pane">-->
     <resize-observer @notify="paneResized" key="'observer'" />
-    <transition-group name="nodeList" tag="div" id='pane'>
+    <transition-group name="nodeList" tag="div" id='pane'
+        :style="{minHeight: windowDims.height-heightAllButPane +'px'}" 
+      >
       <div v-for='(node, i) in (nodesWithExtrasReversed)'
         :style="{minWidth: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
         :class="{item: true, extra: node.type=='extra'}"
@@ -14,6 +16,8 @@
         {{node.id}}
         </div>
       </div>
+
+      <!--
       <div v-for='(node, i) in (extras)'
         :style="{minWidth: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
         :class="{item: true, extra: node.type=='extra'}"
@@ -25,6 +29,7 @@
         {{node.id}}
         </div>
       </div>
+      -->
     </transition-group>
     <a @click="addNode">add</a>
     <a @click="removeNode">remove</a>
@@ -70,20 +75,23 @@ export default {
   data () {
     return {
       minWidth: 100, 
+      //extras: [],
       extras: [{'id': Math.random(), 'type': 'extra'}],
+      extraWidth: 30,
       //nodes: [{'id': Math.random(), 'type': 'node'}]
       unwatchActiveTab: undefined,
     }
   },
   props:[
     'nodes',
-    
   ],
   computed:{
     ...mapGetters([
       'minPaneItemWidth', 
       'paneItemHeight', 
       'activeTab',
+      'heightAllButPane',
+      'windowDims',
     ]),
     nodesOfActiveTab: function(){
       if(this.activeTab.type == 'all'){
@@ -117,8 +125,9 @@ export default {
       this.calculateExtras();
     },
     calculateExtras: function(){
-      this.extras.push({'id': Math.random(), 'type':'extra' });
+      this.extraWidth = Math.random();
       return;
+      //this.extras.push({'id': Math.random(), 'type':'extra' });
       let debug = true;
       let w = this.$el.offsetWidth;
       if(debug) console.log('w', w);
@@ -128,12 +137,23 @@ export default {
       if(debug) console.log('e', e);
       this.extras = [];
       let extrasNeeded = e==0?0:perRow-e;
-      if(debug) console.log('extarsNeeded', extrasNeeded);
-      for(let i = 0; i < extrasNeeded; i++){
-        this.extras.push({'id': Math.random(), 'type':'extra' });
-      }
-      //this.extras = e==0?0:perRow-e;
-      if(debug) console.log('extras', this.extras);
+      this.extraWidth = (w/perRow)*extrasNeeded;
+      return;
+      //let debug = true;
+      //let w = this.$el.offsetWidth;
+      //if(debug) console.log('w', w);
+      //let perRow = Math.floor(w/this.minPaneItemWidth);
+      //if(debug) console.log('perRow', perRow);
+      //let e = this.nodesOfActiveTab.length % perRow;
+      //if(debug) console.log('e', e);
+      //this.extras = [];
+      //let extrasNeeded = e==0?0:perRow-e;
+      //if(debug) console.log('extarsNeeded', extrasNeeded);
+      //for(let i = 0; i < extrasNeeded; i++){
+      //  this.extras.push({'id': Math.random(), 'type':'extra' });
+      //}
+      ////this.extras = e==0?0:perRow-e;
+      //if(debug) console.log('extras', this.extras);
     },
     randomIndex: function () {
       return Math.floor(Math.random() * this.nodes.length)
@@ -164,33 +184,40 @@ export default {
   }
   #pane{
     width:100%;
-    height:1000px;
     overflow: scroll;
     display: flex;
     flex-flow: row wrap;
     justify-content:center;
     align-content: flex-start;
     position:relative;
+    /*
+    background-color:green;
+    /**/
   }
   .item{
     flex-grow:1;
+    /*
     outline: black dotted 1px;
     outline-offset: -1px;
-    transition: transform 1s;
+    /**/
     background-color:white;
   }
   .insideItem{
     margin:auto;
-    outline: red dotted 1px;
+    outline: black dotted 1px;
+    outline-offset: -1px;
     overflow: hidden;
   }
   .extra{
     background-color:red;
     opacity:1;
+    /*
     visibility:hidden;
+    /**/
+    transition: width 20s;
   }
   .nodeList-leave-active {
-    transition: all 1s;
+    transition: transform 1s;
     position: absolute;
   }
   .nodeList-enter-active {

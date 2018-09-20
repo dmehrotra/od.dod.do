@@ -109,6 +109,8 @@ export default {
   },
   mounted(){
     window.addEventListener('resize', this.handleResize)
+    this.changeWindowDims({'width':Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
+        'height':Math.max(document.documentElement.clientHeight, window.innerHeight || 0)});
     this.unwatchLeftColPercGoal = this.$store.watch(this.$store.getters.leftColPercGoalWatcher, leftColPercGoal => {
       TweenLite.to(this.$data, 0.5, { leftColPerc: leftColPercGoal  });
     });
@@ -125,10 +127,13 @@ export default {
     ...mapActions([
       'changeLeftColPerc', 
       'changeReaderHeight',
+      'changeWindowDims',
     ]),
     handleResize(){
       this.width =  Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
       this.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+      this.changeWindowDims({'width':Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
+        'height':Math.max(document.documentElement.clientHeight, window.innerHeight || 0)});
 
     },
     toggleLeftColWidth(){

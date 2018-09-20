@@ -1,6 +1,7 @@
 import * as types from '../mutation-types'
 
 const state = {
+  windowDims: {width: 1, height: 1},
   // layout 
   leftColPercGoal: 0.5,
   //resize element middle
@@ -32,6 +33,7 @@ const state = {
 
 const getters = {
   // layout 
+  windowDims: state => state.windowDims,
   // main
   leftColPercGoalWatcher: state => () => state.leftColPercGoal,
   //resize element middle
@@ -50,11 +52,15 @@ const getters = {
   //pane
   minPaneItemWidth: state => state.minPaneItemWidth,
   paneItemHeight: state => state.paneItemHeight,
+  heightAllButPane: state => state.readerHeightGoal+state.searchBarHeight+state.tabBarHeight+state.resizeElementWidth/2,
 
 
 }
 
 const mutations = {
+  [types.CHANGE_WINDOW_DIMS] (state, data){
+    state.windowDims = data;
+  },
   [types.CHANGE_LEFT_COL_PERC_GOAL] (state, data){
     state.leftColPercGoal = data;
   },
@@ -78,6 +84,9 @@ const mutations = {
 }
 
 const actions = {
+  changeWindowDims({commit}, data){
+    commit(types.CHANGE_WINDOW_DIMS, data);
+  },
   changeLeftColPerc({commit}, data){
     commit(types.CHANGE_LEFT_COL_PERC_GOAL, data);
   },
