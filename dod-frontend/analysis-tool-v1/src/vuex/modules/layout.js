@@ -20,8 +20,8 @@ const state = {
   readerHeightGoal: 0,
   
   //pane
-  minPaneItemWidth: 130,
-  paneItemHeight: 60,
+  minPaneItemWidth: 90,
+  paneItemHeight: 120,
 
   paneWidthPercentage: 40,
   readerHeight: 210,

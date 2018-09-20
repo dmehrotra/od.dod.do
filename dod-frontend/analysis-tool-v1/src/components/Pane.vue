@@ -3,7 +3,13 @@
      <!--<div id="pane">-->
     <resize-observer @notify="paneResized" key="'observer'" />
     <transition-group name="nodeList" tag="div" id='pane'
-        :style="{minHeight: windowDims.height-heightAllButPane +'px'}" 
+        :style="{
+            minHeight: windowDims.height-heightAllButPane-15 +'px',
+            gridTemplateColumns: 'repeat(auto-fill, minmax('+minPaneItemWidth+'px, 1fr))',
+            gridTemplateRows: 'repeat(auto-fill, minmax('+paneItemHeight+'px, 1fr))',
+            gridGap: 10+'px',
+            gridRowGap: 8+'px',
+           }" 
       >
       <div v-for='(node, i) in (nodesWithExtrasReversed)'
         :style="{minWidth: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
@@ -13,70 +19,31 @@
         <div class='insideItem'
           :style="{width: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
           >
-        {{node.id}}
-        </div>
-      </div>
+          <pane-node
+            :data=node
+            >
 
-      <!--
-      <div v-for='(node, i) in (extras)'
-        :style="{minWidth: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
-        :class="{item: true, extra: node.type=='extra'}"
-        :key="node.id"
-      >
-        <div class='insideItem'
-          :style="{width: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
-          >
-        {{node.id}}
+          </pane-node>
         </div>
       </div>
-      -->
     </transition-group>
-    <a @click="addNode">add</a>
-    <a @click="removeNode">remove</a>
-      <!--</div>-->
-<!--
-      <div class='item extra' v-for='(node, i) in extras'
-          :style="{minWidth: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
-          :key=nodes.length+i
-      >
-        {{i}}
-      </div>
--->
-
   </div>
-  <!--
-  <transition-group name='list' tag="div" id="pane" :style="{height:height+'px'}">
-
-    <pane-node v-for="(node, i) in nodes" 
-      :data=node
-      :toggleSelect=toggleSelect
-      :deleteProject=deleteProject
-      :index="i"
-      :key=i
-      :id="'pane-node-'+node.id"
-    >
-    </pane-node>
-  
-  </transition-group>
-  -->
 </template>
 
 <script>
 
 import {mapGetters, mapActions} from 'vuex';
-//import PaneNode from '@/components/PaneNode'
+import PaneNode from '@/components/PaneNode'
 import { ResizeObserver } from 'vue-resize'
 export default {
   name: 'pane',
   components: {
-    //PaneNode
+    PaneNode,
     ResizeObserver,
   },
   data () {
     return {
       minWidth: 100, 
-      //extras: [],
-      extras: [{'id': Math.random(), 'type': 'extra'}],
       extraWidth: 30,
       //nodes: [{'id': Math.random(), 'type': 'node'}]
       unwatchActiveTab: undefined,
@@ -101,13 +68,7 @@ export default {
       }
     },
     nodesWithExtrasReversed:function(){
-      //return this.;
-      //return this.nodes;
-      //return this.extras.concat(this.nodes).reverse();
-      // never seen before, but from here: https://stackoverflow.com/a/9650855
-      
       return this.nodesOfActiveTab
-
     }
   },
   mounted(){
@@ -185,28 +146,47 @@ export default {
   #pane{
     width:100%;
     overflow: scroll;
+    position:relative;
+    /*
     display: flex;
     flex-flow: row wrap;
     justify-content:center;
     align-content: flex-start;
-    position:relative;
-    /*
     background-color:green;
     /**/
+    display: grid;
+    /*
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    grid-template-rows: repeat(auto-fill, minmax(90px, 1fr));
+    grid-gap: 5px;
+    grid-row-gap: 5px;
+    /**/
+    z-index:-2;
+    background-color: #e6e6e6;
+    background-color: white;
+    padding-left:10px;
+    padding-right:10px;
+    box-sizing: border-box;
+
   }
   .item{
-    flex-grow:1;
     /*
+    flex-grow:1;
     outline: black dotted 1px;
     outline-offset: -1px;
     /**/
-    background-color:white;
   }
   .insideItem{
     margin:auto;
+    box-shadow: 3px 3px;
+        outline: black 1px solid;
+    outline-offset: -1px;
+    /*
     outline: black dotted 1px;
     outline-offset: -1px;
+    /**/
     overflow: hidden;
+    background-color:white;
   }
   .extra{
     background-color:red;
@@ -217,7 +197,7 @@ export default {
     transition: width 20s;
   }
   .nodeList-leave-active {
-    transition: transform 1s;
+    transition: 0s;
     position: absolute;
   }
   .nodeList-enter-active {
@@ -230,7 +210,6 @@ export default {
   }
   .nodeList-leave-to {
     opacity: 0;
-    transform: translateY(+200px);
   }
   .nodeList-move {
     transition: transform 1s;

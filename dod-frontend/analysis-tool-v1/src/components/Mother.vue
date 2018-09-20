@@ -140,7 +140,8 @@ export default {
               searchValues = searchValues.concat(searchSources.map(rs=>rs.value))
               return acc.concat(searchSources);
             }, []);
-      return sources
+
+      return sources.sort((a, b)=> a.timestamp-b.timestamp)
     },
     selectedNodeData: function(){
       return this.nodes.filter(d=>d.selected);
@@ -187,7 +188,7 @@ export default {
         .then((response) => {
           console.log("nodes", response);
           let num = response.body.length;
-          this.integrateNodes(response.body, {'type': 'search', 'value': query.query});
+          this.integrateNodes(response.body, {'type': 'search', 'value': query.query, 'timestamp': Date.now()});
           done(num);
         })
         .catch((error) => {
