@@ -9,15 +9,16 @@
       </template>
 
       <template slot="tabs">
-        <tabs
-          :tabs=requestSources
-        >
-        </tabs>
+          <tabs
+            :tabs=requestSources
+          >
+          </tabs>
       </template>
 
       <template slot="pane">
         <pane
           :nodes=nodes
+          :deleteNode=deleteNode
         >
         </pane>
       </template>
@@ -126,6 +127,7 @@ export default {
       'searchBarHeight',
       'paneWidthPercentage',
       'currentReaderHeight',
+      'activeTab',
     ]),
     nodesReversed: function(){
       return this.nodes.reverse();
@@ -159,6 +161,9 @@ export default {
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {
+    ...mapActions([
+      'changeActiveTab',
+    ]),
     //handleResize(){
     //  this.width =  Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     //  this.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
@@ -188,8 +193,9 @@ export default {
         .then((response) => {
           console.log("nodes", response);
           let num = response.body.length;
-          this.integrateNodes(response.body, {'type': 'search', 'value': query.query, 'timestamp': Date.now()});
-          done(num);
+          let timestamp = Date.now();
+          this.integrateNodes(response.body, {'type': 'search', 'value': query.query, 'timestamp': timestamp});
+          done(num, timestamp);
         })
         .catch((error) => {
           console.log("ERROR with API", error); 
@@ -197,8 +203,9 @@ export default {
         });
     },
     search(query, done){
-      this.queryNodes({'type': 'search', 'query': query}, (res)=>{
-        done({'res': res, 'query': query});
+      this.queryNodes({'type': 'search', 'query': query}, (res,timestamp )=>{
+
+        done({'res': res, 'query': query, 'timestamp': timestamp});
       });
     },
 
@@ -248,68 +255,86 @@ export default {
       this.nodes.push.apply(this.nodes, newNodes);
 
     },
-
-
-
-
-    integrateNewNodes(newNodes, selectedDefault, requestSource){
-      //first check which nodes exist already and brng them to the top,
-      
-      let del = [];
-      newNodes = newNodes.map(node=>{
-        
-        // keeping track of how each node got into the data
-        node["requestSource"] = [requestSource];
-        //node.relationships.forEach(d=>d.visible = false);
-        let activeSubnodes = this.activeSubnodeIds;
-        // this is so that incoming nodes have there relationships subnodes already visible if they are displayed so far.
-        node.relationships.forEach(d=>{
-          if(activeSubnodes.includes(d.id)){
-            d.visible = true;
-          }else{
-            d.visible = false;
-          }
-        });
-
-        node.selected = selectedDefault;
-        node.active = false;
-        node.marked = 'none';
-
-        this.nodes.find((d, i)=>{
-
-          if(d.id == node.id){
-            // if node exists already, then we use the one that alreadt in the array (since it might have position values alrady)
-            node = d;
-
-            // keeping track of how each node got into the data
-            if(!node.requestSource.includes(requestSource)){
-              node.requestSource.push(requestSource);
-            }
-
-            // this node exists already, to make sure it comes in on top of the array, we delte the old instance and simly add it again as part of newNodes
-            del.push(i);
-          }
-
-        });
-        return node;
-      });
-      del.sort((a,b)=>a - b).reverse().forEach(i=>this.nodes.splice(i, 1));
-
-      //then fill up the new nodes
-
-      // never seen before, but from here: https://stackoverflow.com/a/9650855
-      this.nodes.push.apply(this.nodes, newNodes);
-
-
-      if(this.unfoldSharedRelationsByDefault){
-
-        this.unfoldSharedRelationByThreshold();
-
+    deleteNode(id){ //this does not mean relationship nodes as those are never deleted but only 'folded in'
+      let projectIndex = this.nodes.findIndex(d=>d.id==id);
+      if(projectIndex > -1){
+        this.nodes.splice(projectIndex, 1);
+        let tabShouldStillExist = this.requestSources.find(rs=>(rs.type == this.activeTab.type&&rs.value == this.activeTab.value&&rs.timestamp == this.activeTab.timestamp));
+        if(!tabShouldStillExist){
+          setTimeout(()=>{
+            this.changeActiveTab({type:'all', value:'all', timestamp:0})
+          }, 600);
+        }
       }
-
-
-
     },
+    deleteByTab(tab){
+      // SHIT, when a tab closes I need to update all nodes so that none of them
+      // has that tab in its requestSource array anymore 
+      // equally if I close a whole tab I need to take this tab ut of all the ndoes.
+      // these two cases are related but my brain is too tired right now, postponing this function to another day
+      // ... shouldnt be too hard
+    },
+
+
+
+    //integrateNewNodes(newNodes, selectedDefault, requestSource){
+    //  //first check which nodes exist already and brng them to the top,
+    //  
+    //  let del = [];
+    //  newNodes = newNodes.map(node=>{
+    //    
+    //    // keeping track of how each node got into the data
+    //    node["requestSource"] = [requestSource];
+    //    //node.relationships.forEach(d=>d.visible = false);
+    //    let activeSubnodes = this.activeSubnodeIds;
+    //    // this is so that incoming nodes have there relationships subnodes already visible if they are displayed so far.
+    //    node.relationships.forEach(d=>{
+    //      if(activeSubnodes.includes(d.id)){
+    //        d.visible = true;
+    //      }else{
+    //        d.visible = false;
+    //      }
+    //    });
+
+    //    node.selected = selectedDefault;
+    //    node.active = false;
+    //    node.marked = 'none';
+
+    //    this.nodes.find((d, i)=>{
+
+    //      if(d.id == node.id){
+    //        // if node exists already, then we use the one that alreadt in the array (since it might have position values alrady)
+    //        node = d;
+
+    //        // keeping track of how each node got into the data
+    //        if(!node.requestSource.includes(requestSource)){
+    //          node.requestSource.push(requestSource);
+    //        }
+
+    //        // this node exists already, to make sure it comes in on top of the array, we delte the old instance and simly add it again as part of newNodes
+    //        del.push(i);
+    //      }
+
+    //    });
+    //    return node;
+    //  });
+    //  del.sort((a,b)=>a - b).reverse().forEach(i=>this.nodes.splice(i, 1));
+
+    //  //then fill up the new nodes
+
+    //  // never seen before, but from here: https://stackoverflow.com/a/9650855
+    //  this.nodes.push.apply(this.nodes, newNodes);
+
+
+    //  if(this.unfoldSharedRelationsByDefault){
+
+    //    this.unfoldSharedRelationByThreshold();
+
+    //  }
+
+
+
+    //},
     requestRelatedToId(requestSource, id){
       let domain = "https://quagga.club/api/connected/" + id;
       api.get(domain)
@@ -457,5 +482,7 @@ div{
 .thirdWidth{
   width: 33%;
 }
+
+
 
 </style>

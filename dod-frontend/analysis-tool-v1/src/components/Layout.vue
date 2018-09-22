@@ -191,6 +191,7 @@ export default {
     /**/
   }
   .main-col-1-row-1{
+    /*
     outline: green 1px dotted;
     /**/
   }

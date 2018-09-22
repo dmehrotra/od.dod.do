@@ -52,7 +52,7 @@ export default {
         if(res.res == null){
           this.message = "error when searching for '"+res.query+"'"
         }else{
-          this.changeActiveTab({'type':'search', 'value':res.query});
+          this.changeActiveTab({'type':'search', 'value':res.query, 'timestamp': res.timestamp});
           this.message = String(res.res) + " results found for '"+res.query+"'"
         }
         this.searching = false;

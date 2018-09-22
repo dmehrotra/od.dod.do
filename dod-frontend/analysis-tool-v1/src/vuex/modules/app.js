@@ -2,7 +2,7 @@ import * as types from '../mutation-types'
 
 const state = {
   //tabs
-  activeTab: {'type':'all', 'value':'all'},
+  activeTab: {'type':'all', 'value':'all', 'timestamp': 0},
 }
 
 const getters = {
@@ -13,6 +13,7 @@ const getters = {
 
 const mutations = {
   [types.CHANGE_ACTIVE_TAB] (state, data){
+    console.log('changin tab', data);
     state.activeTab = data;
   },
 }

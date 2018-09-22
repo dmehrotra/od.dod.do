@@ -4,7 +4,7 @@
     <resize-observer @notify="paneResized" key="'observer'" />
     <transition-group name="nodeList" tag="div" id='pane'
         :style="{
-            minHeight: windowDims.height-heightAllButPane-15 +'px',
+            minHeight: windowDims.height-heightAllButPane-105 +'px',
             gridTemplateColumns: 'repeat(auto-fill, minmax('+minPaneItemWidth+'px, 1fr))',
             gridTemplateRows: 'repeat(auto-fill, minmax('+paneItemHeight+'px, 1fr))',
             gridGap: 10+'px',
@@ -21,8 +21,8 @@
           >
           <pane-node
             :data=node
+                                      :deleteNode='()=>deleteNode(node.id)'
             >
-
           </pane-node>
         </div>
       </div>
@@ -51,6 +51,7 @@ export default {
   },
   props:[
     'nodes',
+    'deleteNode',
   ],
   computed:{
     ...mapGetters([
@@ -161,13 +162,15 @@ export default {
     grid-gap: 5px;
     grid-row-gap: 5px;
     /**/
-    z-index:-2;
     background-color: #e6e6e6;
     background-color: white;
     padding-left:10px;
     padding-right:10px;
     box-sizing: border-box;
 
+    /*
+    z-index:-2;
+    /**/
   }
   .item{
     /*
@@ -201,8 +204,7 @@ export default {
     position: absolute;
   }
   .nodeList-enter-active {
-    transition: all 1s;
-    z-index:-1;
+    transition: all 0.5s;
   }
   .nodeList-enter /* .list-leave-active below version 2.1.8 */ {
     opacity: 0;
@@ -212,7 +214,8 @@ export default {
     opacity: 0;
   }
   .nodeList-move {
-    transition: transform 1s;
+    transition: transform 0.5s;
+    z-index:1;
   }
 
 </style>

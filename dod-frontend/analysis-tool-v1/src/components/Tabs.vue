@@ -1,21 +1,28 @@
 <template>
-  <div id="tabs" :style="{height: tabBarHeight +'px'}">
-    <div class='tab' v-if='tabs.length>0'
-       @click="changeActiveTab({type:'all', value:'all'})"
-       :class="{tab: true, active: isActive({type:'all', value:'all'}), inActive: !isActive({type:'all', value:'all'})}"
-       :style="{height: tabHeight +'px'}">
-      <a class='title'>all</a>
-      <a class='close'></a>
-    </div>
-
-    <div class='tab' v-for="tab in tabs"
-      @click="changeActiveTab(tab)"
-      :class="{tab: true, active: isActive(tab), inActive: !isActive(tab)}"
-      :style="{height: tabHeight +'px'}"
+  <div id="tabsWrapper" :style="{height: tabBarHeight +'px'}">
+    <transition-group name='individual-tab-transition' tag='div' id='tabs'
+      :style="{height: tabBarHeight +'px'}"
       >
-      <a class='title'>{{tab.value}}</a>
-      <a class='close'></a>
-    </div>
+      <div class='tab' v-if='tabs.length>0'
+         @click="changeActiveTab({type:'all', value:'all', timestamp:0})"
+         :class="{tab: true, active: isActive({type:'all', value:'all'}), inActive: !isActive({type:'all', value:'all'})}"
+         :style="{height: tabHeight +'px'}"
+         :key="'all'"
+         >
+        <a class='title'>all</a>
+        <a class='close'></a>
+      </div>
+
+      <div class='tab' v-for="tab in tabs"
+        @click="changeActiveTab(tab)"
+        :class="{tab: true, active: isActive(tab), inActive: !isActive(tab)}"
+        :style="{height: tabHeight +'px'}"
+        :key="tab.timestamp"
+        >
+        <a class='title'>{{tab.value}}</a>
+        <a class='close'></a>
+      </div>
+    </transition-group>
   </div>
 </template>
 
@@ -58,6 +65,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  #tabsWrapper{
+    width:100%;
+  }
   #tabs{
     width:100%;
     display: flex;
@@ -71,7 +81,9 @@ export default {
     border-width: 1px;
     cursor: pointer;
     position:relative;
+    background-color:white;
   }
+
   .active{
     border-style: solid solid none solid;
   }
@@ -92,13 +104,13 @@ export default {
   }
 
   .close {
-  position: absolute;
-  right: 5px;
-  top: 4px;
-  width: 12px;
-  height: 12px;
-  opacity: 1;
-  visibility:hidden;
+    position: absolute;
+    right: 5px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    opacity: 1;
+    visibility:hidden;
   }
   .close:hover {
     opacity: 0.5;
@@ -120,4 +132,16 @@ export default {
   .tab:hover .close{
     visibility: visible;
   }
+
+
+
+.individual-tab-transition-enter-active, .individual-tab-transition-leave-active {
+  transition: all 0.6s ease;
+}
+.individual-tab-transition-enter, .individual-tab-transition-leave-to/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateY(100px);
+}
+.individual-tab-transition-move {
+  transition: transform 0.6s;
+}
 </style>
