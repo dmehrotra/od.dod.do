@@ -11,6 +11,7 @@
       <template slot="tabs">
           <tabs
             :tabs=requestSources
+            :deleteByTab=deleteByTab
           >
           </tabs>
       </template>
@@ -259,7 +260,7 @@ export default {
       let projectIndex = this.nodes.findIndex(d=>d.id==id);
       if(projectIndex > -1){
         this.nodes.splice(projectIndex, 1);
-        let tabShouldStillExist = this.requestSources.find(rs=>(rs.type == this.activeTab.type&&rs.value == this.activeTab.value&&rs.timestamp == this.activeTab.timestamp));
+        let tabShouldStillExist = this.requestSources.find(rs=>(rs.timestamp == this.activeTab.timestamp));
         if(!tabShouldStillExist){
           setTimeout(()=>{
             this.changeActiveTab({type:'all', value:'all', timestamp:0})
@@ -273,6 +274,8 @@ export default {
       // equally if I close a whole tab I need to take this tab ut of all the ndoes.
       // these two cases are related but my brain is too tired right now, postponing this function to another day
       // ... shouldnt be too hard
+      console.log("deleteTab", tab);
+      //console.log(this.nodes.filter(node => node.requestSource.filter(rs => rs.timestamp==tab.timestamp)) )
     },
 
 

@@ -21,7 +21,7 @@
           >
           <pane-node
             :data=node
-                                      :deleteNode='()=>deleteNode(node.id)'
+            :deleteNode='()=>deleteNode(node.id)'
             >
           </pane-node>
         </div>

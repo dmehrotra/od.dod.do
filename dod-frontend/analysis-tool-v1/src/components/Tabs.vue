@@ -4,13 +4,22 @@
       :style="{height: tabBarHeight +'px'}"
       >
       <div class='tab' v-if='tabs.length>0'
-         @click="changeActiveTab({type:'all', value:'all', timestamp:0})"
          :class="{tab: true, active: isActive({type:'all', value:'all'}), inActive: !isActive({type:'all', value:'all'})}"
          :style="{height: tabHeight +'px'}"
          :key="'all'"
          >
-        <a class='title'>all</a>
-        <a class='close'></a>
+
+         <div class='titleWrapper'
+           @click="changeActiveTab({type:'all', value:'all', timestamp:0})"
+           >
+           <a class='title'>all</a>
+         </div>
+         
+        <a 
+          @click="deleteByTab({type:'all', value:'all', timestamp:0})"
+          class='close'
+          >
+        </a>
       </div>
 
       <div class='tab' v-for="tab in tabs"
@@ -19,8 +28,17 @@
         :style="{height: tabHeight +'px'}"
         :key="tab.timestamp"
         >
-        <a class='title'>{{tab.value}}</a>
-        <a class='close'></a>
+         <div class='titleWrapper'
+          @click="changeActiveTab(tab)"
+           >
+           <a class='title'>{{tab.value}}</a>
+         </div>
+         
+        <a 
+          @click="deleteByTab({type:'all', value:'all', timestamp:0})"
+          class='close'
+          >
+        </a>
       </div>
     </transition-group>
   </div>
@@ -39,6 +57,7 @@ export default {
   },
   props:[
     'tabs',
+    'deleteByTab',
   ],
   computed:{
     ...mapGetters([
