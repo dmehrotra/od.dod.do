@@ -47,6 +47,7 @@ const getters = {
 
   //reader
   readerMaxHeight: state => state.readerMaxHeight,
+  readerHeightGoal: state => state.readerHeightGoal,
   readerHeightGoalWatcher: state => () => state.readerHeightGoal,
 
   //pane

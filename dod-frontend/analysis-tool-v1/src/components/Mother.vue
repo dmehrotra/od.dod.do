@@ -25,7 +25,11 @@
       </template>
 
       <template slot="reader">
-        <h1>read</h1>
+        <reader
+          :nodes=nodes
+          :deleteNode=deleteNode
+        >
+        </reader>
       </template>
 
       <template slot="viz">
@@ -102,6 +106,7 @@ export default {
     Search,
     Pane, 
     Tabs,
+    Reader,
  //   FirstThrowRequester,
  //   FirstThrowDisplay,
     //Viz,
@@ -129,6 +134,7 @@ export default {
       'paneWidthPercentage',
       'currentReaderHeight',
       'activeTab',
+      'currentReaderContent',
     ]),
     nodesReversed: function(){
       return this.nodes.reverse();
@@ -164,26 +170,9 @@ export default {
   methods: {
     ...mapActions([
       'changeActiveTab',
+      'changeReaderHeight',
+      'changeReaderContent',
     ]),
-    //handleResize(){
-    //  this.width =  Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    //  this.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-
-    //},
-    //activeSubnodeIds(){
-    //  let out = this.nodes.reduce((acc, d)=>{
-    //    console.log(d);
-    //    d.relationships.forEach(subnode=>{
-    //      if(subnode.visible){
-    //        if(!acc.includes(subnode.id)){
-    //          acc.push(subnode.id);
-    //        }
-    //      }
-    //    })
-    //    return acc;
-    //  }, []);
-    //  return out;
-    //},
     queryNodes(query, done){
       let type = query.type; 
       let domain;
@@ -260,6 +249,10 @@ export default {
       let projectIndex = this.nodes.findIndex(d=>d.id==id);
       if(projectIndex > -1){
         this.nodes.splice(projectIndex, 1);
+        if(this.currentReaderContent.id == id){
+          this.changeReaderHeight(0);
+          this.changeReaderContent({id: undefined, text: undefined});
+        }
         let tabShouldStillExist = this.requestSources.find(rs=>(rs.timestamp == this.activeTab.timestamp));
         if(!tabShouldStillExist){
           setTimeout(()=>{

@@ -29,7 +29,7 @@
       </div>
       
       <div class='reader-resize main-col-1-row' @click="toggleReaderHeight"
-         :style="{height: resizeElementWidth+'px'}">
+         :style="{height: resizeElementWidth+'px', cursor: 'pointer'}">
         <span class="arrow-down"
               :style="{left: (leftColPerc*width)/2 - arrowWidth + 'px',
                       top: resizeElementWidth/2-arrowWidth/2 + 'px',
@@ -40,10 +40,12 @@
         </span>
       </div>
 
-      <div class='main-col-1-row-4 main-col-1-row' v-show='readerHeight == readerMaxHeight'
-         :style="{height: readerHeight - resizeElementWidth/2 +'px'}">
-        <slot name="reader"></slot>
-      </div>
+      <transition name=fade>
+        <div class='main-col-1-row-4 main-col-1-row' v-show='readerHeight == readerMaxHeight'
+           :style="{height: readerHeight - resizeElementWidth/2 +'px'}">
+            <slot name="reader"></slot>
+        </div>
+      </transition>
 
     </div>
 
@@ -158,14 +160,16 @@ export default {
 <style scoped>
   #layout{
     display: flex;
+    /*
     outline: red 1px dotted;
     outline-offset: -1px;
+    /**/
   }
   .main-col{
-    outline: blue 1px dotted;
   }
   .main-col-resize{
     position:relative;
+    outline: black 1px solid;
   }
   .main-col-resize:hover{
     cursor: pointer;
@@ -197,10 +201,12 @@ export default {
   }
   .reader-resize{
     position:relative;
-    outline: green 1px dotted;
-  }
-  .reader-resize:hover{
-    cursor: pointer;
+
+    border-top: black 1px solid;
+    border-bottom: black 1px solid;
+    /*
+    outline: black 1px solid;
+    /**/
   }
   .reader-resize:hover .arrow-down{
     border-color: transparent transparent black transparent;
@@ -212,5 +218,14 @@ export default {
     position: absolute;
   }
 
+  .fade-enter-active{
+    transition: opacity .5s;
+  }
+  .fade-leave-active{
+    transition: opacity 0s;
+  }
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+  }
 
 </style>
