@@ -1,19 +1,46 @@
 <template>
-  <div id="viz" :style="{height:windowDims.height+'px'}">
+  <!--<div id="vizWrapper" :style="{width: width+'px', height: height+'px', display: 'inline-block', float: 'left'}">-->
+  <div id="viz" :style="{height:height+'px'}">
+    <div id="vizControl">
+      <p>verbose note: entering contracts will ALWAYS connect to relations they share that are already on display</p>
+      <br>
+      <p>in addition we have the option of automatically folding out relation nodes if they are shared by
+      <input type="number" name="points" value=2 min=1 step="1" @change=changeThreshold>
+      or more contract nodes. Click here <input type="checkbox" checked=unfoldSharedRelationsByDefault @click=toggleUnfoldSharedRelationsByDefault ></input> to activate this behaviour by default or click <a href="#" @click="unfoldSharedRelationByThreshold">here</a> to run in just once on for the nodes on display.</p>
+
+
+    </div>
+    <!--<div id="currentNode" v-if=currentNode>-->
+      <!--<p v-if="currentNode.type=='project'">{{currentNode.id}}</p>-->
+      <!--<p v-else>{{currentNode.title}}</p>-->
+    <!--</div>-->
+    <tooltip
+      :xPos=tooltipX
+      :yPos=tooltipY
+      :fullactive=tooltipFullactive
+      :setActiveNode=setActiveNode
+      :currentNode=currentNode
+      :deleteProject=deleteProject
+      :setSubnode=setSubnode
+      :setAnimateViz=setAnimateViz
+      
+      :unselectProject=unselectProject
+    >
+    </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg">
     </svg>
   </div>
 </template> 
 <script>
 import * as d3 from 'd3';
-//import Tooltip from '@/components/Tooltip'
+import Tooltip from '@/components/Tooltip'
 
 import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'viz',
   components:{
-    //Tooltip
+    Tooltip
   },
   data () {
     return {
@@ -24,96 +51,90 @@ export default {
       labelLayer: undefined,
       
       simulation: undefined,
-      //root: undefined,
-      //node: undefined, 
-      //label: undefined,
-      //link: undefined,
+      root: undefined,
+      node: undefined, 
+      label: undefined,
+      link: undefined,
 
-      //data: {
-      //  nodes:[],
-      //  links:[]
-      //},
+      data: {
+        nodes:[],
+        links:[]
+      },
 
-      //currentNode: undefined,
+      currentNode: undefined,
 
-      //tooltipX: -500,
-      //tooltipY: -500,
-      //tooltipFullactive: false,
+      tooltipX: -500,
+      tooltipY: -500,
+      tooltipFullactive: false,
     }
   },
   props:[
     'nodeData',
-    //'width',
-    //'height',
-    //'setActiveNode',
-    //'activeNode',
-    //'requestRelatedToId',
-    //'unfoldSharedRelationsByDefault',
-    //'toggleUnfoldSharedRelationsByDefault',
-    //'changeThreshold',
-    //'unfoldSharedRelationByThreshold',
-    //
-    //'deleteProject',
-    //'setSubnode',
+    'width',
+    'height',
+    'setActiveNode',
+    'activeNode',
+    'requestRelatedToId',
+    'unfoldSharedRelationsByDefault',
+    'toggleUnfoldSharedRelationsByDefault',
+    'changeThreshold',
+    'unfoldSharedRelationByThreshold',
+    
+    'deleteProject',
+    'setSubnode',
 
-    //'animateViz',
-    //'setAnimateViz',
-    //'unselectProject',
+    'animateViz',
+    'setAnimateViz',
+    'unselectProject',
 
   ],
   computed:{
     ...mapGetters([
-      'windowDims',
-      'leftColPerc',
-      'resizeElementWidth',
     ]),
-    vizWidth: function(){
-      return (1.0-this.leftColPerc)*this.windowDims.width-this.resizeElementWidth/2;
+    dataIds: function(){
+      return this.data.map(d=>d.id);
     }
-    //dataIds: function(){
-    //  return this.data.map(d=>d.id);
-    //}
   },
 	watch: {
-   // '$props.nodeData':{
-   //   handler: function (val, oldVal) { 
-   //     console.log('nodes changed!');
-   //     //this.integrateChanges(val);
-   //   },
-   //   deep: true
-   // },
-    //'$props.activeNode':{
-    //  handler: function (val, oldVal) { 
-    //    console.log("[Viz] activeNode changed");
-    //    console.log(val);
-    //    this.node.selectAll(".activeRing")
-    //      .attr("stroke", d=>{
-    //        if(d.id==val){ 
-    //          return 'red';
-    //        }else{
-    //          return 'none';
-    //        }
-    //      })
-    //    ;
-    //    this.link
-    //      .attr("stroke-width", d=>{
-    //        if(d.target.id == val || d.source.id == val){
-    //          return 2;
-    //        }else{
-    //          return 1;
-    //        }
-    //      })
-    //      .attr("stroke", d=>{
-    //        if(d.target.id == val || d.source.id == val){
-    //          return 'red'
-    //        }else{
-    //          return 'grey'
-    //        }
-    //      })
-    //    ;
-    //  },
-    //  deep: true
-    //},
+   
+    '$props.nodeData':{
+      handler: function (val, oldVal) { 
+        this.integrateChanges(val);
+      },
+      deep: true
+    },
+    '$props.activeNode':{
+      handler: function (val, oldVal) { 
+        console.log("[Viz] activeNode changed");
+        console.log(val);
+        this.node.selectAll(".activeRing")
+          .attr("stroke", d=>{
+            if(d.id==val){ 
+              return 'red';
+            }else{
+              return 'none';
+            }
+          })
+        ;
+        this.link
+          .attr("stroke-width", d=>{
+            if(d.target.id == val || d.source.id == val){
+              return 2;
+            }else{
+              return 1;
+            }
+          })
+          .attr("stroke", d=>{
+            if(d.target.id == val || d.source.id == val){
+              return 'red'
+            }else{
+              return 'grey'
+            }
+          })
+        ;
+      },
+      deep: true
+    },
   },
   mounted(){
     this.svg = d3.select("svg");
@@ -121,50 +142,47 @@ export default {
 
     this.linkLayer = this.chart.append("g").attr("class", "linkLayer");
     this.nodeLayer = this.chart.append("g").attr("class", "nodeLayer");
-    //this.labelLayer = this.chart.append("g").attr("class", "labelLayer");
+    this.labelLayer = this.chart.append("g").attr("class", "labelLayer");
 
 
 
-    //this.simulation = d3.forceSimulation()
-    //    //.force("attract", attractForce)
-    //    //.force("repell", repelForce)
-    //    //.force("specific", d3.forceManyBody().strength(-50))
-    //    .force("specific", d3.forceManyBody().strength(d=>{
-    //         if(d.type == "project"){
-    //          console.log(d); 
-    //           if(d.subnodes.length > 0){
-    //             console.log("long");
-    //             return -2000;
-    //           }else{
-    //             return -100;
-    //           }
-    //         }else{
-    //           return -10;
-    //         }
-    //    }))
-    //    //.force("x", d3.forceX().strength(0.002))
-    //    //.force("y", d3.forceY().strength(0.002))
-    //    .force("center", d3.forceCenter(this.width/2, this.height/2))
-    //    .force("collide", d3.forceCollide().radius(20).iterations(2))
-    //    .force("link", d3.forceLink().id(d=> d.id))
-    //    .on("tick", this.ticked)
-    //;
+    this.simulation = d3.forceSimulation()
+        //.force("attract", attractForce)
+        //.force("repell", repelForce)
+        //.force("specific", d3.forceManyBody().strength(-50))
+        .force("specific", d3.forceManyBody().strength(d=>{
+             if(d.type == "project"){
+              console.log(d); 
+               if(d.subnodes.length > 0){
+                 console.log("long");
+                 return -2000;
+               }else{
+                 return -100;
+               }
+             }else{
+               return -10;
+             }
+        }))
+        //.force("x", d3.forceX().strength(0.002))
+        //.force("y", d3.forceY().strength(0.002))
+        .force("center", d3.forceCenter(this.width/2, this.height/2))
+        .force("collide", d3.forceCollide().radius(20).iterations(2))
+        .force("link", d3.forceLink().id(d=> d.id))
+        .on("tick", this.ticked)
+    ;
 
-    //this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
-    //this.link = this.linkLayer.selectAll(".link").attr("class", "link");
-    ////this.label = this.labelLayer.selectAll(".label").attr("class", "label");
+    this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
+    this.link = this.linkLayer.selectAll(".link").attr("class", "link");
+    //this.label = this.labelLayer.selectAll(".label").attr("class", "label");
 
-		////this.unwatchSelection = this.$store.watch(this.$store.getters.selectionWatcher, n => {
-    ////  console.log("todo", n);
-    ////  
+		//this.unwatchSelection = this.$store.watch(this.$store.getters.selectionWatcher, n => {
+    //  console.log("todo", n);
+    //  
 
-    ////  this.processNewData(n.map(id => this.getProjectById(id)));
-    ////})
+    //  this.processNewData(n.map(id => this.getProjectById(id)));
+    //})
   },
   methods: {
-    testFunction(){
-      console.log(msg);
-    },
     ticked() {
 
       let margin =10;
@@ -377,33 +395,38 @@ export default {
         // go over subnodes here
 
         let subnodes = node.relationships.filter(subnode=>subnode.visible).map(subnode=>{
-          // going over all visible subnodes:
-
-          // saving the ones we make visible here in an array to avoid adding them twice:
+          //links.push({source: node.id, target: subnode.id});
           if(!allVisibleSubnodeIds.includes(subnode.id)){
             allVisibleSubnodeIds.push(subnode.id);
           }
-        
-          // check if this subnode is already on the graph
+
           if(this.data.nodes.map(d=>d.id).includes(subnode.id)){
-            // if it is on the graph already, we return its instance:
             return this.data.nodes.find(d=>d.id==subnode.id);
           }else{
-            // if the subnode is not on the graph yet, 
-            // we set its initial x and y position to that of the node it unfolds from
             if(this.data.nodes.map(d=>d.id).includes(node.id)){
-              // if that node is on the graph already (which it should be in a normal)
-              // case we get its current x and y position
-              let n = this.data.nodes.find(d=>d.id==node.id);
-              subnode.x = n.x;
-              subnode.y = n.y;
+              //the idea here is that the subnode orgin in the node that it is folded out from
+              // but i am not sure if this works yet
+              subnode.x = node.x;
+              subnode.y = node.y;
+              
+              // this is experimental, freezing the mother nood in place while subndes unfold
+              // then unfreeze after timeout
+              node.fx = node.x;
+              node.fy = node.y;
+              setTimeout(function(){
+                node.fx = undefined;
+              }, 1500);
+
             }else{
-              subnode.x = this.vizWidth*0.5;
-              subnode.y = this.vizHeight*0.5;
+              //the idea here is that the subnode orgin in the node that it is folded out from
+              // but i am not sure if this works yet
+              subnode.x = this.width*0.5;
+              subnode.y = this.height*0.5;
             }
             return subnode;
           }
         })
+        console.log("subnodes", subnodes);
 
         if(this.data.nodes.map(d=>d.id).includes(node.id)){
           let n = this.data.nodes.find(d=>d.id==node.id);
@@ -464,7 +487,7 @@ export default {
     position:relative;
   }
   svg{
-    background-color: #bebebe;
+    background-color: black;
     width:100%;
     height:100%;
   }

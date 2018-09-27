@@ -22,6 +22,7 @@
           <pane-node
             :data=node
             :deleteNode='()=>deleteNode(node.id)'
+            :toggleGraphSelect='()=>setNodeSelect(node.id, !node.selected)'
             >
           </pane-node>
         </div>
@@ -52,6 +53,7 @@ export default {
   props:[
     'nodes',
     'deleteNode',
+    'setNodeSelect',
   ],
   computed:{
     ...mapGetters([

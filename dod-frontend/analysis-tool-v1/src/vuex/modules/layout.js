@@ -16,7 +16,7 @@ const state = {
   tabHeight: 20,
 
   //reader
-  readerMaxHeight: 200,
+  readerMaxHeight: 250,
   readerHeightGoal: 0,
   
   //pane
@@ -35,6 +35,7 @@ const getters = {
   // layout 
   windowDims: state => state.windowDims,
   // main
+  leftColPercGoal: state => state.leftColPercGoal,
   leftColPercGoalWatcher: state => () => state.leftColPercGoal,
   //resize element middle
   resizeElementWidth: state => state.resizeElementWidth,

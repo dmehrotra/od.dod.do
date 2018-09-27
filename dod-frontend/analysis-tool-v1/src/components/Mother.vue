@@ -20,20 +20,22 @@
         <pane
           :nodes=nodes
           :deleteNode=deleteNode
+          :setNodeSelect=setNodeSelect
         >
         </pane>
       </template>
 
       <template slot="reader">
-        <reader
-          :nodes=nodes
-          :deleteNode=deleteNode
-        >
+        <reader>
         </reader>
       </template>
 
       <template slot="viz">
-        <h1>viz b here</h1>
+        <viz
+          ref='vizComponent'
+          :nodeData=selectedNodeData
+        >
+        </viz>
       </template>
 
     </layout>
@@ -107,10 +109,7 @@ export default {
     Pane, 
     Tabs,
     Reader,
- //   FirstThrowRequester,
- //   FirstThrowDisplay,
-    //Viz,
-    //Reader,
+    Viz,
   },
   data () {
     return {
@@ -179,6 +178,7 @@ export default {
       if(type == 'search'){
         domain = "https://quagga.club/api/search/" + encodeURIComponent(query.query);
       }
+      console.log(domain);
       api.get(domain)
         .then((response) => {
           console.log("nodes", response);
@@ -211,7 +211,6 @@ export default {
         node.selected = false;
         node.active = false;
         node.marked = 'none';
-        node.type = 'node'; //(as opposed to 'extra'-nodes that are invisible, but needed for layout purposes in the pane
 
         this.nodes.find((d, i)=>{
 
@@ -271,6 +270,10 @@ export default {
       //console.log(this.nodes.filter(node => node.requestSource.filter(rs => rs.timestamp==tab.timestamp)) )
     },
 
+    setNodeSelect(id, flag){
+      this.nodes.find(d=>d.id==id).selected = flag;
+      this.$refs.vizComponent.testFunction("update graph");
+    },
 
 
     //integrateNewNodes(newNodes, selectedDefault, requestSource){
@@ -331,57 +334,53 @@ export default {
 
 
     //},
-    requestRelatedToId(requestSource, id){
-      let domain = "https://quagga.club/api/connected/" + id;
-      api.get(domain)
-        .then((response) => {
-          this.integrateNewNodes(response.body.projects, true, requestSource);
-        })
-        .catch((error) => {
-          console.log("ERROR with API", error); 
-        });
-    },
-    searchRequest(query){
-      let domain = "https://quagga.club/api/search/" + encodeURIComponent(query);
-      api.get(domain)
-        .then((response) => {
-          this.integrateNewNodes(response.body, false, {type: 'search', value: query});
-        })
-        .catch((error) => {
-          console.log("ERROR with API", error); 
-        });
-    },
-    unfoldSharedRelationByThreshold(){
-      let sharedSubnodes = this.nodes.reduce((acc, d)=>{
-        if(d.selected){
-          d.relationships.forEach(subnode=>{
-            if(!subnode.active && acc[subnode.id] != this.sharedRelationsThreshold){
-              if(acc[subnode.id] == undefined){
-                acc[subnode.id] = 1;
-              }else{
-                acc[subnode.id]++;
-              }
-            }
-          })
-        }
-        return acc;
-      }, {});
-      Object.keys(sharedSubnodes).forEach(d=>{
-        if(sharedSubnodes[d] >= this.sharedRelationsThreshold){
-          this.setSubnode(d, true);
-        }
-      });
-    },
-    toggleSelect(id){
-      this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;
-      
-      if(this.unfoldSharedRelationsByDefault){
-
-        this.unfoldSharedRelationByThreshold();
-
-      }
-
-    },
+    //requestRelatedToId(requestSource, id){
+    //  let domain = "https://quagga.club/api/connected/" + id;
+    //  api.get(domain)
+    //    .then((response) => {
+    //      this.integrateNewNodes(response.body.projects, true, requestSource);
+    //    })
+    //    .catch((error) => {
+    //      console.log("ERROR with API", error); 
+    //    });
+    //},
+    //searchRequest(query){
+    //  let domain = "https://quagga.club/api/search/" + encodeURIComponent(query);
+    //  api.get(domain)
+    //    .then((response) => {
+    //      this.integrateNewNodes(response.body, false, {type: 'search', value: query});
+    //    })
+    //    .catch((error) => {
+    //      console.log("ERROR with API", error); 
+    //    });
+    //},
+    //unfoldSharedRelationByThreshold(){
+    //  let sharedSubnodes = this.nodes.reduce((acc, d)=>{
+    //    if(d.selected){
+    //      d.relationships.forEach(subnode=>{
+    //        if(!subnode.active && acc[subnode.id] != this.sharedRelationsThreshold){
+    //          if(acc[subnode.id] == undefined){
+    //            acc[subnode.id] = 1;
+    //          }else{
+    //            acc[subnode.id]++;
+    //          }
+    //        }
+    //      })
+    //    }
+    //    return acc;
+    //  }, {});
+    //  Object.keys(sharedSubnodes).forEach(d=>{
+    //    if(sharedSubnodes[d] >= this.sharedRelationsThreshold){
+    //      this.setSubnode(d, true);
+    //    }
+    //  });
+    //},
+    //toggleSelect(id){
+    //  this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;
+    //  if(this.unfoldSharedRelationsByDefault){
+    //    this.unfoldSharedRelationByThreshold();
+    //  }
+    //},
     unselectProject(id){
       this.nodes.find(d=>d.id==id).selected = false;
     },
