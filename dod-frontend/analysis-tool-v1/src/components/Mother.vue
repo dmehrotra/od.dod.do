@@ -272,7 +272,18 @@ export default {
 
     setNodeSelect(id, flag){
       this.nodes.find(d=>d.id==id).selected = flag;
-      this.$refs.vizComponent.testFunction("update graph");
+      //this.$refs.vizComponent.integrateNewNodes();
+
+
+      // my thinking to do this from here (mother component) is that I 
+      // have a hunch that otherwise every small trigger (e.g. many nodes updated slighted after each other)
+      // triggers the viz coponent to react, but it might be more economocial (and perhaps better for the graph 
+      // force animation, if I update the graph in a more controlled manner
+      // above, it lets me seperate between updates that need to trigger an animation
+      // and those that only change colors etc. 
+      // i am not sure if this all is sensical, but i try if it does what i 
+      // hope for it to do :)
+      this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
     },
 
 
