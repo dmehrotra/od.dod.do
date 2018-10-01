@@ -1,12 +1,15 @@
 <template>
-  <div id="viz" :style="{height:windowDims.height+'px'}">
-    <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg'>
-      <g class="zoomLayer">
-        <rect x="0" y="0" width="100" height="100" fill="beige"></rect>
-        <g class="centerLayer" :transform="'translate('+ vizWidth/2 +','+ windowDims.height/2+')'">
-        <rect x="0" y="0" width="100" height="100" fill="beige"></rect>
-        <circle cx="0" cy="0" :r="boundaryRadius" stroke="black" fill="none"></circle>
-        </g>
+  <div id="viz" :style="{height:windowDims.height+'px', width: 500 +'px'}" >
+    <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' width=500 height=500>
+
+      <!--<g class="zoomLayer">-->
+        <!--<rect x="0" y="0" width="100" height="100" fill="beige"></rect>-->
+        <!--<g class="centerLayer" :transform="'translate('+ vizWidth/2 +','+ windowDims.height/2+')'">-->
+        <!--<g class="centerLayer"> -->
+          <!--[><rect x="0" y="0" width="100" height="100" fill="grey"></rect><]-->
+          <!--[><circle cx="0" cy="0" :r="boundaryRadius" stroke="black" fill="none"></circle><]-->
+          <!--<circle cx="0" cy="0" :r="5" stroke="black" fill="black"></circle>-->
+       <!--</g>-->
       </g>
     </svg>
   </div>
@@ -36,6 +39,7 @@ export default {
       node: undefined, 
       //label: undefined,
       //link: undefined,
+      zoom: undefined,
 
       data: {
         nodes:[],
@@ -128,25 +132,69 @@ export default {
   },
   mounted(){
     this.svg = d3.select("#vizsvg");
-    this.zoomLayer = d3.select(".zoomLayer");
-    this.svg
-      .call(d3.zoom().on("zoom", () => {
-          this.zoomLayer.attr("transform", d3.event.transform)
-       }))
-    ;
-    this.centerLayer = d3.select(".centerLayer")
-    ;
-    this.centerLayer.append("rect").attr("x", 0).attr("y", 0).attr("width", 100).attr("height", 100).attr("fill", "beige");
-    this.chart = this.centerLayer.append("g").attr("class", "chart");
-    this.chart.append('circle').attr("cx", 0).attr("cy", 0).attr("r", 50).attr("stroke", "black").attr("fill", "none");
+    let width = +this.svg.attr("width");
+    let height = +this.svg.attr("height");
+    var zoom = d3.zoom()
+    .scaleExtent([1, 40])
+    .translateExtent([[-100, -100], [width + 90, height + 100]])
+    .on("zoom", zoomed);
+    
 
-    this.linkLayer = this.chart.append("g").attr("class", "linkLayer");
-    this.nodeLayer = this.chart.append("g").attr("class", "nodeLayer");
+    var view = this.svg.append("g")
+    .attr("class", "view");
+   // view.append('rect')
+   // .attr("x", 0.5)
+   // .attr("y", 0.5)
+   // .attr("width", width - 1)
+   // .attr("height", height - 1);
+    view.append('rect')
+    .attr("x", width/2)
+    .attr("y", height/2)
+    .attr("width", 5)
+    .attr("height", 5)
+    .attr("fill", "white")
+    ;
+
+    this.svg.call(zoom);
+    function zoomed() {
+      view.attr("transform", d3.event.transform);
+    }
+
+
+
+
+
+
+    //this.svg.attr('width', 500).attr('height', 500);
+    //this.centerLayer = this.svg.append("g");
+    //this.centerLayer
+    //  .append("rect").attr("x", 0).attr("y", 0).attr("width", 100).attr("height", 100).attr("fill", "beige")
+    //;
+    ////this.zoomLayer = d3.select(".zoomLayer");
+    //this.zoom = d3.zoom()
+    //    //.extent([[-50, -50], [150, 150]])
+    //    //.scaleExtent([1,3])
+    //    .translateExtent([[-50, -50], [150, 150]])
+    //    .on('zoom', () => {
+    //      this.centerLayer.attr("transform", d3.event.transform)
+    //   });
+    //this.zoomLayer
+    //  .call(this.zoom)
+    //;
+    //this.centerLayer = d3.select(".centerLayer")
+      //.attr("transform", "translate("+(this.vizWidth/2)+","+(this.windowDims.height/2)+")")
+    //;
+    //this.svg.call(this.zoom);
+    //this.chart = this.centerLayer.append("g").attr("class", "chart");
+    ////this.chart.append('circle').attr("cx", 0).attr("cy", 0).attr("r", 50).attr("stroke", "black").attr("fill", "none");
+
+    //this.linkLayer = this.chart.append("g").attr("class", "linkLayer");
+    //this.nodeLayer = this.chart.append("g").attr("class", "nodeLayer");
     //this.labelLayer = this.chart.append("g").attr("class", "labelLayer");
 
 
 
-    this.simulation = d3.forceSimulation()
+    //this.simulation = d3.forceSimulation()
         //.force("attract", attractForce)
         //.force("repell", repelForce)
         //.force("specific", d3.forceManyBody().strength(-50))
@@ -165,13 +213,14 @@ export default {
         //}))
         //.force("x", d3.forceX().strength(0.002))
         //.force("y", d3.forceY().strength(0.002))
-        .force("center", d3.forceCenter(0,0))
-        .force("collide", d3.forceCollide().radius(20).iterations(2))
+     //   .force("center", d3.forceCenter(0,0))
+     //   .force("collide", d3.forceCollide().radius(20).iterations(2))
     //    .force("link", d3.forceLink().id(d=> d.id))
-        .on("tick", this.ticked)
-    ;
+   //     .on("tick", this.ticked)
+   // ;
 
-    this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
+    //this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
+
     //this.link = this.linkLayer.selectAll(".link").attr("class", "link");
     ////this.label = this.labelLayer.selectAll(".label").attr("class", "label");
 
@@ -188,16 +237,16 @@ export default {
       let height = 300;
 
 
-      this.node
-        //.attr("x", d => { return d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x)); })
-        //.attr("y", d => { return d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y)); });
-        .attr("transform", d=>{
-          //d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x));
-          //d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y));
-          return "translate("+d.x+","+d.y+")";
+   //   this.node
+   //     //.attr("x", d => { return d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x)); })
+   //     //.attr("y", d => { return d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y)); });
+   //     .attr("transform", d=>{
+   //       //d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x));
+   //       //d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y));
+   //       return "translate("+d.x+","+d.y+")";
 
-        })
-      ;
+   //     })
+   //   ;
       //this.link
       //    .attr("x1", function(d) { return d.source.x; })
       //    .attr("y1", function(d) { return d.source.y; })
@@ -472,8 +521,10 @@ export default {
   }
   svg{
     background-color: #bebebe;
+    /*
     width:100%;
     height:100%;
+    /**/
   }
   #vizControl{
     position: absolute;
