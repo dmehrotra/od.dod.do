@@ -14,23 +14,6 @@ The constellation of press releases paints a picture of an industry thats knotte
 - ***what is this***: defense.fish is a tool that generates network maps of coporate entities, contract awards, and military technology based on daily Pentagon press releases.
 - ***how does it work***: Contract Announcements are categorized and indexed using keywords and "intelligent tagging". Defense.fish then provides a frontend to query and examine the relationships between tags and contract announcements. 
 
-## Extension Installation
-  - git clone https://github.com/dmehrotra/department-of-defense-contracts.git 
-  - navigate to chrome://extensions
-  - click load unpacked extension and click the department-of-defense-contracts folder
-
-## Neo4j/Cypher Visualizations
-
-This repo contains import scripts so you can import the PSQL DB to a Neo4j db.  The value of this is to visualize connections between contracts, departments, contractors, contracting activities, and the places where the work if performed. 
-
-- ![You should see something like this](./readme-files/1.png "Logo Title Text 1")
-- ![You should see something like this](./readme-files/2.png "Logo Title Text 1")
-- ![You should see something like this](./readme-files/3.png "Logo Title Text 1")
-
-
-## Machine Learning and Semantic Analysis 
-
-The DOD-Semantics folder is a semantic analysis of the purposes of each contract.  Ideally it will be used to find similar contracts to eachother. It is an Jupyter Notebook.  To run it pull the repo at run jupyter-notebook. 
 
 ## Who do dis?
 
