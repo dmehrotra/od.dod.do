@@ -3,6 +3,10 @@ import Router from 'vue-router'
 import Mother from '@/components/Mother'
 import Landing from '@/components/Landing'
 
+
+import GridTest from '@/components/GridTest'
+import Layout from '@/components/Layout'
+
 Vue.use(Router)
 
 export default new Router({
@@ -17,6 +21,11 @@ export default new Router({
       path: '/app',
       name: 'Mother',
       component: Mother
+    },
+    {
+      path: '/layout',
+      name: 'Layout',
+      component: Layout
     }
   ]
 })

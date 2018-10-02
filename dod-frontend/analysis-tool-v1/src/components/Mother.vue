@@ -1,27 +1,68 @@
 <template>
   <div id="mother">
-    <div class="halfWidth">
+    <layout>
+      <template slot="search">
+        <search
+          :search=search
+        >
+        </search>
+      </template>
+
+      <template slot="tabs">
+          <tabs
+            :tabs=requestSources
+            :deleteByTab=deleteByTab
+          >
+          </tabs>
+      </template>
+
+      <template slot="pane">
+        <pane
+          :nodes=nodes
+          :deleteNode=deleteNode
+          :setNodeSelect=setNodeSelect
+        >
+        </pane>
+      </template>
+
+      <template slot="reader">
+        <reader>
+        </reader>
+      </template>
+
+      <template slot="viz">
+        <viz
+          ref='vizComponent'
+          :nodeData=selectedNodeData
+        >
+        </viz>
+      </template>
+
+    </layout>
+
+    <!--
+    <div :style="{width: paneWidthPercentage + '%'}">
       <search
         :letMotherSearch=searchRequest
-        :height=80
+        :height=searchBarHeight
       >
       </search>
       <pane
-         :nodes=nodeData
-         :height=height-80
+         :nodes=nodes
+         :height=height-searchBarHeight-currentReaderHeight
          :toggleSelect=toggleSelect
-         :setAllSubnodes=setAllSubnodes
-         :setActiveNode=setActiveNode
-         :markProject=markProject
          :deleteProject=deleteProject
-         :setAnimateViz=setAnimateViz
-         :activeNode=activeNode
          >
       </pane>
+      <reader v-if="currentReaderHeight>0"
+        :height=currentReaderHeight
+      >
+
+      </reader>
 
 
     </div>
-    <div class="halfWidth">
+    <div :style="{width: (100-paneWidthPercentage) + '%'}">
       <viz
          :nodeData=selectedNodeData
          :width=width*0.5
@@ -31,6 +72,9 @@
          :requestRelatedToId=requestRelatedToId
          :unfoldSharedRelationsByDefault=unfoldSharedRelationsByDefault
          :toggleUnfoldSharedRelationsByDefault=toggleUnfoldSharedRelationsByDefault
+         :changeThreshold=changeThreshold
+         :unfoldSharedRelationByThreshold=unfoldSharedRelationByThreshold
+
          :deleteProject=deleteProject
          :setSubnode=setSubnode
 
@@ -40,28 +84,31 @@
       >
       </viz>
     </div>
+    -->
   </div>
 </template>
 
 <script>
+import Layout from '@/components/Layout'
 
-//import FirstThrowRequester from '@/components/FirstThrowRequester'
-//import FirstThrowDisplay from '@/components/FirstThrowDisplay'
-import Viz from '@/components/Viz'
 import Search from '@/components/Search'
+import Tabs from '@/components/Tabs'
 import Pane from '@/components/Pane'
 
-//import {mapGetters, mapActions} from 'vuex';
+import Viz from '@/components/Viz'
+import Reader from '@/components/Reader'
+import {mapGetters, mapActions} from 'vuex';
 
 import api from '@/vuex/api'
 
 export default {
   name: 'mother',
   components: {
+    Layout,
     Search,
     Pane, 
- //   FirstThrowRequester,
- //   FirstThrowDisplay,
+    Tabs,
+    Reader,
     Viz,
   },
   data () {
@@ -73,31 +120,41 @@ export default {
       nodes: [],
       activeNode: undefined,
       unfoldSharedRelationsByDefault: true,
+      sharedRelationsThreshold: 2,
 
       animateViz:true,
+
       
     }
   },
   computed:{
-    nodeData: function(){
+    ...mapGetters([
+      'searchBarHeight',
+      'paneWidthPercentage',
+      'currentReaderHeight',
+      'activeTab',
+      'currentReaderContent',
+    ]),
+    nodesReversed: function(){
       return this.nodes.reverse();
+    },
+    requestSources: function(){
+      let searchValues = [];
+      let idValues = [];
+      let sources = this.nodes.reduce((acc, node)=>{
+              //return acc.concat(node.requestSource)
+              let searchSources = node.requestSource.filter(rs=>rs.type=='search')
+              searchSources = searchSources.filter(rs=>(!searchValues.includes(rs.value)));
+              searchValues = searchValues.concat(searchSources.map(rs=>rs.value))
+              return acc.concat(searchSources);
+            }, []);
+
+      return sources.sort((a, b)=> a.timestamp-b.timestamp)
     },
     selectedNodeData: function(){
       return this.nodes.filter(d=>d.selected);
     },
     activeSubnodeIds(){
-      let out = this.nodes.reduce((acc, d)=>{
-        console.log(d);
-        d.relationships.forEach(subnode=>{
-          if(subnode.visible){
-            if(!acc.includes(subnode.id)){
-              acc.push(subnode.id);
-            }
-          }
-        })
-        return acc;
-      }, []);
-      return out;
     },
   },
   mounted(){
@@ -110,27 +167,39 @@ export default {
     window.removeEventListener('resize', this.handleResize)
   },
   methods: {
-    handleResize(){
-      this.width =  Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-      this.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-
+    ...mapActions([
+      'changeActiveTab',
+      'changeReaderHeight',
+      'changeReaderContent',
+    ]),
+    queryNodes(query, done){
+      let type = query.type; 
+      let domain;
+      if(type == 'search'){
+        domain = "https://quagga.club/api/search/" + encodeURIComponent(query.query);
+      }
+      console.log(domain);
+      api.get(domain)
+        .then((response) => {
+          console.log("nodes", response);
+          let num = response.body.length;
+          let timestamp = Date.now();
+          this.integrateNodes(response.body, {'type': 'search', 'value': query.query, 'timestamp': timestamp});
+          done(num, timestamp);
+        })
+        .catch((error) => {
+          console.log("ERROR with API", error); 
+          done(null);
+        });
     },
-    //activeSubnodeIds(){
-    //  let out = this.nodes.reduce((acc, d)=>{
-    //    console.log(d);
-    //    d.relationships.forEach(subnode=>{
-    //      if(subnode.visible){
-    //        if(!acc.includes(subnode.id)){
-    //          acc.push(subnode.id);
-    //        }
-    //      }
-    //    })
-    //    return acc;
-    //  }, []);
-    //  return out;
-    //},
+    search(query, done){
+      this.queryNodes({'type': 'search', 'query': query}, (res,timestamp )=>{
 
-    integrateNewNodes(newNodes, selectedDefault, requestSource){
+        done({'res': res, 'query': query, 'timestamp': timestamp});
+      });
+    },
+
+    integrateNodes(newNodes, requestSource){
       //first check which nodes exist already and brng them to the top,
       
       let del = [];
@@ -138,18 +207,8 @@ export default {
         
         // keeping track of how each node got into the data
         node["requestSource"] = [requestSource];
-        //node.relationships.forEach(d=>d.visible = false);
-        let activeSubnodes = this.activeSubnodeIds;
-        // this is so that incoming nodes have there relationships subnodes already visible if they are displayed so far.
-        node.relationships.forEach(d=>{
-          if(activeSubnodes.includes(d.id)){
-            d.visible = true;
-          }else{
-            d.visible = false;
-          }
-        });
 
-        node.selected = selectedDefault;
+        node.selected = false;
         node.active = false;
         node.marked = 'none';
 
@@ -159,10 +218,17 @@ export default {
             // if node exists already, then we use the one that alreadt in the array (since it might have position values alrady)
             node = d;
 
-            // keeping track of how each node got into the data
-            if(!node.requestSource.includes(requestSource)){
+            let requestSourceExists = node.requestSource.find(rs=>(rs.type==requestSource.type&&rs.value==requestSource.value));
+            console.log('requestSourceExists', requestSourceExists);
+            if(requestSourceExists==undefined){
               node.requestSource.push(requestSource);
             }
+
+            // keeping track of how each node got into the data
+            //if(!node.requestSource.includes(requestSource)){
+            //  node.requestSource.push(requestSource);
+            //}
+
             // this node exists already, to make sure it comes in on top of the array, we delte the old instance and simly add it again as part of newNodes
             del.push(i);
           }
@@ -177,59 +243,155 @@ export default {
       // never seen before, but from here: https://stackoverflow.com/a/9650855
       this.nodes.push.apply(this.nodes, newNodes);
 
-
-
-
-
-
     },
-    requestRelatedToId(requestSource, id){
-      let domain = "https://quagga.club/api/connected/" + id;
-      api.get(domain)
-        .then((response) => {
-          this.integrateNewNodes(response.body.projects, true, requestSource);
-        })
-        .catch((error) => {
-          console.log("ERROR with API", error); 
-        });
-    },
-    searchRequest(query){
-      let domain = "https://quagga.club/api/search/" + encodeURIComponent(query);
-      api.get(domain)
-        .then((response) => {
-          this.integrateNewNodes(response.body, false, {type: 'search', value: query});
-        })
-        .catch((error) => {
-          console.log("ERROR with API", error); 
-        });
-
-    },
-    toggleSelect(id){
-      this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;
-      
-      if(this.unfoldSharedRelationsByDefault){
-        let sharedSubnodes = this.nodes.reduce((acc, d)=>{
-          if(d.selected){
-            d.relationships.forEach(subnode=>{
-              if(!subnode.active && acc[subnode.id] != true){
-                if(acc[subnode.id] == undefined){
-                  acc[subnode.id] = false;
-                }else{
-                  acc[subnode.id] = true;
-                }
-              }
-            })
-          }
-          return acc;
-        }, {});
-        Object.keys(sharedSubnodes).forEach(d=>{
-          if(sharedSubnodes[d] == true){
-            this.setSubnode(d, true);
-          }
-        });
+    deleteNode(id){ //this does not mean relationship nodes as those are never deleted but only 'folded in'
+      let projectIndex = this.nodes.findIndex(d=>d.id==id);
+      if(projectIndex > -1){
+        this.nodes.splice(projectIndex, 1);
+        if(this.currentReaderContent.id == id){
+          this.changeReaderHeight(0);
+          this.changeReaderContent({id: undefined, text: undefined});
+        }
+        let tabShouldStillExist = this.requestSources.find(rs=>(rs.timestamp == this.activeTab.timestamp));
+        if(!tabShouldStillExist){
+          setTimeout(()=>{
+            this.changeActiveTab({type:'all', value:'all', timestamp:0})
+          }, 600);
+        }
       }
-
     },
+    deleteByTab(tab){
+      // SHIT, when a tab closes I need to update all nodes so that none of them
+      // has that tab in its requestSource array anymore 
+      // equally if I close a whole tab I need to take this tab ut of all the ndoes.
+      // these two cases are related but my brain is too tired right now, postponing this function to another day
+      // ... shouldnt be too hard
+      console.log("deleteTab", tab);
+      //console.log(this.nodes.filter(node => node.requestSource.filter(rs => rs.timestamp==tab.timestamp)) )
+    },
+
+    setNodeSelect(id, flag){
+      this.nodes.find(d=>d.id==id).selected = flag;
+      //this.$refs.vizComponent.integrateNewNodes();
+
+
+      // my thinking to do this from here (mother component) is that I 
+      // have a hunch that otherwise every small trigger (e.g. many nodes updated slighted after each other)
+      // triggers the viz coponent to react, but it might be more economocial (and perhaps better for the graph 
+      // force animation, if I update the graph in a more controlled manner
+      // above, it lets me seperate between updates that need to trigger an animation
+      // and those that only change colors etc. 
+      // i am not sure if this all is sensical, but i try if it does what i 
+      // hope for it to do :)
+      this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
+    },
+
+
+    //integrateNewNodes(newNodes, selectedDefault, requestSource){
+    //  //first check which nodes exist already and brng them to the top,
+    //  
+    //  let del = [];
+    //  newNodes = newNodes.map(node=>{
+    //    
+    //    // keeping track of how each node got into the data
+    //    node["requestSource"] = [requestSource];
+    //    //node.relationships.forEach(d=>d.visible = false);
+    //    let activeSubnodes = this.activeSubnodeIds;
+    //    // this is so that incoming nodes have there relationships subnodes already visible if they are displayed so far.
+    //    node.relationships.forEach(d=>{
+    //      if(activeSubnodes.includes(d.id)){
+    //        d.visible = true;
+    //      }else{
+    //        d.visible = false;
+    //      }
+    //    });
+
+    //    node.selected = selectedDefault;
+    //    node.active = false;
+    //    node.marked = 'none';
+
+    //    this.nodes.find((d, i)=>{
+
+    //      if(d.id == node.id){
+    //        // if node exists already, then we use the one that alreadt in the array (since it might have position values alrady)
+    //        node = d;
+
+    //        // keeping track of how each node got into the data
+    //        if(!node.requestSource.includes(requestSource)){
+    //          node.requestSource.push(requestSource);
+    //        }
+
+    //        // this node exists already, to make sure it comes in on top of the array, we delte the old instance and simly add it again as part of newNodes
+    //        del.push(i);
+    //      }
+
+    //    });
+    //    return node;
+    //  });
+    //  del.sort((a,b)=>a - b).reverse().forEach(i=>this.nodes.splice(i, 1));
+
+    //  //then fill up the new nodes
+
+    //  // never seen before, but from here: https://stackoverflow.com/a/9650855
+    //  this.nodes.push.apply(this.nodes, newNodes);
+
+
+    //  if(this.unfoldSharedRelationsByDefault){
+
+    //    this.unfoldSharedRelationByThreshold();
+
+    //  }
+
+
+
+    //},
+    //requestRelatedToId(requestSource, id){
+    //  let domain = "https://quagga.club/api/connected/" + id;
+    //  api.get(domain)
+    //    .then((response) => {
+    //      this.integrateNewNodes(response.body.projects, true, requestSource);
+    //    })
+    //    .catch((error) => {
+    //      console.log("ERROR with API", error); 
+    //    });
+    //},
+    //searchRequest(query){
+    //  let domain = "https://quagga.club/api/search/" + encodeURIComponent(query);
+    //  api.get(domain)
+    //    .then((response) => {
+    //      this.integrateNewNodes(response.body, false, {type: 'search', value: query});
+    //    })
+    //    .catch((error) => {
+    //      console.log("ERROR with API", error); 
+    //    });
+    //},
+    //unfoldSharedRelationByThreshold(){
+    //  let sharedSubnodes = this.nodes.reduce((acc, d)=>{
+    //    if(d.selected){
+    //      d.relationships.forEach(subnode=>{
+    //        if(!subnode.active && acc[subnode.id] != this.sharedRelationsThreshold){
+    //          if(acc[subnode.id] == undefined){
+    //            acc[subnode.id] = 1;
+    //          }else{
+    //            acc[subnode.id]++;
+    //          }
+    //        }
+    //      })
+    //    }
+    //    return acc;
+    //  }, {});
+    //  Object.keys(sharedSubnodes).forEach(d=>{
+    //    if(sharedSubnodes[d] >= this.sharedRelationsThreshold){
+    //      this.setSubnode(d, true);
+    //    }
+    //  });
+    //},
+    //toggleSelect(id){
+    //  this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;
+    //  if(this.unfoldSharedRelationsByDefault){
+    //    this.unfoldSharedRelationByThreshold();
+    //  }
+    //},
     unselectProject(id){
       this.nodes.find(d=>d.id==id).selected = false;
     },
@@ -287,6 +449,12 @@ export default {
       this.unfoldSharedRelationsByDefault = !this.unfoldSharedRelationsByDefault;
 
     },
+    changeThreshold(e){
+      console.log(e.target.value);
+      this.sharedRelationsThreshold = parseInt(e.target.value);
+      
+
+    },
 
     setAnimateViz(flag){
       this.animateViz=flag;
@@ -302,7 +470,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 div{
+  /*
   outline: 1px solid black;
+  /**/
 }
 #mother{
   width:100%;
@@ -318,5 +488,7 @@ div{
 .thirdWidth{
   width: 33%;
 }
+
+
 
 </style>

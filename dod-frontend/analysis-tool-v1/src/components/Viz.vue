@@ -1,180 +1,234 @@
 <template>
-  <!--<div id="vizWrapper" :style="{width: width+'px', height: height+'px', display: 'inline-block', float: 'left'}">-->
-  <div id="viz" :style="{height:height+'px'}">
-    <div id="vizControl">
-      <p>show shared relations by default</p><input type="checkbox" checked=unfoldSharedRelationsByDefault @click=toggleUnfoldSharedRelationsByDefault ></input>
-    </div>
-    <!--<div id="currentNode" v-if=currentNode>-->
-      <!--<p v-if="currentNode.type=='project'">{{currentNode.id}}</p>-->
-      <!--<p v-else>{{currentNode.title}}</p>-->
-    <!--</div>-->
-    <tooltip
-      :xPos=tooltipX
-      :yPos=tooltipY
-      :fullactive=tooltipFullactive
-      :setActiveNode=setActiveNode
-      :currentNode=currentNode
-      :deleteProject=deleteProject
-      :setSubnode=setSubnode
-      :setAnimateViz=setAnimateViz
-      
-      :unselectProject=unselectProject
-    >
-    </tooltip>
-    <svg xmlns="http://www.w3.org/2000/svg">
+  <div id="viz" :style="{height:windowDims.height+'px', width: 500 +'px'}" >
+    <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' width=500 height=500>
+
+      <!--<g class="zoomLayer">-->
+        <!--<rect x="0" y="0" width="100" height="100" fill="beige"></rect>-->
+        <!--<g class="centerLayer" :transform="'translate('+ vizWidth/2 +','+ windowDims.height/2+')'">-->
+        <!--<g class="centerLayer"> -->
+          <!--[><rect x="0" y="0" width="100" height="100" fill="grey"></rect><]-->
+          <!--[><circle cx="0" cy="0" :r="boundaryRadius" stroke="black" fill="none"></circle><]-->
+          <!--<circle cx="0" cy="0" :r="5" stroke="black" fill="black"></circle>-->
+       <!--</g>-->
+      </g>
     </svg>
   </div>
 </template> 
 <script>
 import * as d3 from 'd3';
-import Tooltip from '@/components/Tooltip'
+//import Tooltip from '@/components/Tooltip'
 
 import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'viz',
   components:{
-    Tooltip
+    //Tooltip
   },
   data () {
     return {
       svg: undefined,
+      centerLayer: undefined,
       chart: undefined,
       linkLayer: undefined,
       nodeLayer: undefined,
       labelLayer: undefined,
       
       simulation: undefined,
-      root: undefined,
+      //root: undefined,
       node: undefined, 
-      label: undefined,
-      link: undefined,
+      //label: undefined,
+      //link: undefined,
+      zoom: undefined,
 
       data: {
         nodes:[],
         links:[]
       },
 
-      currentNode: undefined,
+      //currentNode: undefined,
 
-      tooltipX: -500,
-      tooltipY: -500,
-      tooltipFullactive: false,
+      //tooltipX: -500,
+      //tooltipY: -500,
+      //tooltipFullactive: false,
     }
   },
   props:[
     'nodeData',
-    'width',
-    'height',
-    'setActiveNode',
-    'activeNode',
-    'requestRelatedToId',
-    'unfoldSharedRelationsByDefault',
-    'toggleUnfoldSharedRelationsByDefault',
-    
-    'deleteProject',
-    'setSubnode',
+    //'width',
+    //'height',
+    //'setActiveNode',
+    //'activeNode',
+    //'requestRelatedToId',
+    //'unfoldSharedRelationsByDefault',
+    //'toggleUnfoldSharedRelationsByDefault',
+    //'changeThreshold',
+    //'unfoldSharedRelationByThreshold',
+    //
+    //'deleteProject',
+    //'setSubnode',
 
-    'animateViz',
-    'setAnimateViz',
-    'unselectProject',
+    //'animateViz',
+    //'setAnimateViz',
+    //'unselectProject',
 
   ],
   computed:{
     ...mapGetters([
+      'windowDims',
+      'leftColPercGoal',
+      'resizeElementWidth',
     ]),
-    dataIds: function(){
-      return this.data.map(d=>d.id);
+    vizWidth: function(){
+      return (1.0-this.leftColPercGoal)*this.windowDims.width-this.resizeElementWidth/2;
+    },
+    boundaryRadius: function(){
+      return (this.data.nodes.length + 1) * 20;
     }
+    //dataIds: function(){
+    //  return this.data.map(d=>d.id);
+    //}
   },
 	watch: {
-   
-    '$props.nodeData':{
-      handler: function (val, oldVal) { 
-        this.integrateChanges(val);
-      },
-      deep: true
-    },
-    '$props.activeNode':{
-      handler: function (val, oldVal) { 
-        console.log("[Viz] activeNode changed");
-        console.log(val);
-        this.node.selectAll(".activeRing")
-          .attr("stroke", d=>{
-            if(d.id==val){ 
-              return 'red';
-            }else{
-              return 'none';
-            }
-          })
-        ;
-        this.link
-          .attr("stroke-width", d=>{
-            if(d.target.id == val || d.source.id == val){
-              return 2;
-            }else{
-              return 1;
-            }
-          })
-          .attr("stroke", d=>{
-            if(d.target.id == val || d.source.id == val){
-              return 'red'
-            }else{
-              return 'grey'
-            }
-          })
-        ;
-      },
-      deep: true
-    },
+   // '$props.nodeData':{
+   //   handler: function (val, oldVal) { 
+   //     console.log('nodes changed!');
+   //     //this.integrateChanges(val);
+   //   },
+   //   deep: true
+   // },
+    //'$props.activeNode':{
+    //  handler: function (val, oldVal) { 
+    //    console.log("[Viz] activeNode changed");
+    //    console.log(val);
+    //    this.node.selectAll(".activeRing")
+    //      .attr("stroke", d=>{
+    //        if(d.id==val){ 
+    //          return 'red';
+    //        }else{
+    //          return 'none';
+    //        }
+    //      })
+    //    ;
+    //    this.link
+    //      .attr("stroke-width", d=>{
+    //        if(d.target.id == val || d.source.id == val){
+    //          return 2;
+    //        }else{
+    //          return 1;
+    //        }
+    //      })
+    //      .attr("stroke", d=>{
+    //        if(d.target.id == val || d.source.id == val){
+    //          return 'red'
+    //        }else{
+    //          return 'grey'
+    //        }
+    //      })
+    //    ;
+    //  },
+    //  deep: true
+    //},
   },
   mounted(){
-    this.svg = d3.select("svg");
-    this.chart = this.svg.append("g").attr("class", "chart");
+    this.svg = d3.select("#vizsvg");
+    let width = +this.svg.attr("width");
+    let height = +this.svg.attr("height");
+    var zoom = d3.zoom()
+    .scaleExtent([1, 40])
+    .translateExtent([[-100, -100], [width + 90, height + 100]])
+    .on("zoom", zoomed);
+    
 
-    this.linkLayer = this.chart.append("g").attr("class", "linkLayer");
-    this.nodeLayer = this.chart.append("g").attr("class", "nodeLayer");
-    this.labelLayer = this.chart.append("g").attr("class", "labelLayer");
+    var view = this.svg.append("g")
+    .attr("class", "view");
+   // view.append('rect')
+   // .attr("x", 0.5)
+   // .attr("y", 0.5)
+   // .attr("width", width - 1)
+   // .attr("height", height - 1);
+    view.append('rect')
+    .attr("x", width/2)
+    .attr("y", height/2)
+    .attr("width", 5)
+    .attr("height", 5)
+    .attr("fill", "white")
+    ;
+
+    this.svg.call(zoom);
+    function zoomed() {
+      view.attr("transform", d3.event.transform);
+    }
 
 
 
-    this.simulation = d3.forceSimulation()
+
+
+
+    //this.svg.attr('width', 500).attr('height', 500);
+    //this.centerLayer = this.svg.append("g");
+    //this.centerLayer
+    //  .append("rect").attr("x", 0).attr("y", 0).attr("width", 100).attr("height", 100).attr("fill", "beige")
+    //;
+    ////this.zoomLayer = d3.select(".zoomLayer");
+    //this.zoom = d3.zoom()
+    //    //.extent([[-50, -50], [150, 150]])
+    //    //.scaleExtent([1,3])
+    //    .translateExtent([[-50, -50], [150, 150]])
+    //    .on('zoom', () => {
+    //      this.centerLayer.attr("transform", d3.event.transform)
+    //   });
+    //this.zoomLayer
+    //  .call(this.zoom)
+    //;
+    //this.centerLayer = d3.select(".centerLayer")
+      //.attr("transform", "translate("+(this.vizWidth/2)+","+(this.windowDims.height/2)+")")
+    //;
+    //this.svg.call(this.zoom);
+    //this.chart = this.centerLayer.append("g").attr("class", "chart");
+    ////this.chart.append('circle').attr("cx", 0).attr("cy", 0).attr("r", 50).attr("stroke", "black").attr("fill", "none");
+
+    //this.linkLayer = this.chart.append("g").attr("class", "linkLayer");
+    //this.nodeLayer = this.chart.append("g").attr("class", "nodeLayer");
+    //this.labelLayer = this.chart.append("g").attr("class", "labelLayer");
+
+
+
+    //this.simulation = d3.forceSimulation()
         //.force("attract", attractForce)
         //.force("repell", repelForce)
         //.force("specific", d3.forceManyBody().strength(-50))
-        .force("specific", d3.forceManyBody().strength(d=>{
-             if(d.type == "project"){
-              console.log(d); 
-               if(d.subnodes.length > 0){
-                 console.log("long");
-                 return -2000;
-               }else{
-                 return -100;
-               }
-             }else{
-               return -10;
-             }
-        }))
+        //.force("specific", d3.forceManyBody().strength(d=>{
+        //     if(d.type == "project"){
+        //      console.log(d); 
+        //       if(d.subnodes.length > 0){
+        //         console.log("long");
+        //         return -2000;
+        //       }else{
+        //         return -100;
+        //       }
+        //     }else{
+        //       return -10;
+        //     }
+        //}))
         //.force("x", d3.forceX().strength(0.002))
         //.force("y", d3.forceY().strength(0.002))
-        .force("center", d3.forceCenter(this.width/2, this.height/2))
-        .force("collide", d3.forceCollide().radius(20).iterations(2))
-        .force("link", d3.forceLink().id(d=> d.id))
-        .on("tick", this.ticked)
-    ;
+     //   .force("center", d3.forceCenter(0,0))
+     //   .force("collide", d3.forceCollide().radius(20).iterations(2))
+    //    .force("link", d3.forceLink().id(d=> d.id))
+   //     .on("tick", this.ticked)
+   // ;
 
-    this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
-    this.link = this.linkLayer.selectAll(".link").attr("class", "link");
-    //this.label = this.labelLayer.selectAll(".label").attr("class", "label");
+    //this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
 
-		//this.unwatchSelection = this.$store.watch(this.$store.getters.selectionWatcher, n => {
-    //  console.log("todo", n);
-    //  
+    //this.link = this.linkLayer.selectAll(".link").attr("class", "link");
+    ////this.label = this.labelLayer.selectAll(".label").attr("class", "label");
 
-    //  this.processNewData(n.map(id => this.getProjectById(id)));
-    //})
   },
   methods: {
+    testFunction(){
+      console.log(msg);
+    },
     ticked() {
 
       let margin =10;
@@ -183,21 +237,21 @@ export default {
       let height = 300;
 
 
-      this.node
-        //.attr("x", d => { return d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x)); })
-        //.attr("y", d => { return d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y)); });
-        .attr("transform", d=>{
-          d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x));
-          d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y));
-          return "translate("+d.x+","+d.y+")";
+   //   this.node
+   //     //.attr("x", d => { return d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x)); })
+   //     //.attr("y", d => { return d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y)); });
+   //     .attr("transform", d=>{
+   //       //d.x = Math.max(margin+radius, Math.min(this.width - margin - radius, d.x));
+   //       //d.y = Math.max(margin+radius, Math.min(this.height - margin - radius, d.y));
+   //       return "translate("+d.x+","+d.y+")";
 
-        })
-      ;
-      this.link
-          .attr("x1", function(d) { return d.source.x; })
-          .attr("y1", function(d) { return d.source.y; })
-          .attr("x2", function(d) { return d.target.x; })
-          .attr("y2", function(d) { return d.target.y; });
+   //     })
+   //   ;
+      //this.link
+      //    .attr("x1", function(d) { return d.source.x; })
+      //    .attr("y1", function(d) { return d.source.y; })
+      //    .attr("x2", function(d) { return d.target.x; })
+      //    .attr("y2", function(d) { return d.target.y; });
 
       //this.label
       //    .attr("x", function(d) { return 10+d.x; })
@@ -206,31 +260,32 @@ export default {
     },
     updateGraph(){
       this.simulation.nodes(this.data.nodes, d => d.id);
-      this.simulation.force("link").links(this.data.links);
+      //this.simulation.force("link").links(this.data.links);
 
-      this.link = this.link.data(this.data.links, function(d) { return d.target.id; });
+      //this.link = this.link.data(this.data.links, function(d) { return d.target.id; });
+
 
     //  // Exit any old links.
-      this.link.exit().remove();
+      //this.link.exit().remove();
 
       // Enter any new links.
-      this.link = this.link.enter().insert("line", ".node")
-          .attr("class", "link")
-          .attr("stroke", "grey")
-          .attr("stroke-width", 1)
-          .attr("x1", function(d) { return d.source.x; })
-          .attr("y1", function(d) { return d.source.y; })
-          .attr("x2", function(d) { return d.target.x; })
-          .attr("y2", function(d) { return d.target.y; })
-          .merge(this.link)
-      ;
+      //this.link = this.link.enter().insert("line", ".node")
+      //    .attr("class", "link")
+      //    .attr("stroke", "grey")
+      //    .attr("stroke-width", 1)
+      //    .attr("x1", function(d) { return d.source.x; })
+      //    .attr("y1", function(d) { return d.source.y; })
+      //    .attr("x2", function(d) { return d.target.x; })
+      //    .attr("y2", function(d) { return d.target.y; })
+      //    .merge(this.link)
+      //;
 
       this.node = this.node.data(this.data.nodes, d=>d.id);
-      this.node.selectAll(".markedRing")
-                .attr("stroke", d=>{
-                    return d.marked; // this assumes the incoming node is always currently hovered (in the pane)
-                })
-      ;
+      //this.node.selectAll(".markedRing")
+      //          .attr("stroke", d=>{
+      //              return d.marked; // this assumes the incoming node is always currently hovered (in the pane)
+      //          })
+      //;
 
       
       this.node.exit().remove();
@@ -261,103 +316,98 @@ export default {
                 })
                 .attr("fill", d=>{
 
-                  if(d.type=='project'){
-                    return 'white';
-                  }else{
+     //             if(d.type=='project'){
+     //               return 'white';
+     //             }else{
                     return 'blue';
-                  }
+     //             }
 
                 })
 
-                .on('mouseover', (d,i,nodes)=>{
-                  this.setActiveNode(d.id, true);
-                  this.currentNode = d;
-                  this.tooltipX = d.x + 20;
-                  this.tooltipY = d.y - 110;
-                  this.tooltipFullactive = true;
+     //           .on('mouseover', (d,i,nodes)=>{
+     //             this.setActiveNode(d.id, true);
+     //             this.currentNode = d;
+     //             this.tooltipX = d.x + 20;
+     //             this.tooltipY = d.y - 110;
+     //             this.tooltipFullactive = true;
 
-                  //d3.select(nodes[i]).select(".main").attr("fill","red");
-                })
-                .on('mouseout', (d,i,nodes)=>{
-                  this.setActiveNode(d.id, false);
-                  //if(d.type=='project'){
-                  //d3.select(nodes[i]).select(".main").attr("fill","white");
-                  //}else{
-                  //d3.select(nodes[i]).select(".main").attr("fill","blue");
-                  //}
-                  //this.hideTooltip();
-                  this.tooltipX = null;
-                  this.tooltipY = null;
-                  this.tooltipFullactive = false;
-                })
-                .on('click', (d,i,nodes)=>{
-                  if(d.type!='project'){
-                    console.log("clicked", d.id, d);
-                    this.requestRelatedToId({type: 'relation', value: d.title}, d.id);
-                  }
-                })
+     //             //d3.select(nodes[i]).select(".main").attr("fill","red");
+     //           })
+     //           .on('mouseout', (d,i,nodes)=>{
+     //             this.setActiveNode(d.id, false);
+     //             //if(d.type=='project'){
+     //             //d3.select(nodes[i]).select(".main").attr("fill","white");
+     //             //}else{
+     //             //d3.select(nodes[i]).select(".main").attr("fill","blue");
+     //             //}
+     //             //this.hideTooltip();
+     //             this.tooltipX = null;
+     //             this.tooltipY = null;
+     //             this.tooltipFullactive = false;
+     //           })
+     //           .on('click', (d,i,nodes)=>{
+     //             if(d.type!='project'){
+     //               console.log("clicked", d.id, d);
+     //               this.requestRelatedToId({type: 'relation', value: d.title}, d.id);
+     //             }
+     //           })
       ;
-      this.nodeIn
-                .append("circle")
-                .attr("class", "activeRing")
-                .attr("cx", 0)
-                .attr("cy", 0)
-                .attr("r", d=>{
-                  if(d.type=='project'){
-                    return 15 + 8;
-                  }else{
-                    return 6 + 8;
-                  }
-                })
-                .attr("fill", "none")
-                .attr("stroke", d=>{
-                  if(d.type=='project'){
-                    return 'red'; // this assumes the incoming node is always currently hovered (in the pane)
-                  }else{
-                    return 'none';
-                  }
-                })
-                .attr("stroke-width", 3);
-      ;
-      this.nodeIn
-                .append("circle")
-                .attr("class", "markedRing")
-                .attr("cx", 0)
-                .attr("cy", 0)
-                .attr("r", d=>{
-                  if(d.type=='project'){
-                    return 15 + 2;
-                  }else{
-                    return 6 + 2;
-                  }
-                })
-                .attr("fill", "none")
-                .attr("stroke", d=>{
-                    return d.marked; // this assumes the incoming node is always currently hovered (in the pane)
-                })
-                .attr("stroke-width", 2);
-      ;
+    //  this.nodeIn
+    //            .append("circle")
+    //            .attr("class", "activeRing")
+    //            .attr("cx", 0)
+    //            .attr("cy", 0)
+    //            .attr("r", d=>{
+    //  //            if(d.type=='project'){
+    //  //              return 15 + 8;
+    //  //            }else{
+    //                return 6 + 8;
+    //  //            }
+    //            })
+    //            .attr("fill", "none")
+    //            .attr("stroke", d=>{
+    //   //           if(d.type=='project'){
+    //                return 'red'; // this assumes the incoming node is always currently hovered (in the pane)
+    //    //          }else{
+    //    //            return 'none';
+    //    //          }
+    //    //        })
+    //            .attr("stroke-width", 3);
+    //  ;
+    //  this.nodeIn
+    //            .append("circle")
+    //            .attr("class", "markedRing")
+    //            .attr("cx", 0)
+    //            .attr("cy", 0)
+    //            .attr("r", d=>{
+    //              if(d.type=='project'){
+    //                return 15 + 2;
+    //              }else{
+    //                return 6 + 2;
+    //              }
+    //            })
+    //            .attr("fill", "none")
+    //            .attr("stroke", d=>{
+    //                return d.marked; // this assumes the incoming node is always currently hovered (in the pane)
+    //            })
+    //            .attr("stroke-width", 2);
+    //  ;
       this.node = this.nodeIn.merge(this.node);
 
 
-      if(!this.animateViz){
-        //this needs a solution
-        // generally how to not animate a graph like crazy??
+    //  if(!this.animateViz){
+    //    //this needs a solution
+    //    // generally how to not animate a graph like crazy??
+    //    this.simulation.alpha(1).restart();
+    //    this.setAnimateViz(true);
+    //  }else{
         this.simulation.alpha(1).restart();
-        this.setAnimateViz(true);
-      }else{
-        this.simulation.alpha(1).restart();
-      }
+    //  }
 
 
     },
     flatten(nestedData){
-      let keys = [];
-      let out = [];
-      //nestedData.forEach(d=>{
-      //  if
-      //});
-      let o = nestedData.reduce((acc, d)=>{
+      return nestedData.reduce((acc, d)=>{
         if(!acc.map(node=>node.id).includes(d.id)){
           console.log("checking", d);
           acc.push(d); 
@@ -370,68 +420,55 @@ export default {
         return acc;
 
       }, []);
-      return o;
-
-      
     },
-    integrateChanges(newData){
-      console.log("latest", newData);
-      
-      //this.data = newData;
-
-
+    integrateNewNodes(newData){
+      //let newData = this.nodeData;
       let allVisibleSubnodeIds = [];
       newData = newData.map(node=>{
-        //let links = []; 
-
-        // go over subnodes here
-
+        let existingNode = this.data.nodes.find(d=>d.id==node.id);
         let subnodes = node.relationships.filter(subnode=>subnode.visible).map(subnode=>{
-          //links.push({source: node.id, target: subnode.id});
+          // going over all visible subnodes:
+
+          // saving the ones we make visible here in an array to avoid adding them twice:
           if(!allVisibleSubnodeIds.includes(subnode.id)){
             allVisibleSubnodeIds.push(subnode.id);
           }
+          
 
+
+          // check if this subnode is already on the graph
           if(this.data.nodes.map(d=>d.id).includes(subnode.id)){
+            // if it is on the graph already, we return its instance:
             return this.data.nodes.find(d=>d.id==subnode.id);
           }else{
-            if(this.data.nodes.map(d=>d.id).includes(node.id)){
-              //the idea here is that the subnode orgin in the node that it is folded out from
-              // but i am not sure if this works yet
-              subnode.x = node.x;
-              subnode.y = node.y;
-              
-              // this is experimental, freezing the mother nood in place while subndes unfold
-              // then unfreeze after timeout
-              node.fx = node.x;
-              node.fy = node.y;
-              setTimeout(function(){
-                node.fx = undefined;
-              }, 1500);
-
+            // if the subnode is not on the graph yet, 
+            // we set its initial x and y position to that of the node it unfolds from
+            if(existingNode){
+              // if that node is on the graph already (which it should be in a normal)
+              // case we get its current x and y position
+              subnode.x = existingNode.x;
+              subnode.y = existingNode.y;
             }else{
-              //the idea here is that the subnode orgin in the node that it is folded out from
-              // but i am not sure if this works yet
-              subnode.x = this.width*0.5;
-              subnode.y = this.height*0.5;
+              subnode.x = 0;
+              subnode.y = 0;
+      //        subnode.x = this.vizWidth*0.5;
+      //        subnode.y = this.windowDims.height*0.5;
+
             }
             return subnode;
           }
         })
-        console.log("subnodes", subnodes);
 
-        if(this.data.nodes.map(d=>d.id).includes(node.id)){
-          let n = this.data.nodes.find(d=>d.id==node.id);
-          console.log("got this node already!", n);
-          n.subnodes = subnodes;
-          //n.links = links;
-          return n;
+        if(existingNode){
+          existingNode.subnodes = subnodes;
+          return existingNode;
         }else{
-          node.x = this.width*0.5;
-          node.y = this.height*0.5;
+          node.x = 0;
+          node.y = 0;
+          //node.x = this.vizWidth*0.5;
+          //node.y = this.windowDims.height*0.5;
           node.subnodes = subnodes;
           node.type = 'project';
-          //node.links = links;
           return node;
         }
       });
@@ -450,6 +487,10 @@ export default {
       this.data.nodes = this.flatten(newData);
       this.updateGraph();
     },
+    zoomed() {
+      centerLayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    },
+
     dragstarted(d) {
       if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
@@ -479,9 +520,11 @@ export default {
     position:relative;
   }
   svg{
-    background-color: black;
+    background-color: #bebebe;
+    /*
     width:100%;
     height:100%;
+    /**/
   }
   #vizControl{
     position: absolute;

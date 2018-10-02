@@ -5,8 +5,6 @@
 </template>
 
 <script>
-
-
 export default {
   name: 'tooltipName',
   components: {
@@ -45,7 +43,6 @@ export default {
     animation: marquee 5s linear infinite;
   }
   .tooltip-name{
-    
     overflow:hidden;
     white-space: nowrap;
     background-color:white;
