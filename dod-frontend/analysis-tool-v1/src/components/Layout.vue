@@ -170,6 +170,7 @@ export default {
   .main-col-resize{
     position:relative;
     outline: black 1px solid;
+    outline-offset: -1px;
   }
   .main-col-resize:hover{
     cursor: pointer;
