@@ -5,7 +5,13 @@ const state = {
   activeTab: {'type':'all', 'value':'all', 'timestamp': 0},
 
   //reader
-  currentReaderContent: {'id': undefined, 'text': undefined},
+  currentReaderContent: {'id': undefined, 'text': undefined, 'date': undefined},
+
+  //viz Settings
+  showVizSettings: false,
+  unfoldSharedRelationsByDefault: true,
+  sharedRelationsThreshold: 2,
+
 }
 
 const getters = {
@@ -15,6 +21,11 @@ const getters = {
 
   //reader
   currentReaderContent: state => state.currentReaderContent,
+
+  //viz Settings
+  showVizSettings: state => state.showVizSettings,
+  unfoldSharedRelationsByDefault: state => state.unfoldSharedRelationsByDefault,
+  sharedRelationsThreshold: state => state.sharedRelationsThreshold,
 }
 
 const mutations = {
@@ -26,6 +37,9 @@ const mutations = {
     console.log('changin reader content', data);
     state.currentReaderContent = data;
   },
+  [types.TOGGLE_VIZ_SETTINGS] (state){
+    state.showVizSettings = !state.showVizSettings;
+  }
 }
 
 const actions = {
@@ -33,9 +47,11 @@ const actions = {
     commit(types.CHANGE_ACTIVE_TAB, data);
   },
   changeReaderContent({commit}, data){
-    console.log("yup");
     commit(types.CHANGE_READER_CONTENT, data);
   },
+  toggleVizSettings({commit}){
+    commit(types.TOGGLE_VIZ_SETTINGS);
+  }
 }
 export default {
   state,

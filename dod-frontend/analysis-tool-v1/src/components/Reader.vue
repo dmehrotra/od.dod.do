@@ -6,7 +6,7 @@
 
       <div class='readerTextWrapper'>
 
-        <p class='readerTitle'>{{currentReaderContent.id}}</p>
+        <p class='readerTitle'>{{getDate(currentReaderContent.date)}}</p>
         <p class='readerContent'>{{currentReaderContent.text}}</p>
       </div>
     </div>
@@ -40,6 +40,13 @@ export default {
   beforeDestroy: function () {
   },
   methods: {
+    getDate(d){
+      d = new Date(d);
+      let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; 
+
+      return months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear()
+
+    }
   }
 }
 </script>

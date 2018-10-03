@@ -11,7 +11,7 @@
             gridRowGap: 8+'px',
            }" 
       >
-      <div v-for='(node, i) in (nodesWithExtrasReversed)'
+      <div v-for='(node, i) in (nodesBytTabAndDate)'
         :style="{minWidth: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
         :class="{item: true, extra: node.type=='extra'}"
         :key="node.id"
@@ -70,8 +70,12 @@ export default {
         return this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==this.activeTab.type&&rs.value==this.activeTab.value)));
       }
     },
-    nodesWithExtrasReversed:function(){
-      return this.nodesOfActiveTab
+    nodesBytTabAndDate:function(){
+      return this.nodesOfActiveTab.sort(function(a,b){
+        // Turn your strings into dates, and then subtract them
+        // to get a value that is either negative, positive, or zero.
+        return new Date(b.filing_date) - new Date(a.filing_date);
+      });
     }
   },
   mounted(){

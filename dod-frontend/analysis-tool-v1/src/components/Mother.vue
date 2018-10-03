@@ -119,8 +119,6 @@ export default {
       //nodes: [{id:"ill stay"}, {id:"d5ac3158-8c3b-430a-88af-97acc36083b3"}, {id:"69fabee7-0a3e-4dea-8e91-4107c0d6cddf"}, {id:"66b45a0d-707a-4f14-bb3f-63fbf5e7f9f5"}, {id:"me too"}],
       nodes: [],
       activeNode: undefined,
-      unfoldSharedRelationsByDefault: true,
-      sharedRelationsThreshold: 2,
 
       animateViz:true,
 
@@ -134,6 +132,9 @@ export default {
       'currentReaderHeight',
       'activeTab',
       'currentReaderContent',
+
+      'unfoldSharedRelationsByDefault',
+      'sharedRelationsThreshold',
     ]),
     nodesReversed: function(){
       return this.nodes.reverse();
@@ -247,11 +248,18 @@ export default {
     deleteNode(id){ //this does not mean relationship nodes as those are never deleted but only 'folded in'
       let projectIndex = this.nodes.findIndex(d=>d.id==id);
       if(projectIndex > -1){
+        let upadetVizNeeded = this.nodes[projectIndex].selected;
         this.nodes.splice(projectIndex, 1);
+        //update reader
         if(this.currentReaderContent.id == id){
           this.changeReaderHeight(0);
           this.changeReaderContent({id: undefined, text: undefined});
         }
+        //update viz
+        if(upadetVizNeeded){
+          this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
+        }
+        //update tabs
         let tabShouldStillExist = this.requestSources.find(rs=>(rs.timestamp == this.activeTab.timestamp));
         if(!tabShouldStillExist){
           setTimeout(()=>{
@@ -261,12 +269,40 @@ export default {
       }
     },
     deleteByTab(tab){
+
       // SHIT, when a tab closes I need to update all nodes so that none of them
       // has that tab in its requestSource array anymore 
       // equally if I close a whole tab I need to take this tab ut of all the ndoes.
       // these two cases are related but my brain is too tired right now, postponing this function to another day
       // ... shouldnt be too hard
       console.log("deleteTab", tab);
+
+      if(tab.type == 'all'){
+        let ids = this.nodes.map(d=>d.id);
+        ids.forEach(id=>{
+          this.deleteNode(id);
+        });
+      }else{
+        let idsSingles =  this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==tab.type&&rs.value==tab.value))).filter(node=>node.requestSource.length==1).map(d=>d.id);
+        idsSingles.forEach(id=>{
+          this.deleteNode(id);
+        });
+        this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==tab.type&&rs.value==tab.value))).filter(node=>node.requestSource.length>1).forEach(node=>{
+          node
+          let sourceIndex = node.requestSource.findIndex(rs=>rs.type==tab.type&&rs.value==rs.value);
+          if(sourceIndex > -1){
+            node.requestSource.splice(sourceIndex, 1);
+          }
+        });
+      }
+      setTimeout(()=>{
+        this.changeActiveTab({type:'all', value:'all', timestamp:0})
+      }, 600);
+
+
+
+
+
       //console.log(this.nodes.filter(node => node.requestSource.filter(rs => rs.timestamp==tab.timestamp)) )
     },
 
@@ -283,7 +319,33 @@ export default {
       // and those that only change colors etc. 
       // i am not sure if this all is sensical, but i try if it does what i 
       // hope for it to do :)
+
+      if(flag==true && this.unfoldSharedRelationsByDefault){
+        this.unfoldSharedRelationByThreshold();
+      }
       this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
+    },
+    unfoldSharedRelationByThreshold(){
+      let sharedSubnodes = this.nodes.reduce((acc, d)=>{
+        if(d.selected){
+          d.relationships.forEach(subnode=>{
+            if(!subnode.active && acc[subnode.id] != this.sharedRelationsThreshold){
+              if(acc[subnode.id] == undefined){
+                acc[subnode.id] = 1;
+              }else{
+                acc[subnode.id]++;
+              }
+            }
+          })
+        }
+        return acc;
+      }, {});
+      console.log(sharedSubnodes);
+      Object.keys(sharedSubnodes).forEach(d=>{
+        if(sharedSubnodes[d] >= this.sharedRelationsThreshold){
+          this.setSubnode(d, true);
+        }
+      });
     },
 
 
@@ -364,27 +426,6 @@ export default {
     //    .catch((error) => {
     //      console.log("ERROR with API", error); 
     //    });
-    //},
-    //unfoldSharedRelationByThreshold(){
-    //  let sharedSubnodes = this.nodes.reduce((acc, d)=>{
-    //    if(d.selected){
-    //      d.relationships.forEach(subnode=>{
-    //        if(!subnode.active && acc[subnode.id] != this.sharedRelationsThreshold){
-    //          if(acc[subnode.id] == undefined){
-    //            acc[subnode.id] = 1;
-    //          }else{
-    //            acc[subnode.id]++;
-    //          }
-    //        }
-    //      })
-    //    }
-    //    return acc;
-    //  }, {});
-    //  Object.keys(sharedSubnodes).forEach(d=>{
-    //    if(sharedSubnodes[d] >= this.sharedRelationsThreshold){
-    //      this.setSubnode(d, true);
-    //    }
-    //  });
     //},
     //toggleSelect(id){
     //  this.nodes.find(d=>d.id==id).selected = !this.nodes.find(d=>d.id==id).selected;

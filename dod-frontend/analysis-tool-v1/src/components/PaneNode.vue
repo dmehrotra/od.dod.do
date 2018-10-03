@@ -2,7 +2,7 @@
   <div class="paneNode">
     <div class='title'
         :style="{height: paneItemHeight + 'px', width: leftTitleWidth +'px'}"
-      ><p>{{data.id}}</p>
+      ><p>{{getDate(data.filing_date)}}</p>
     </div>
     <div class='paneNodeMain' 
        :style="{width: minPaneItemWidth - leftTitleWidth + 'px', height: paneItemHeight +'px'}"
@@ -119,7 +119,7 @@ export default {
   },
   data () {
     return {
-      leftTitleWidth: 12,
+      leftTitleWidth: 20,
       paneNodeOptionsMargin: 5,
       numOptions: 3,
     }
@@ -159,11 +159,18 @@ export default {
     changeReader: function(){
       if(this.currentReaderContent.id == this.data.id && this.readerHeightGoal == this.readerMaxHeight){
         this.changeReaderHeight(0);
-        this.changeReaderContent({id: undefined, text: undefined});
+        this.changeReaderContent({id: undefined, text: undefined, date: undefined});
       }else{
         this.changeReaderHeight(this.readerMaxHeight);
-        this.changeReaderContent({id: this.data.id, text: this.data.full_text});
+        this.changeReaderContent({id: this.data.id, text: this.data.full_text, date: this.data.filing_date});
       }
+    },
+    getDate(d){
+      d = new Date(d);
+      let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; 
+
+      return d.getFullYear() + " " + months[d.getMonth()]
+
     },
   }
 }
@@ -188,8 +195,8 @@ export default {
     margin: 0;
     font-family: sans-serif;
     transform: rotate(90deg);
-    font-size: 5.9px;
-    
+    font-size: 12px;
+    font-weight: bold; 
   }
 
   .paneNodeMain{
@@ -212,6 +219,7 @@ export default {
     left: 7px;
     content: ' ';
     height: 12px;
+
     width: 2px;
     background-color: black;
   }

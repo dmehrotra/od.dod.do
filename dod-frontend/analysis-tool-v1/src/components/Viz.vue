@@ -1,18 +1,25 @@
 <template>
   <div id="viz" :style="{height:windowDims.height+'px'}" >
     <resize-observer @notify="vizResized" />
+    <a class='settings-button' @click=toggleVizSettings v-show=!showVizSettings>settings</a>
+
     <!--<svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :width=vizWidth :height=windowDims.height>-->
     <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :height=windowDims.height>
 
     </svg>
     <p class="zoomNote" v-show=zoomable
        :style="">scroll to zoom</p>
+    <viz-settings v-if=showVizSettings
+       :vizWidth=vizWidth
+      >
+    </viz-settings>
   </div>
 </template> 
 <script>
 import * as d3 from 'd3';
 //import Tooltip from '@/components/Tooltip'
 
+import VizSettings from '@/components/VizSettings'
 import { ResizeObserver } from 'vue-resize'
 import {mapGetters, mapActions} from 'vuex';
 
@@ -20,6 +27,7 @@ export default {
   name: 'viz',
   components:{
     ResizeObserver,
+    VizSettings
     //Tooltip
   },
   data () {
@@ -38,7 +46,7 @@ export default {
       //root: undefined,
       node: undefined, 
       //label: undefined,
-      //link: undefined,
+      link: undefined,
       zoom: undefined,
 
       data: {
@@ -52,6 +60,7 @@ export default {
       //tooltipY: -500,
       //tooltipFullactive: false,
       //boundaryRadius: 50,
+      projectNodeRadius: 15,
     }
   },
   props:[
@@ -79,6 +88,7 @@ export default {
       'windowDims',
       'leftColPercGoal',
       'resizeElementWidth',
+      'showVizSettings',
     ]),
     vizWidth: function(){
       let w = (1.0-this.leftColPercGoal)*this.windowDims.width-this.resizeElementWidth/2;
@@ -86,6 +96,12 @@ export default {
     },
     boundaryRadius: function(){
       //return 400;
+      let projectSurface = this.projectNodeRadius * this.projectNodeRadius * Math.PI;
+      //let spaceTakenByProjectNodes = projectSurface*this.data.nodes.filter(node=>node.type=='project').length;
+      let spaceTakenByProjectNodes = projectSurface*this.data.nodes.length;
+      let spaceFactorPerNode = 10;
+      let radiusForRequiredSpace = Math.sqrt((spaceTakenByProjectNodes*spaceFactorPerNode)/Math.PI)
+      return Math.max(radiusForRequiredSpace, Math.min(this.vizWidth, this.windowDims.height)/2);
       return Math.max((this.data.nodes.length) * 50, Math.min(this.vizWidth, this.windowDims.height)/2);
     },
     //dataIds: function(){
@@ -101,6 +117,9 @@ export default {
     }, 500);
   },
   methods: {
+    ...mapActions([
+      'toggleVizSettings'
+    ]),
     vizResized(){
       if(this.ready)
       this.adjustZoom();
@@ -181,10 +200,9 @@ export default {
       this.svg.call(this.zoom);
       this.adjustZoom();
 
-      //this.linkLayer = this.centerLayer.append("g").attr("class", "linkLayer");
+      this.linkLayer = this.centerLayer.append("g").attr("class", "linkLayer");
       this.nodeLayer = this.centerLayer.append("g").attr("class", "nodeLayer");
       //this.labelLayer = this.centerLayer.append("g").attr("class", "labelLayer");
-
 
 
       this.simulation = d3.forceSimulation()
@@ -206,17 +224,60 @@ export default {
           //}))
           //.force("x", d3.forceX().strength(0.002))
           //.force("y", d3.forceY().strength(0.002))
+      .force('x', d3.forceX().strength(0.0005))
+    .force('y', d3.forceY().strength(0.0005))
           .force("center", d3.forceCenter(0,0))
-          .force("collide", d3.forceCollide().radius(20).iterations(2))
-      //    .force("link", d3.forceLink().id(d=> d.id))
+          //.force("collide", d3.forceCollide().radius(20).iterations(2))
+          //.force('cluster', this.clustering)
+          .force("link", d3.forceLink().id(d=> d.id))
           .on("tick", this.ticked)
       ;
 
       this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
 
-      //this.link = this.linkLayer.selectAll(".link").attr("class", "link");
+      this.link = this.linkLayer.selectAll(".link").attr("class", "link");
       ////this.label = this.labelLayer.selectAll(".label").attr("class", "label");
 
+    },
+    clustering(alpha) {
+      // i need to adjust this a lot, but maybe it brings me on the right way
+      // it's from here https://bl.ocks.org/micahstubbs/3f439df92579c5bb2902fab15742ba87
+      //console.log("--");
+      alpha *= 0.5 * alpha;
+      let projects = this.data.nodes.filter(d=>d.type=='project');
+      this.data.nodes.filter(d=>d.type!='project').forEach((d) => {
+        //console.log("sub", d);
+        let relatedProjectsIds = d.projects.map(p=>p.id);
+        //console.log(relatedProjectsIds);
+        projects.filter(p=>relatedProjectsIds.includes(p.id)).forEach(project=>{
+          //console.log(project);
+          let x = d.x - project.x;
+          let y = d.y - project.y;
+          let l = Math.sqrt((x * x) + (y * y));
+          const r = 20;
+          if (l !== r) {
+            l = ((l - r) / l) * alpha;
+            d.x -= x *= l;
+            d.y -= y *= l;
+          }
+        });
+
+
+        
+        //const cluster = clusters[d.cluster];
+        //if (cluster === d) return;
+        //let x = d.x - cluster.x;
+        //let y = d.y - cluster.y;
+        //let l = Math.sqrt((x * x) + (y * y));
+        //const r = d.r + cluster.r;
+        //if (l !== r) {
+        //  l = ((l - r) / l) * alpha;
+        //  d.x -= x *= l;
+        //  d.y -= y *= l;
+        //  cluster.x += x;
+        //  cluster.y += y;
+        //}
+      });
     },
     ticked() {
       this.node
@@ -228,11 +289,11 @@ export default {
         })
       ;
       
-      //this.link
-      //    .attr("x1", function(d) { return d.source.x; })
-      //    .attr("y1", function(d) { return d.source.y; })
-      //    .attr("x2", function(d) { return d.target.x; })
-      //    .attr("y2", function(d) { return d.target.y; });
+      this.link
+          .attr("x1", function(d) { return d.source.x; })
+          .attr("y1", function(d) { return d.source.y; })
+          .attr("x2", function(d) { return d.target.x; })
+          .attr("y2", function(d) { return d.target.y; });
 
       //this.label
       //    .attr("x", function(d) { return 10+d.x; })
@@ -261,25 +322,25 @@ export default {
     },
     updateGraph(){
       this.simulation.nodes(this.data.nodes, d => d.id);
-      //this.simulation.force("link").links(this.data.links);
+      this.simulation.force("link").links(this.data.links);
 
-      //this.link = this.link.data(this.data.links, function(d) { return d.target.id; });
+      this.link = this.link.data(this.data.links, function(d) { return d.target.id; });
 
 
     //  // Exit any old links.
-      //this.link.exit().remove();
+      this.link.exit().remove();
 
       // Enter any new links.
-      //this.link = this.link.enter().insert("line", ".node")
-      //    .attr("class", "link")
-      //    .attr("stroke", "grey")
-      //    .attr("stroke-width", 1)
-      //    .attr("x1", function(d) { return d.source.x; })
-      //    .attr("y1", function(d) { return d.source.y; })
-      //    .attr("x2", function(d) { return d.target.x; })
-      //    .attr("y2", function(d) { return d.target.y; })
-      //    .merge(this.link)
-      //;
+      this.link = this.link.enter().insert("line", ".node")
+          .attr("class", "link")
+          .attr("stroke", "grey")
+          .attr("stroke-width", 1)
+          .attr("x1", function(d) { return d.source.x; })
+          .attr("y1", function(d) { return d.source.y; })
+          .attr("x2", function(d) { return d.target.x; })
+          .attr("y2", function(d) { return d.target.y; })
+          .merge(this.link)
+      ;
 
       this.node = this.node.data(this.data.nodes, d=>d.id);
       //this.node.selectAll(".markedRing")
@@ -532,6 +593,21 @@ export default {
     height:100%;
     /**/
   }
+  .settings-button{
+    margin:0;
+    position:absolute;
+    font-family: sans-serif;
+    font-size:14px;
+    text-align: right;
+    right:10px;
+    top: 5px;
+    color: grey;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .settings-button:hover{
+    opacity: 0.8;
+  }
   .zoomNote{
     margin:0;
     position:absolute;
@@ -540,7 +616,8 @@ export default {
     text-align: right;
     right:10px;
     bottom: 5px;
-    color: grey;
+    color: white;
+    mix-blend-mode: difference;
   }
   /*
   #vizControl{

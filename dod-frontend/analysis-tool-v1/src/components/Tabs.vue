@@ -35,7 +35,7 @@
          </div>
          
         <a 
-          @click="deleteByTab({type:'all', value:'all', timestamp:0})"
+          @click="deleteByTab(tab)"
           class='close'
           >
         </a>
