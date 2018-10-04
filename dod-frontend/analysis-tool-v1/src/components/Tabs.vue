@@ -24,14 +24,19 @@
 
       <div class='tab' v-for="tab in tabs"
         @click="changeActiveTab(tab)"
+        @mouseover=mouseOver(tab.value) @mouseout=mouseOut(tab.value)
         :class="{tab: true, active: isActive(tab), inActive: !isActive(tab)}"
         :style="{height: tabHeight +'px'}"
         :key="tab.timestamp"
         >
-         <div class='titleWrapper'
+
+         <div 
+         :class='{titleWrapper: true, tabNodeFocused: !isActive(tab) &&idsByTab[tab.value].find(id=>focusedNode.includes(id)) }'
           @click="changeActiveTab(tab)"
            >
-           <a class='title'>{{tab.value}}</a>
+           <a 
+             
+             class='title'>{{tab.value}}</a>
          </div>
          
         <a 
@@ -58,12 +63,14 @@ export default {
   props:[
     'tabs',
     'deleteByTab',
+    'idsByTab',
   ],
   computed:{
     ...mapGetters([
       'tabHeight',
       'tabBarHeight',
       'activeTab',
+      'focusedNode',
     ]),
   },
   mounted(){
@@ -73,10 +80,21 @@ export default {
   methods: {
     ...mapActions([
       'changeActiveTab',
+      'setFocusedNode',
     ]),
     isActive: function(tab){
       if(tab.type==this.activeTab.type && tab.value == this.activeTab.value) return true;
       else return false;
+    },
+    mouseOver(t){
+      this.idsByTab[t].forEach(id=>{
+        this.setFocusedNode({id:id, flag:true});
+      });
+    },
+    mouseOut(t){
+      this.idsByTab[t].forEach(id=>{
+        this.setFocusedNode({id:id, flag:false});
+      });
     }
   }
 }
@@ -150,6 +168,10 @@ export default {
   }
   .tab:hover .close{
     visibility: visible;
+  }
+
+  .tabNodeFocused a{
+    color: red;
   }
 
 

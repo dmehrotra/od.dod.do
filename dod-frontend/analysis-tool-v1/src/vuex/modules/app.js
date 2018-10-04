@@ -10,7 +10,8 @@ const state = {
   //viz Settings
   showVizSettings: false,
   unfoldSharedRelationsByDefault: true,
-  sharedRelationsThreshold: 2,
+  sharedRelationsThreshold: 3,
+  focusedNode:[],
 
 }
 
@@ -26,6 +27,9 @@ const getters = {
   showVizSettings: state => state.showVizSettings,
   unfoldSharedRelationsByDefault: state => state.unfoldSharedRelationsByDefault,
   sharedRelationsThreshold: state => state.sharedRelationsThreshold,
+
+  focusedNode: state => state.focusedNode,
+  focusedNodeWatcher: state => () => state.focusedNode,
 }
 
 const mutations = {
@@ -39,7 +43,19 @@ const mutations = {
   },
   [types.TOGGLE_VIZ_SETTINGS] (state){
     state.showVizSettings = !state.showVizSettings;
-  }
+  },
+  [types.SET_FOCUSED_NODE] (state, data){
+    if(data.flag){
+      if(!state.focusedNode.includes(data.id)){
+        state.focusedNode.push(data.id);
+      }
+    }else{
+      if(state.focusedNode.includes(data.id)){
+        let idx = state.focusedNode.indexOf(data.id);
+        state.focusedNode.splice(idx, 1);
+      }
+    }
+  },
 }
 
 const actions = {
@@ -51,7 +67,10 @@ const actions = {
   },
   toggleVizSettings({commit}){
     commit(types.TOGGLE_VIZ_SETTINGS);
-  }
+  },
+  setFocusedNode({commit}, data){
+    commit(types.SET_FOCUSED_NODE, data);
+  },
 }
 export default {
   state,

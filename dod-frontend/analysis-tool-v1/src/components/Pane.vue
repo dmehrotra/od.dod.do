@@ -16,7 +16,8 @@
         :class="{item: true, extra: node.type=='extra'}"
         :key="node.id"
       >
-        <div class='insideItem'
+        <div 
+          :class='{insideItem: true, focused: focusedNode.includes(node.id)}'
           :style="{width: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
           >
           <pane-node
@@ -62,6 +63,7 @@ export default {
       'activeTab',
       'heightAllButPane',
       'windowDims',
+      'focusedNode',
     ]),
     nodesOfActiveTab: function(){
       if(this.activeTab.type == 'all'){
@@ -187,8 +189,8 @@ export default {
   }
   .insideItem{
     margin:auto;
-    box-shadow: 3px 3px;
-        outline: black 1px solid;
+    box-shadow: 3px 3px 3px;
+    outline: black 1px solid;
     outline-offset: -1px;
     /*
     outline: black dotted 1px;
@@ -196,6 +198,10 @@ export default {
     /**/
     overflow: hidden;
     background-color:white;
+  }
+  .focused{
+    transition: all 0.1s;
+    box-shadow: #e10000 5px 5px 3px;
   }
   .extra{
     background-color:red;

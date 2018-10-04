@@ -1,5 +1,5 @@
 <template>
-  <div class="paneNode">
+  <div class="paneNode" @mouseover=mouseOver @mouseout=mouseOut>
     <div class='title'
         :style="{height: paneItemHeight + 'px', width: leftTitleWidth +'px'}"
       ><p>{{getDate(data.filing_date)}}</p>
@@ -14,7 +14,8 @@
 
         </div>
 
-        <div class='paneNodeOptions'
+        <div 
+          :class='{paneNodeOptions: true, focused: data.id==focusedNode}'
          :style="{width: paneNodeMainWidth + 'px', height: paneNodeOptionsHeight + 'px',
            }"
          >
@@ -122,6 +123,7 @@ export default {
       leftTitleWidth: 20,
       paneNodeOptionsMargin: 5,
       numOptions: 3,
+      unwatchFocus: undefined,
     }
   },
   props:[
@@ -136,6 +138,7 @@ export default {
       'readerMaxHeight',
       'readerHeightGoal',
       'currentReaderContent',
+      'focusedNode',
     ]),
     paneNodeMainWidth: function(){
       return this.minPaneItemWidth - this.leftTitleWidth;
@@ -155,7 +158,14 @@ export default {
     ...mapActions([
       'changeReaderContent',
       'changeReaderHeight',
+      'setFocusedNode',
     ]),
+    mouseOver(){
+      this.setFocusedNode({id: this.data.id, flag:true});
+    },
+    mouseOut(){
+      this.setFocusedNode({id: this.data.id, flag:false});
+    },
     changeReader: function(){
       if(this.currentReaderContent.id == this.data.id && this.readerHeightGoal == this.readerMaxHeight){
         this.changeReaderHeight(0);
@@ -207,19 +217,14 @@ export default {
     top: 4px;
     width: 12px;
     height: 12px;
-    opacity: 0.3;
+    opacity: 0.05;
     position: absolute;
-  }
-  .close:hover{
-    opacity: 1;
-    cursor: pointer;
   }
   .close:before, .close:after {
     position: absolute;
     left: 7px;
     content: ' ';
     height: 12px;
-
     width: 2px;
     background-color: black;
   }
@@ -262,7 +267,7 @@ export default {
     /**/
   }
   svg{
-    opacity: 0.2;
+    opacity: 0.05;
   }
   .paneNodeOptionItem:hover svg{
     opacity: 1;
@@ -270,9 +275,22 @@ export default {
   .paneNodeOptionItemInner{
     cursor: pointer;
   }
+  .focused .close{
+    opacity:0.4;
+  }
+  .focused svg{
+    opacity:0.4;
+  }
   .active svg{
     opacity: 1;
+    /*
     fill: #18ca18;
+    /**/
+    fill: red;
+  }
+  .close:hover{
+    opacity: 1;
+    cursor: pointer;
   }
 </style>
 

@@ -12,6 +12,7 @@
           <tabs
             :tabs=requestSources
             :deleteByTab=deleteByTab
+            :idsByTab=idsByTab
           >
           </tabs>
       </template>
@@ -138,6 +139,13 @@ export default {
     ]),
     nodesReversed: function(){
       return this.nodes.reverse();
+    },
+    idsByTab: function(){
+      return this.requestSources.reduce((acc,rs)=>{
+        let ids = this.nodes.filter(node=>node.requestSource.find(rss=>(rss.type==rs.type&&rss.value==rs.value))).map(n=>n.id);
+          acc[rs.value] = ids;
+        return acc; 
+      }, {});
     },
     requestSources: function(){
       let searchValues = [];

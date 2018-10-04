@@ -20,6 +20,9 @@ import * as d3 from 'd3';
 //import Tooltip from '@/components/Tooltip'
 
 import VizSettings from '@/components/VizSettings'
+import { forceCluster } from 'd3-force-cluster'
+import { forceAttract } from 'd3-force-attract'
+
 import { ResizeObserver } from 'vue-resize'
 import {mapGetters, mapActions} from 'vuex';
 
@@ -60,7 +63,9 @@ export default {
       //tooltipY: -500,
       //tooltipFullactive: false,
       //boundaryRadius: 50,
-      projectNodeRadius: 15,
+      projectNodeRadius: 20,
+      relationNodeRadius: 10,
+      unwatchFocus: undefined,
     }
   },
   props:[
@@ -89,6 +94,7 @@ export default {
       'leftColPercGoal',
       'resizeElementWidth',
       'showVizSettings',
+      'focusedNode',
     ]),
     vizWidth: function(){
       let w = (1.0-this.leftColPercGoal)*this.windowDims.width-this.resizeElementWidth/2;
@@ -99,7 +105,7 @@ export default {
       let projectSurface = this.projectNodeRadius * this.projectNodeRadius * Math.PI;
       //let spaceTakenByProjectNodes = projectSurface*this.data.nodes.filter(node=>node.type=='project').length;
       let spaceTakenByProjectNodes = projectSurface*this.data.nodes.length;
-      let spaceFactorPerNode = 10;
+      let spaceFactorPerNode = 50;
       let radiusForRequiredSpace = Math.sqrt((spaceTakenByProjectNodes*spaceFactorPerNode)/Math.PI)
       return Math.max(radiusForRequiredSpace, Math.min(this.vizWidth, this.windowDims.height)/2);
       return Math.max((this.data.nodes.length) * 50, Math.min(this.vizWidth, this.windowDims.height)/2);
@@ -115,10 +121,18 @@ export default {
       this.init();
       this.ready = true;
     }, 500);
+
+    this.unwatchFocus = this.$store.watch(this.$store.getters.focusedNodeWatcher, _ => {
+      this.updateGraphVisual();
+    });
+  },
+  beforeDestroy: function () {
+    this.unwatchFocus();
   },
   methods: {
     ...mapActions([
-      'toggleVizSettings'
+      'toggleVizSettings',
+      'setFocusedNode'
     ]),
     vizResized(){
       if(this.ready)
@@ -177,6 +191,7 @@ export default {
     },
     init(){
       this.svg = d3.select("#vizsvg");
+
       this.zoom = d3.zoom()
         .on("zoom", this.zoomed);
 
@@ -205,11 +220,77 @@ export default {
       //this.labelLayer = this.centerLayer.append("g").attr("class", "labelLayer");
 
 
+      let attractForce = forceAttract().target((d)=> { 
+            let relatedProjectIds = d.projects.map(p=>p.id);
+            let projects = this.data.nodes.filter(n=>n.type=='project');
+            //console.log(relatedProjectIds)
+            //console.log(projects);
+            let ys = projects.filter(p=>relatedProjectIds.includes(p.id)).reduce((acc, p, i)=>{
+              //console.log("--");
+              //console.log("acc", acc);
+              //console.log("p", p);
+              //console.log("p.x", p.x);
+              //console.log("i", i);
+              let sum = acc * i + p.y;
+              if(sum == 0){
+                return 0;
+              }else{
+                acc = sum/(i+1);
+                return acc 
+              }
+            }, 0)
+            let xs = projects.filter(p=>relatedProjectIds.includes(p.id)).reduce((acc, p, i)=>{
+              //console.log("--");
+              //console.log("acc", acc);
+              //console.log("p", p);
+              //console.log("p.x", p.x);
+              //console.log("i", i);
+              let sum = acc * i + p.x;
+              if(sum == 0){
+                return 0;
+              }else{
+                acc = sum/(i+1);
+                return acc 
+              }
+            }, 0)
+            console.log("final xs", xs);
+            console.log("final ys", ys);
+            
+            
+            return [xs,ys];
+      }).strength(1);
+      let attractInit = attractForce.initialize; 
+      attractForce.initialize = (nodes)=>{
+       // Filter subset of nodes and delegate to saved initialization.
+        attractInit(nodes.filter(d => d.type!='project'));
+      }
+
+      let forceManyBodyNew = d3.forceManyBody().strength(-9000).distanceMin(200);
+      let forceManyBodyNewInit = forceManyBodyNew.initialize;
+      forceManyBodyNew.initialize = (nodes)=>{
+        forceManyBodyNewInit(nodes.filter(d => d.type=='project'));
+      }
+      let forceManyBodySubnodes = d3.forceManyBody().strength(-800).distanceMin(100);
+      let forceManyBodySubnodesInit = forceManyBodySubnodes.initialize;
+      forceManyBodySubnodes.initialize = (nodes)=>{
+        forceManyBodySubnodesInit(nodes.filter(d => d.type!='project'));
+      }
+
+      let centerForce = d3.forceCenter(0,0);
+      let centerForceInit = centerForce.initialize;
+      centerForce.initialize = (nodes)=>{
+        centerForceInit(nodes.filter(d => d.type=='project'));
+      }
+    
+
       this.simulation = d3.forceSimulation()
           //.force("attract", attractForce)
           //.force("repell", repelForce)
-          .force("specific", d3.forceManyBody().strength(-50))
-          //.force("specific", d3.forceManyBody().strength(d=>{
+
+          .force('cluster',attractForce)  //.force("specific", d3.forceManyBody().strength(d=>{
+          .force("specific", forceManyBodyNew)
+          .force("specific2", forceManyBodySubnodes)
+          .force("specific3", d3.forceManyBody().strength(-30).distanceMax(100))
           //     if(d.type == "project"){
           //      console.log(d); 
           //       if(d.subnodes.length > 0){
@@ -224,12 +305,13 @@ export default {
           //}))
           //.force("x", d3.forceX().strength(0.002))
           //.force("y", d3.forceY().strength(0.002))
-      .force('x', d3.forceX().strength(0.0005))
-    .force('y', d3.forceY().strength(0.0005))
-          .force("center", d3.forceCenter(0,0))
-          //.force("collide", d3.forceCollide().radius(20).iterations(2))
+          //.force('x', d3.forceX().strength(0.0005))
+          //.force('y', d3.forceY().strength(0.0005))
+          .force("center", centerForce)
+          .force("collide", d3.forceCollide().radius(20).iterations(2))
           //.force('cluster', this.clustering)
           .force("link", d3.forceLink().id(d=> d.id))
+
           .on("tick", this.ticked)
       ;
 
@@ -238,46 +320,19 @@ export default {
       this.link = this.linkLayer.selectAll(".link").attr("class", "link");
       ////this.label = this.labelLayer.selectAll(".label").attr("class", "label");
 
-    },
-    clustering(alpha) {
-      // i need to adjust this a lot, but maybe it brings me on the right way
-      // it's from here https://bl.ocks.org/micahstubbs/3f439df92579c5bb2902fab15742ba87
-      //console.log("--");
-      alpha *= 0.5 * alpha;
-      let projects = this.data.nodes.filter(d=>d.type=='project');
-      this.data.nodes.filter(d=>d.type!='project').forEach((d) => {
-        //console.log("sub", d);
-        let relatedProjectsIds = d.projects.map(p=>p.id);
-        //console.log(relatedProjectsIds);
-        projects.filter(p=>relatedProjectsIds.includes(p.id)).forEach(project=>{
-          //console.log(project);
-          let x = d.x - project.x;
-          let y = d.y - project.y;
-          let l = Math.sqrt((x * x) + (y * y));
-          const r = 20;
-          if (l !== r) {
-            l = ((l - r) / l) * alpha;
-            d.x -= x *= l;
-            d.y -= y *= l;
-          }
-        });
+      var radialGradient = this.svg.append("defs")
+          .append("radialGradient")
+            .attr("id", "radial-gradient");
 
+        radialGradient.append("stop")
+            .attr("offset", "40%")
+            .attr("stop-color", "red");
 
-        
-        //const cluster = clusters[d.cluster];
-        //if (cluster === d) return;
-        //let x = d.x - cluster.x;
-        //let y = d.y - cluster.y;
-        //let l = Math.sqrt((x * x) + (y * y));
-        //const r = d.r + cluster.r;
-        //if (l !== r) {
-        //  l = ((l - r) / l) * alpha;
-        //  d.x -= x *= l;
-        //  d.y -= y *= l;
-        //  cluster.x += x;
-        //  cluster.y += y;
-        //}
-      });
+        radialGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", "white")
+            .attr("stop-opacity", "0");
+
     },
     ticked() {
       this.node
@@ -364,6 +419,21 @@ export default {
       ;
       
 
+      this.nodeIn.append("circle")
+              .attr("class", "focusRing")
+              .attr("cx", 0)
+              .attr("cy", 0)
+              .attr("r", d=>{
+                if(d.type=='project'){
+                  return this.projectNodeRadius*2.2;
+                }else{
+                  return this.relationNodeRadius*2.2;
+                }
+              })
+              .style("fill", "url(#radial-gradient)")
+              .attr("opacity", d=>(d.id==this.focusedNode?1:0))
+      ;
+
       this.nodeIn
                 .append("circle")
                 .attr("class", "main")
@@ -371,9 +441,9 @@ export default {
                 .attr("cy", 0)
                 .attr("r", d=>{
                   if(d.type=='project'){
-                    return 15;
+                    return this.projectNodeRadius;
                   }else{
-                    return 6;
+                    return this.relationNodeRadius;
                   }
                 })
                 .attr("fill", d=>{
@@ -386,17 +456,17 @@ export default {
 
                 })
 
-     //           .on('mouseover', (d,i,nodes)=>{
-     //             this.setActiveNode(d.id, true);
+               .on('mouseover', (d,i,nodes)=>{
+                 this.setFocusedNode({id:d.id, flag:true});
      //             this.currentNode = d;
      //             this.tooltipX = d.x + 20;
      //             this.tooltipY = d.y - 110;
      //             this.tooltipFullactive = true;
 
      //             //d3.select(nodes[i]).select(".main").attr("fill","red");
-     //           })
-     //           .on('mouseout', (d,i,nodes)=>{
-     //             this.setActiveNode(d.id, false);
+                })
+                .on('mouseout', (d,i,nodes)=>{
+                 this.setFocusedNode({id:d.id, flag:false});
      //             //if(d.type=='project'){
      //             //d3.select(nodes[i]).select(".main").attr("fill","white");
      //             //}else{
@@ -406,7 +476,7 @@ export default {
      //             this.tooltipX = null;
      //             this.tooltipY = null;
      //             this.tooltipFullactive = false;
-     //           })
+                })
      //           .on('click', (d,i,nodes)=>{
      //             if(d.type!='project'){
      //               console.log("clicked", d.id, d);
@@ -414,6 +484,11 @@ export default {
      //             }
      //           })
       ;
+
+
+
+
+
     //  this.nodeIn
     //            .append("circle")
     //            .attr("class", "activeRing")
@@ -467,6 +542,11 @@ export default {
         this.simulation.alpha(1).restart();
     //  }
 
+
+    },
+    updateGraphVisual(){
+
+      this.node.select(".focusRing").transition().duration(200).attr("opacity", d=>(this.focusedNode.includes(d.id)?1:0));
 
     },
     flatten(nestedData){
