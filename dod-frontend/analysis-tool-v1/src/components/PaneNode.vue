@@ -1,16 +1,21 @@
 <template>
   <div class="paneNode" @mouseover=mouseOver @mouseout=mouseOut>
     <div class='title'
+        title='Filing date of this press release'
         :style="{height: paneItemHeight + 'px', width: leftTitleWidth +'px'}"
       ><p>{{getDate(data.filing_date)}}</p>
     </div>
     <div class='paneNodeMain' 
        :style="{width: minPaneItemWidth - leftTitleWidth + 'px', height: paneItemHeight +'px'}"
       >
-        <a class='close' @click="deleteNode"></a>
+        <a class='close' title='Delete this press reslease from the pane and graph' @click="deleteNode"></a>
+
         <div class='paneNodeTopSection'
          :style="{width: minPaneItemWidth - leftTitleWidth + 'px'}"
          >
+         <p title='Number of subnodes currently on the graph that are connected to this filing.' class='visibleConnectionsCounter' v-show='visibleConnections.length>0'>
+          {{visibleConnections.length}}
+         </p>
 
         </div>
 
@@ -130,6 +135,7 @@ export default {
     'data',
     'deleteNode',
     'toggleGraphSelect',
+    'visibleConnections',
   ],
   computed:{
     ...mapGetters([
@@ -219,6 +225,7 @@ export default {
     height: 12px;
     opacity: 0.05;
     position: absolute;
+    z-index:1;
   }
   .close:before, .close:after {
     position: absolute;
@@ -239,7 +246,18 @@ export default {
     /*
     outline: black 1px solid;
     /**/
-    height:  23px;
+    height:  24px;
+    padding-left:4px;
+    box-sizing: border-box;
+    opacity:0.15;
+  }
+  .visibleConnectionsCounter{
+    margin-top: 0;
+    font-family: sans-serif;
+    font-size: 12px;
+    font-weight: bold; 
+    cursor: default;
+    display:inline;
   }
 
   .paneNodeOptions{
@@ -287,6 +305,9 @@ export default {
     fill: #18ca18;
     /**/
     fill: red;
+  }
+  .focused .paneNodeTopSection{
+    opacity: 0.4;
   }
   .close:hover{
     opacity: 1;

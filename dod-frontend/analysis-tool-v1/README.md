@@ -57,6 +57,8 @@ todo:
 - export option
 
 
+- in tooltip allow to write label for main nodes
+- tab with everything that currently on the graph
 
 
 maybe in the pane, for each node and steadily updating it should displayed how many of the relation nodes on viz curretnly they share...

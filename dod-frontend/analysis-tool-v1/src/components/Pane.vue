@@ -24,6 +24,7 @@
             :data=node
             :deleteNode='()=>deleteNode(node.id)'
             :toggleGraphSelect='()=>setNodeSelect(node.id, !node.selected)'
+            :visibleConnections='node.relationships.filter(rs=>activeSubnodeIds.includes(rs.id)).map(rs=>rs.id)'
             >
           </pane-node>
         </div>
@@ -55,6 +56,7 @@ export default {
     'nodes',
     'deleteNode',
     'setNodeSelect',
+    'activeSubnodeIds',
   ],
   computed:{
     ...mapGetters([
@@ -68,6 +70,8 @@ export default {
     nodesOfActiveTab: function(){
       if(this.activeTab.type == 'all'){
         return this.nodes;
+      }else if(this.activeTab.type == 'graph'){
+        return this.nodes.filter(node=>node.selected);
       }else{
         return this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==this.activeTab.type&&rs.value==this.activeTab.value)));
       }

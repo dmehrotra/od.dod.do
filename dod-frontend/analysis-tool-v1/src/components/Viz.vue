@@ -4,7 +4,14 @@
     <a class='settings-button' @click=toggleVizSettings v-show=!showVizSettings>settings</a>
 
     <!--<svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :width=vizWidth :height=windowDims.height>-->
+
+    <tooltip
+      :xPos=tooltipX
+      :yPos=tooltipY
+    >
+    </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :height=windowDims.height>
+
 
     </svg>
     <p class="zoomNote" v-show=zoomable
@@ -17,10 +24,10 @@
 </template> 
 <script>
 import * as d3 from 'd3';
-//import Tooltip from '@/components/Tooltip'
+import Tooltip from '@/components/Tooltip'
 
 import VizSettings from '@/components/VizSettings'
-import { forceCluster } from 'd3-force-cluster'
+//import { forceCluster } from 'd3-force-cluster'
 import { forceAttract } from 'd3-force-attract'
 
 import { ResizeObserver } from 'vue-resize'
@@ -30,8 +37,8 @@ export default {
   name: 'viz',
   components:{
     ResizeObserver,
-    VizSettings
-    //Tooltip
+    VizSettings,
+    Tooltip,
   },
   data () {
     return {
@@ -59,8 +66,8 @@ export default {
 
       //currentNode: undefined,
 
-      //tooltipX: -500,
-      //tooltipY: -500,
+      tooltipX: -500,
+      tooltipY: -500,
       //tooltipFullactive: false,
       //boundaryRadius: 50,
       projectNodeRadius: 20,
@@ -131,7 +138,7 @@ export default {
   },
   methods: {
     ...mapActions([
-      'toggleVizSettings',
+     'toggleVizSettings',
       'setFocusedNode'
     ]),
     vizResized(){
@@ -459,8 +466,19 @@ export default {
                .on('mouseover', (d,i,nodes)=>{
                  this.setFocusedNode({id:d.id, flag:true});
      //             this.currentNode = d;
-     //             this.tooltipX = d.x + 20;
-     //             this.tooltipY = d.y - 110;
+                  let clientRect = d3.select(nodes[i]).node().getBoundingClientRect()
+                  var transform2 = d3.zoomTransform(this.svg.node());
+                  console.log('transform2', transform2);
+                  let xy1 = transform2.invert([d.x,d.y] )
+                  //xy1 = transform2.invert()
+                  console.log('xy1', xy1);
+                  
+                  this.tooltipX = clientRect.x - (this.windowDims.width-this.vizWidth) + 50;
+                  this.tooltipY = clientRect.y;
+                  //this.tooltipX = xy1[0];
+                  //this.tooltipY = xy1[1]; 
+                  //this.tooltipX = d.x + 20 + this.vizWidth/2;
+                  //this.tooltipY = d.y - 110 + this.windowDims.height/2;
      //             this.tooltipFullactive = true;
 
      //             //d3.select(nodes[i]).select(".main").attr("fill","red");
@@ -473,8 +491,8 @@ export default {
      //             //d3.select(nodes[i]).select(".main").attr("fill","blue");
      //             //}
      //             //this.hideTooltip();
-     //             this.tooltipX = null;
-     //             this.tooltipY = null;
+                  this.tooltipX = null;
+                  this.tooltipY = null;
      //             this.tooltipFullactive = false;
                 })
      //           .on('click', (d,i,nodes)=>{
@@ -642,6 +660,11 @@ export default {
     dragged(d) {
       d.fx = d3.event.x;
       d.fy = d3.event.y;
+
+      // i have not fully tested if setting or rather reinforcing the focus here in 
+      // the dagging functions might confuse it elsewhere, but on first try it seems
+      // to work
+     this.setFocusedNode({id:d.id, flag:true});
     },
     dragended(d) {
       if (!d3.event.active) this.simulation.alphaTarget(0);
@@ -649,6 +672,11 @@ export default {
       
       d.fx = null;
       d.fy = null;
+
+      // i have not fully tested if setting or rather reinforcing the focus here in 
+      // the dagging functions might confuse it elsewhere, but on first try it seems
+      // to work
+     this.setFocusedNode({id:d.id, flag:false});
     },
     hideTooltip(){
       this.tooltipX = -500;

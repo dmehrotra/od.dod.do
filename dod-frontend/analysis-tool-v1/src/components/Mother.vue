@@ -13,6 +13,7 @@
             :tabs=requestSources
             :deleteByTab=deleteByTab
             :idsByTab=idsByTab
+            :nodesOnGraph="nodes.filter(n=>n.selected).length>0"
           >
           </tabs>
       </template>
@@ -22,6 +23,7 @@
           :nodes=nodes
           :deleteNode=deleteNode
           :setNodeSelect=setNodeSelect
+          :activeSubnodeIds=activeSubnodeIds
         >
         </pane>
       </template>
@@ -164,6 +166,9 @@ export default {
       return this.nodes.filter(d=>d.selected);
     },
     activeSubnodeIds(){
+      return this.nodes.filter(node=>node.selected).reduce((acc,node)=>{
+        return acc.concat(node.relationships.filter(subnode=>(subnode.visible&&!acc.includes(subnode.id))).map(subnode=>subnode.id));
+      }, []);
     },
   },
   mounted(){
@@ -287,6 +292,11 @@ export default {
 
       if(tab.type == 'all'){
         let ids = this.nodes.map(d=>d.id);
+        ids.forEach(id=>{
+          this.deleteNode(id);
+        });
+      }else if(tab.type == 'graph'){
+        let ids = this.nodes.filter(d=>d.selected).map(d=>d.id);
         ids.forEach(id=>{
           this.deleteNode(id);
         });

@@ -3,7 +3,8 @@
     <transition-group name='individual-tab-transition' tag='div' id='tabs'
       :style="{height: tabBarHeight +'px'}"
       >
-      <div class='tab' v-if='tabs.length>0'
+      <div class='tab' v-if='tabs.length>0' 
+          title='All press releases'
          :class="{tab: true, active: isActive({type:'all', value:'all'}), inActive: !isActive({type:'all', value:'all'})}"
          :style="{height: tabHeight +'px'}"
          :key="'all'"
@@ -12,11 +13,31 @@
          <div class='titleWrapper'
            @click="changeActiveTab({type:'all', value:'all', timestamp:0})"
            >
-           <a class='title'>all</a>
+           <a class='title'><i>all</i></a>
          </div>
          
         <a 
           @click="deleteByTab({type:'all', value:'all', timestamp:0})"
+          class='close'
+          >
+        </a>
+      </div>
+
+      <div class='tab' v-if='nodesOnGraph'
+          title='All press releases currently on the graph'
+         :class="{tab: true, active: isActive({type:'graph', value:'graph'}), inActive: !isActive({type:'graph', value:'graph'})}"
+         :style="{height: tabHeight +'px'}"
+         :key="'graph'"
+         >
+
+         <div class='titleWrapper'
+           @click="changeActiveTab({type:'graph', value:'graph', timestamp:0})"
+           >
+           <a class='title'><i>graph</i></a>
+         </div>
+         
+        <a 
+          @click="deleteByTab({type:'graph', value:'graph', timestamp:0})"
           class='close'
           >
         </a>
@@ -64,6 +85,7 @@ export default {
     'tabs',
     'deleteByTab',
     'idsByTab',
+    'nodesOnGraph',
   ],
   computed:{
     ...mapGetters([
