@@ -12,6 +12,10 @@ const state = {
   unfoldSharedRelationsByDefault: true,
   sharedRelationsThreshold: 3,
   focusedNode:[],
+  
+  //tooltip
+  //tooltipDims: {width: 130, height:240},
+  tooltipDims: {width: 30, height:40},
 
 }
 
@@ -30,6 +34,9 @@ const getters = {
 
   focusedNode: state => state.focusedNode,
   focusedNodeWatcher: state => () => state.focusedNode,
+
+  // tooltip
+  tooltipDims: state => state.tooltipDims,
 }
 
 const mutations = {

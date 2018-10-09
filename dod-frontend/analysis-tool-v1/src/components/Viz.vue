@@ -102,6 +102,7 @@ export default {
       'resizeElementWidth',
       'showVizSettings',
       'focusedNode',
+      'tooltipDims',
     ]),
     vizWidth: function(){
       let w = (1.0-this.leftColPercGoal)*this.windowDims.width-this.resizeElementWidth/2;
@@ -472,9 +473,20 @@ export default {
                   let xy1 = transform2.invert([d.x,d.y] )
                   //xy1 = transform2.invert()
                   console.log('xy1', xy1);
-                  
-                  this.tooltipX = clientRect.x - (this.windowDims.width-this.vizWidth) + 50;
-                  this.tooltipY = clientRect.y;
+                  let paneWidth = this.windowDims.width-this.vizWidth;
+                  let leftRight = clientRect.x > (paneWidth+this.vizWidth/2)?1:0;
+                  let topBottom = clientRect.y > (this.windowDims.height/2)?1:0;
+                  console.log("leftRight", leftRight); 
+                  let x = leftRight==0?(clientRect.x-paneWidth+50):(clientRect.x-paneWidth-this.tooltipDims.width);
+                  let y = topBottom==0?(clientRect.y+50):(clientRect.y-this.tooltipDims.height);
+                 
+                  //this.tooltipX = clientRect.x - paneWidth + 50;
+                  this.tooltipX = x;
+                  this.tooltipY = y;
+
+                 
+                  //this.tooltipY = clientRect.y;
+
                   //this.tooltipX = xy1[0];
                   //this.tooltipY = xy1[1]; 
                   //this.tooltipX = d.x + 20 + this.vizWidth/2;

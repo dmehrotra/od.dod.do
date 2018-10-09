@@ -1,14 +1,14 @@
 <template>
   <div id="tooltip" 
-       :style="{left: xPosition +'px', top: yPosition + 'px', opacity:opacity, width: width+'px', height: height+'px'}"
+       :style="{left: xPosition +'px', top: yPosition + 'px', opacity:opacity, width: tooltipDims.width+'px', height: tooltipDims.height+'px'}"
        v-on:mouseover="mouseOver"
        v-on:mouseout="mouseOut"
     >
     <div class="bg"></div>
+      <!--:style="{width: width-2*padding+'px', height: height-2*padding+'px'}"-->
     <div class="tooltip-content"
-      :style="{width: width-2*padding+'px', height: height-2*padding+'px'}"
       >
-        Hello
+      <p>Hello</p>
       </div>
     </div>
 
@@ -22,6 +22,8 @@
 //import ProjectTooltip from '@/components/ProjectTooltip'
 //import ConnectionTooltip from '@/components/ConnectionTooltip'
 import {TweenMax} from "gsap";
+
+import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'tooltip',
@@ -50,6 +52,9 @@ export default {
     'yPos',
   ],
   computed:{
+    ...mapGetters([
+      'tooltipDims',
+    ]),
   },
 	watch: {
     '$props.xPos':{
@@ -147,7 +152,7 @@ export default {
 <style scoped>
   #tooltip{
     position: absolute;
-    border: 1px white solid;
+    border: 1px red solid;
     border-radius: 4px;
     /*
     padding: 5px;
@@ -165,5 +170,9 @@ export default {
     border: 1px white solid;
     opacity:0.4;
     /**/
+  }
+  .tooltip-content{
+    position:absolute;
+    padding:5px;
   }
 </style>
