@@ -101,6 +101,7 @@ function createContract(el,department){
 
 for ( i = 0; i < $('.article-body p').length; i++) { 	 
     var department;
+
     el = $('.article-body p')[i]
     first_child = $(el).children()[0]
     if ($(first_child).is("strong") && $(first_child).text().length > 1){
