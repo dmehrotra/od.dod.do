@@ -8,6 +8,8 @@
     <tooltip
       :xPos=tooltipX
       :yPos=tooltipY
+      :fullactive=tooltipFullactive
+      :currentNode=currentNode
     >
     </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :height=windowDims.height>
@@ -64,11 +66,11 @@ export default {
         links:[]
       },
 
-      //currentNode: undefined,
-
       tooltipX: -500,
       tooltipY: -500,
-      //tooltipFullactive: false,
+      currentNode: undefined,
+      tooltipFullactive: false,
+
       //boundaryRadius: 50,
       projectNodeRadius: 20,
       relationNodeRadius: 10,
@@ -465,35 +467,35 @@ export default {
                 })
 
                .on('mouseover', (d,i,nodes)=>{
-                 this.setFocusedNode({id:d.id, flag:true});
-     //             this.currentNode = d;
+                  this.setFocusedNode({id:d.id, flag:true});
                   let clientRect = d3.select(nodes[i]).node().getBoundingClientRect()
-                  var transform2 = d3.zoomTransform(this.svg.node());
-                  console.log('transform2', transform2);
-                  let xy1 = transform2.invert([d.x,d.y] )
-                  //xy1 = transform2.invert()
-                  console.log('xy1', xy1);
+                  var currentZoom = d3.zoomTransform(this.svg.node()).k;
+                 
                   let paneWidth = this.windowDims.width-this.vizWidth;
+
                   let leftRight = clientRect.x > (paneWidth+this.vizWidth/2)?1:0;
                   let topBottom = clientRect.y > (this.windowDims.height/2)?1:0;
-                  console.log("leftRight", leftRight); 
-                  let x = leftRight==0?(clientRect.x-paneWidth+50):(clientRect.x-paneWidth-this.tooltipDims.width);
-                  let y = topBottom==0?(clientRect.y+50):(clientRect.y-this.tooltipDims.height);
                  
-                  //this.tooltipX = clientRect.x - paneWidth + 50;
+                  let radius = d.type=='project'?this.projectNodeRadius:this.relationNodeRadius;
+                  radius *= currentZoom;
+                  let centerX = clientRect.x - paneWidth + radius; 
+                  let centerY = clientRect.y + radius;
+
+                  let x0 = centerX + radius;
+                  let x1 = centerX - radius - this.tooltipDims.width;
+                  let x = leftRight==0?x0:x1;
+
+                  let y0 = centerY;
+                  let y1 = centerY - this.tooltipDims.height;
+                  let y = topBottom==0?y0:y1;
+                 
                   this.tooltipX = x;
                   this.tooltipY = y;
-
+                    
+                  this.currentNode = d;
+                  this.tooltipFullactive = true;
                  
-                  //this.tooltipY = clientRect.y;
 
-                  //this.tooltipX = xy1[0];
-                  //this.tooltipY = xy1[1]; 
-                  //this.tooltipX = d.x + 20 + this.vizWidth/2;
-                  //this.tooltipY = d.y - 110 + this.windowDims.height/2;
-     //             this.tooltipFullactive = true;
-
-     //             //d3.select(nodes[i]).select(".main").attr("fill","red");
                 })
                 .on('mouseout', (d,i,nodes)=>{
                  this.setFocusedNode({id:d.id, flag:false});
@@ -505,7 +507,7 @@ export default {
      //             //this.hideTooltip();
                   this.tooltipX = null;
                   this.tooltipY = null;
-     //             this.tooltipFullactive = false;
+                  this.tooltipFullactive = false;
                 })
      //           .on('click', (d,i,nodes)=>{
      //             if(d.type!='project'){

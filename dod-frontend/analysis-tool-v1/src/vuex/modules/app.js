@@ -15,7 +15,7 @@ const state = {
   
   //tooltip
   //tooltipDims: {width: 130, height:240},
-  tooltipDims: {width: 30, height:40},
+  tooltipDims: {width: 130, height:240},
 
 }
 
