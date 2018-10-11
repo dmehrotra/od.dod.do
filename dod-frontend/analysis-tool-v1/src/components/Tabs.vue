@@ -3,7 +3,8 @@
     <transition-group name='individual-tab-transition' tag='div' id='tabs'
       :style="{height: tabBarHeight +'px'}"
       >
-      <div class='tab' v-if='tabs.length>0'
+      <div class='tab' v-if='tabs.length>0' 
+          title='All press releases'
          :class="{tab: true, active: isActive({type:'all', value:'all'}), inActive: !isActive({type:'all', value:'all'})}"
          :style="{height: tabHeight +'px'}"
          :key="'all'"
@@ -12,7 +13,7 @@
          <div class='titleWrapper'
            @click="changeActiveTab({type:'all', value:'all', timestamp:0})"
            >
-           <a class='title'>all</a>
+           <a class='title'><i>all</i></a>
          </div>
          
         <a 
@@ -22,20 +23,45 @@
         </a>
       </div>
 
+      <div class='tab' v-if='nodesOnGraph'
+          title='All press releases currently on the graph'
+         :class="{tab: true, active: isActive({type:'graph', value:'graph'}), inActive: !isActive({type:'graph', value:'graph'})}"
+         :style="{height: tabHeight +'px'}"
+         :key="'graph'"
+         >
+
+         <div class='titleWrapper'
+           @click="changeActiveTab({type:'graph', value:'graph', timestamp:0})"
+           >
+           <a class='title'><i>graph</i></a>
+         </div>
+         
+        <a 
+          @click="deleteByTab({type:'graph', value:'graph', timestamp:0})"
+          class='close'
+          >
+        </a>
+      </div>
+
       <div class='tab' v-for="tab in tabs"
         @click="changeActiveTab(tab)"
+        @mouseover=mouseOver(tab.value) @mouseout=mouseOut(tab.value)
         :class="{tab: true, active: isActive(tab), inActive: !isActive(tab)}"
         :style="{height: tabHeight +'px'}"
         :key="tab.timestamp"
         >
-         <div class='titleWrapper'
+
+         <div 
+         :class='{titleWrapper: true, tabNodeFocused: !isActive(tab) &&idsByTab[tab.value].find(id=>focusedNode.includes(id)) }'
           @click="changeActiveTab(tab)"
            >
-           <a class='title'>{{tab.value}}</a>
+           <a 
+             
+             class='title'>{{tab.value}}</a>
          </div>
          
         <a 
-          @click="deleteByTab({type:'all', value:'all', timestamp:0})"
+          @click="deleteByTab(tab)"
           class='close'
           >
         </a>
@@ -58,12 +84,15 @@ export default {
   props:[
     'tabs',
     'deleteByTab',
+    'idsByTab',
+    'nodesOnGraph',
   ],
   computed:{
     ...mapGetters([
       'tabHeight',
       'tabBarHeight',
       'activeTab',
+      'focusedNode',
     ]),
   },
   mounted(){
@@ -73,10 +102,21 @@ export default {
   methods: {
     ...mapActions([
       'changeActiveTab',
+      'setFocusedNode',
     ]),
     isActive: function(tab){
       if(tab.type==this.activeTab.type && tab.value == this.activeTab.value) return true;
       else return false;
+    },
+    mouseOver(t){
+      this.idsByTab[t].forEach(id=>{
+        this.setFocusedNode({id:id, flag:true});
+      });
+    },
+    mouseOut(t){
+      this.idsByTab[t].forEach(id=>{
+        this.setFocusedNode({id:id, flag:false});
+      });
     }
   }
 }
@@ -150,6 +190,10 @@ export default {
   }
   .tab:hover .close{
     visibility: visible;
+  }
+
+  .tabNodeFocused a{
+    color: red;
   }
 
 

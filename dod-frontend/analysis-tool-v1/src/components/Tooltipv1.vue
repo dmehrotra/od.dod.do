@@ -1,15 +1,27 @@
 <template>
   <div id="tooltip" 
-       :style="{left: xPosition +'px', top: yPosition + 'px', opacity:opacity, width: tooltipDims.width+'px', height: tooltipDims.height+'px'}"
+       :style="{left: xPosition +'px', top: yPosition + 'px', opacity:opacity, width: width+'px', height: height+'px'}"
        v-on:mouseover="mouseOver"
        v-on:mouseout="mouseOut"
     >
     <div class="bg"></div>
-      <!--:style="{width: width-2*padding+'px', height: height-2*padding+'px'}"-->
     <div class="tooltip-content"
+      :style="{width: width-2*padding+'px', height: height-2*padding+'px'}"
       >
-      <a @click=crossOutTooltip>close</a>
-      <p>Hello</p>
+      <a href="#" class="close" @click="crossOutTooltip"></a>
+      <div class="tooltip-inner-content" v-if="currentNode != undefined">
+        <project-tooltip v-if="currentNode.type=='project'"
+          :currentNode=currentNode
+          :crossOutNode=crossOutNode
+          :unselectProject=unselectProjectAndCloseTooltip
+          :setSubnode=setSubnode
+        >
+        </project-tooltip>
+        <connection-tooltip v-else
+          :title=currentNode.title
+          :crossOutNode=crossOutNode
+        >
+        </connection-tooltip>
       </div>
     </div>
 
@@ -20,17 +32,15 @@
 <script>
 
 
-//import ProjectTooltip from '@/components/ProjectTooltip'
-//import ConnectionTooltip from '@/components/ConnectionTooltip'
+import ProjectTooltip from '@/components/ProjectTooltip'
+import ConnectionTooltip from '@/components/ConnectionTooltip'
 import {TweenMax} from "gsap";
-
-import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'tooltip',
   components: {
-    //ProjectTooltip,
-    //ConnectionTooltip,
+    ProjectTooltip,
+    ConnectionTooltip,
   },
   data () {
     return {
@@ -38,8 +48,6 @@ export default {
       height:230,
       padding:5,
       opacity:0,
-      //xPosition: 0,
-      //yPosition: 0,
       xPosition: -500,
       yPosition: -500,
 
@@ -52,12 +60,16 @@ export default {
     'xPos',
     'yPos',
     'fullactive',
+    'setActiveNode',
     'currentNode',
+
+    'deleteProject',
+    'setSubnode',
+
+    'setAnimateViz',
+    'unselectProject',
   ],
   computed:{
-    ...mapGetters([
-      'tooltipDims',
-    ]),
   },
 	watch: {
     '$props.xPos':{
@@ -102,9 +114,6 @@ export default {
   beforeDestroy: function () {
   },
   methods: {
-    ...mapActions([
-      'setFocusedNode'
-    ]),
     crossOutTooltip(){
       this.opacity = 0;
       this.xPosition = -500; 
@@ -118,47 +127,36 @@ export default {
         }
       });
     },
-    hideTooltipFast: function(){
-      this.hideAnimation = TweenLite.to(this.$data, 0.1, { opacity: 0.0,
-        onComplete:()=>{
-          this.xPosition = -500; 
-          this.yPosition = -500; 
-        }
-      });
-    },
     mouseOver: function(){
-    //  console.log("HH:");
+      console.log("HH:");
       this.hideAnimation.kill();
       this.opacity = this.maxOpacity;
-
-      this.setFocusedNode({id:this.currentNode.id, flag:true});
-    //  this.setActiveNode(this.currentNode.id, true);
+      this.setActiveNode(this.currentNode.id, true);
     },
     mouseOut: function(){
-      this.hideTooltipFast();
-      this.setFocusedNode({id:this.currentNode.id, flag:false});
-    //  this.setActiveNode(this.currentNode.id, false);
+      this.hideTooltip();
+      this.setActiveNode(this.currentNode.id, false);
     },
-    //crossOutNode: function(){
-    //  
-    //  this.setAnimateViz(false);
-    //    //<a v-if="currentNode.type=='project'" href="#" @click="deleteProject(currentNode.id)">delete node</a>
-    //  if(this.currentNode.type == 'project'){
-    //    this.deleteProject(this.currentNode.id)
-    //  }else{
-    //    this.setSubnode(this.currentNode.id, false)
-    //  }
-    //    //<a v-else href="#" @click="setSubnode(currentNode.id, false)">fold in subnode</a>
-    //  this.xPosition = -500; 
-    //  this.yPosition = -500; 
-    //  this.opacity = 0.0;
-    //},
-    //unselectProjectAndCloseTooltip(){
-    //  this.unselectProject(this.currentNode.id);
-    //  this.xPosition = -500; 
-    //  this.yPosition = -500; 
-    //  this.opacity = 0.0;
-    //},
+    crossOutNode: function(){
+      
+      this.setAnimateViz(false);
+        //<a v-if="currentNode.type=='project'" href="#" @click="deleteProject(currentNode.id)">delete node</a>
+      if(this.currentNode.type == 'project'){
+        this.deleteProject(this.currentNode.id)
+      }else{
+        this.setSubnode(this.currentNode.id, false)
+      }
+        //<a v-else href="#" @click="setSubnode(currentNode.id, false)">fold in subnode</a>
+      this.xPosition = -500; 
+      this.yPosition = -500; 
+      this.opacity = 0.0;
+    },
+    unselectProjectAndCloseTooltip(){
+      this.unselectProject(this.currentNode.id);
+      this.xPosition = -500; 
+      this.yPosition = -500; 
+      this.opacity = 0.0;
+    },
 
     
   }
@@ -169,14 +167,14 @@ export default {
 <style scoped>
   #tooltip{
     position: absolute;
-    border: 1px red solid;
+    border: 1px white solid;
     border-radius: 4px;
     /*
     padding: 5px;
     /**/
   }
   .bg{
-    background-color:white;
+    background-color:black;
     width:100%;
     height:100%;
     position:absolute;
@@ -191,5 +189,37 @@ export default {
   .tooltip-content{
     position:absolute;
     padding:5px;
+  }
+  .tooltip-inner-content{
+    margin-top:20px;
+  }
+  .close-wrapper{
+    position:relative;
+    height:15px;
+  }
+  .close {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 15px;
+  height: 15px;
+  opacity: 0.3;
+  }
+  .close:hover {
+    opacity: 1;
+  }
+  .close:before, .close:after {
+    position: absolute;
+    left: 7px;
+    content: ' ';
+    height: 15px;
+    width: 2px;
+    background-color: white;
+  }
+  .close:before {
+    transform: rotate(45deg);
+  }
+  .close:after {
+    transform: rotate(-45deg);
   }
 </style>

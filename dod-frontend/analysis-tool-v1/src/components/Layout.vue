@@ -30,7 +30,7 @@
       
       <div class='reader-resize main-col-1-row' @click="toggleReaderHeight"
          :style="{height: resizeElementWidth+'px', cursor: 'pointer'}">
-        <span class="arrow-down"
+        <span class="arrow-down" v-show="currentReaderContent.id!=undefined"
               :style="{left: (leftColPerc*width)/2 - arrowWidth + 'px',
                       top: resizeElementWidth/2-arrowWidth/2 + 'px',
                       borderStyle: 'none solid solid solid', 
@@ -104,6 +104,8 @@ export default {
       'readerMaxHeight',
       'tabBarHeight',
       'tabHeight',
+
+      'currentReaderContent',
     ]),
     leftColWidth: function(){
       return this.leftColPerc*this.width-this.resizeElementWidth/2;
@@ -146,7 +148,7 @@ export default {
       }
     },
     toggleReaderHeight(){
-      if(this.readerHeight<this.readerMaxHeight){
+      if(this.readerHeight<this.readerMaxHeight && this.currentReaderContent.id!=undefined){
         this.changeReaderHeight(this.readerMaxHeight); 
       }else{
         this.changeReaderHeight(0); 

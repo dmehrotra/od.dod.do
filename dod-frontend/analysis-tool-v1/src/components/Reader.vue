@@ -1,12 +1,12 @@
 <template>
-  <div id="reader">
+  <div id="reader" @mouseover=mouseOver @mouseout=mouseOut>
     <div class='readerContentWrapper'
        :style="{height: readerMaxHeight -resizeElementWidth/2 + 'px'}"
       >
 
       <div class='readerTextWrapper'>
 
-        <p class='readerTitle'>{{currentReaderContent.id}}</p>
+        <p class='readerTitle'>{{getDate(currentReaderContent.date)}}</p>
         <p class='readerContent'>{{currentReaderContent.text}}</p>
       </div>
     </div>
@@ -40,6 +40,21 @@ export default {
   beforeDestroy: function () {
   },
   methods: {
+    ...mapActions([
+      'setFocusedNode',
+    ]),
+    mouseOver(){
+      this.setFocusedNode({id: this.currentReaderContent.id, flag:true});
+    },
+    mouseOut(){
+      this.setFocusedNode({id: this.currentReaderContent.id, flag:false});
+    },
+    getDate(d){
+      d = new Date(d);
+      let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; 
+
+      return months[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear()
+    }
   }
 }
 </script>

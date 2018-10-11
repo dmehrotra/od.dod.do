@@ -1,17 +1,36 @@
 <template>
   <div id="viz" :style="{height:windowDims.height+'px'}" >
     <resize-observer @notify="vizResized" />
+    <a class='settings-button' @click=toggleVizSettings v-show=!showVizSettings>settings</a>
+
     <!--<svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :width=vizWidth :height=windowDims.height>-->
+
+    <tooltip
+      :xPos=tooltipX
+      :yPos=tooltipY
+      :fullactive=tooltipFullactive
+      :currentNode=currentNode
+    >
+    </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :height=windowDims.height>
+
 
     </svg>
     <p class="zoomNote" v-show=zoomable
        :style="">scroll to zoom</p>
+    <viz-settings v-if=showVizSettings
+       :vizWidth=vizWidth
+      >
+    </viz-settings>
   </div>
 </template> 
 <script>
 import * as d3 from 'd3';
-//import Tooltip from '@/components/Tooltip'
+import Tooltip from '@/components/Tooltip'
+
+import VizSettings from '@/components/VizSettings'
+//import { forceCluster } from 'd3-force-cluster'
+import { forceAttract } from 'd3-force-attract'
 
 import { ResizeObserver } from 'vue-resize'
 import {mapGetters, mapActions} from 'vuex';
@@ -20,7 +39,8 @@ export default {
   name: 'viz',
   components:{
     ResizeObserver,
-    //Tooltip
+    VizSettings,
+    Tooltip,
   },
   data () {
     return {
@@ -38,7 +58,7 @@ export default {
       //root: undefined,
       node: undefined, 
       //label: undefined,
-      //link: undefined,
+      link: undefined,
       zoom: undefined,
 
       data: {
@@ -46,12 +66,15 @@ export default {
         links:[]
       },
 
-      //currentNode: undefined,
+      tooltipX: -500,
+      tooltipY: -500,
+      currentNode: undefined,
+      tooltipFullactive: false,
 
-      //tooltipX: -500,
-      //tooltipY: -500,
-      //tooltipFullactive: false,
       //boundaryRadius: 50,
+      projectNodeRadius: 20,
+      relationNodeRadius: 10,
+      unwatchFocus: undefined,
     }
   },
   props:[
@@ -79,6 +102,9 @@ export default {
       'windowDims',
       'leftColPercGoal',
       'resizeElementWidth',
+      'showVizSettings',
+      'focusedNode',
+      'tooltipDims',
     ]),
     vizWidth: function(){
       let w = (1.0-this.leftColPercGoal)*this.windowDims.width-this.resizeElementWidth/2;
@@ -86,6 +112,12 @@ export default {
     },
     boundaryRadius: function(){
       //return 400;
+      let projectSurface = this.projectNodeRadius * this.projectNodeRadius * Math.PI;
+      //let spaceTakenByProjectNodes = projectSurface*this.data.nodes.filter(node=>node.type=='project').length;
+      let spaceTakenByProjectNodes = projectSurface*this.data.nodes.length;
+      let spaceFactorPerNode = 50;
+      let radiusForRequiredSpace = Math.sqrt((spaceTakenByProjectNodes*spaceFactorPerNode)/Math.PI)
+      return Math.max(radiusForRequiredSpace, Math.min(this.vizWidth, this.windowDims.height)/2);
       return Math.max((this.data.nodes.length) * 50, Math.min(this.vizWidth, this.windowDims.height)/2);
     },
     //dataIds: function(){
@@ -99,8 +131,19 @@ export default {
       this.init();
       this.ready = true;
     }, 500);
+
+    this.unwatchFocus = this.$store.watch(this.$store.getters.focusedNodeWatcher, _ => {
+      this.updateGraphVisual();
+    });
+  },
+  beforeDestroy: function () {
+    this.unwatchFocus();
   },
   methods: {
+    ...mapActions([
+     'toggleVizSettings',
+      'setFocusedNode'
+    ]),
     vizResized(){
       if(this.ready)
       this.adjustZoom();
@@ -158,6 +201,7 @@ export default {
     },
     init(){
       this.svg = d3.select("#vizsvg");
+
       this.zoom = d3.zoom()
         .on("zoom", this.zoomed);
 
@@ -181,17 +225,82 @@ export default {
       this.svg.call(this.zoom);
       this.adjustZoom();
 
-      //this.linkLayer = this.centerLayer.append("g").attr("class", "linkLayer");
+      this.linkLayer = this.centerLayer.append("g").attr("class", "linkLayer");
       this.nodeLayer = this.centerLayer.append("g").attr("class", "nodeLayer");
       //this.labelLayer = this.centerLayer.append("g").attr("class", "labelLayer");
 
 
+      let attractForce = forceAttract().target((d)=> { 
+            let relatedProjectIds = d.projects.map(p=>p.id);
+            let projects = this.data.nodes.filter(n=>n.type=='project');
+            //console.log(relatedProjectIds)
+            //console.log(projects);
+            let ys = projects.filter(p=>relatedProjectIds.includes(p.id)).reduce((acc, p, i)=>{
+              //console.log("--");
+              //console.log("acc", acc);
+              //console.log("p", p);
+              //console.log("p.x", p.x);
+              //console.log("i", i);
+              let sum = acc * i + p.y;
+              if(sum == 0){
+                return 0;
+              }else{
+                acc = sum/(i+1);
+                return acc 
+              }
+            }, 0)
+            let xs = projects.filter(p=>relatedProjectIds.includes(p.id)).reduce((acc, p, i)=>{
+              //console.log("--");
+              //console.log("acc", acc);
+              //console.log("p", p);
+              //console.log("p.x", p.x);
+              //console.log("i", i);
+              let sum = acc * i + p.x;
+              if(sum == 0){
+                return 0;
+              }else{
+                acc = sum/(i+1);
+                return acc 
+              }
+            }, 0)
+            console.log("final xs", xs);
+            console.log("final ys", ys);
+            
+            
+            return [xs,ys];
+      }).strength(1);
+      let attractInit = attractForce.initialize; 
+      attractForce.initialize = (nodes)=>{
+       // Filter subset of nodes and delegate to saved initialization.
+        attractInit(nodes.filter(d => d.type!='project'));
+      }
+
+      let forceManyBodyNew = d3.forceManyBody().strength(-9000).distanceMin(200);
+      let forceManyBodyNewInit = forceManyBodyNew.initialize;
+      forceManyBodyNew.initialize = (nodes)=>{
+        forceManyBodyNewInit(nodes.filter(d => d.type=='project'));
+      }
+      let forceManyBodySubnodes = d3.forceManyBody().strength(-800).distanceMin(100);
+      let forceManyBodySubnodesInit = forceManyBodySubnodes.initialize;
+      forceManyBodySubnodes.initialize = (nodes)=>{
+        forceManyBodySubnodesInit(nodes.filter(d => d.type!='project'));
+      }
+
+      let centerForce = d3.forceCenter(0,0);
+      let centerForceInit = centerForce.initialize;
+      centerForce.initialize = (nodes)=>{
+        centerForceInit(nodes.filter(d => d.type=='project'));
+      }
+    
 
       this.simulation = d3.forceSimulation()
           //.force("attract", attractForce)
           //.force("repell", repelForce)
-          .force("specific", d3.forceManyBody().strength(-50))
-          //.force("specific", d3.forceManyBody().strength(d=>{
+
+          .force('cluster',attractForce)  //.force("specific", d3.forceManyBody().strength(d=>{
+          .force("specific", forceManyBodyNew)
+          .force("specific2", forceManyBodySubnodes)
+          .force("specific3", d3.forceManyBody().strength(-30).distanceMax(100))
           //     if(d.type == "project"){
           //      console.log(d); 
           //       if(d.subnodes.length > 0){
@@ -206,16 +315,33 @@ export default {
           //}))
           //.force("x", d3.forceX().strength(0.002))
           //.force("y", d3.forceY().strength(0.002))
-          .force("center", d3.forceCenter(0,0))
+          //.force('x', d3.forceX().strength(0.0005))
+          //.force('y', d3.forceY().strength(0.0005))
+          .force("center", centerForce)
           .force("collide", d3.forceCollide().radius(20).iterations(2))
-      //    .force("link", d3.forceLink().id(d=> d.id))
+          //.force('cluster', this.clustering)
+          .force("link", d3.forceLink().id(d=> d.id))
+
           .on("tick", this.ticked)
       ;
 
       this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
 
-      //this.link = this.linkLayer.selectAll(".link").attr("class", "link");
+      this.link = this.linkLayer.selectAll(".link").attr("class", "link");
       ////this.label = this.labelLayer.selectAll(".label").attr("class", "label");
+
+      var radialGradient = this.svg.append("defs")
+          .append("radialGradient")
+            .attr("id", "radial-gradient");
+
+        radialGradient.append("stop")
+            .attr("offset", "40%")
+            .attr("stop-color", "red");
+
+        radialGradient.append("stop")
+            .attr("offset", "100%")
+            .attr("stop-color", "white")
+            .attr("stop-opacity", "0");
 
     },
     ticked() {
@@ -228,11 +354,11 @@ export default {
         })
       ;
       
-      //this.link
-      //    .attr("x1", function(d) { return d.source.x; })
-      //    .attr("y1", function(d) { return d.source.y; })
-      //    .attr("x2", function(d) { return d.target.x; })
-      //    .attr("y2", function(d) { return d.target.y; });
+      this.link
+          .attr("x1", function(d) { return d.source.x; })
+          .attr("y1", function(d) { return d.source.y; })
+          .attr("x2", function(d) { return d.target.x; })
+          .attr("y2", function(d) { return d.target.y; });
 
       //this.label
       //    .attr("x", function(d) { return 10+d.x; })
@@ -261,25 +387,25 @@ export default {
     },
     updateGraph(){
       this.simulation.nodes(this.data.nodes, d => d.id);
-      //this.simulation.force("link").links(this.data.links);
+      this.simulation.force("link").links(this.data.links);
 
-      //this.link = this.link.data(this.data.links, function(d) { return d.target.id; });
+      this.link = this.link.data(this.data.links, function(d) { return d.target.id; });
 
 
     //  // Exit any old links.
-      //this.link.exit().remove();
+      this.link.exit().remove();
 
       // Enter any new links.
-      //this.link = this.link.enter().insert("line", ".node")
-      //    .attr("class", "link")
-      //    .attr("stroke", "grey")
-      //    .attr("stroke-width", 1)
-      //    .attr("x1", function(d) { return d.source.x; })
-      //    .attr("y1", function(d) { return d.source.y; })
-      //    .attr("x2", function(d) { return d.target.x; })
-      //    .attr("y2", function(d) { return d.target.y; })
-      //    .merge(this.link)
-      //;
+      this.link = this.link.enter().insert("line", ".node")
+          .attr("class", "link")
+          .attr("stroke", "grey")
+          .attr("stroke-width", 1)
+          .attr("x1", function(d) { return d.source.x; })
+          .attr("y1", function(d) { return d.source.y; })
+          .attr("x2", function(d) { return d.target.x; })
+          .attr("y2", function(d) { return d.target.y; })
+          .merge(this.link)
+      ;
 
       this.node = this.node.data(this.data.nodes, d=>d.id);
       //this.node.selectAll(".markedRing")
@@ -303,6 +429,21 @@ export default {
       ;
       
 
+      this.nodeIn.append("circle")
+              .attr("class", "focusRing")
+              .attr("cx", 0)
+              .attr("cy", 0)
+              .attr("r", d=>{
+                if(d.type=='project'){
+                  return this.projectNodeRadius*2.2;
+                }else{
+                  return this.relationNodeRadius*2.2;
+                }
+              })
+              .style("fill", "url(#radial-gradient)")
+              .attr("opacity", d=>(d.id==this.focusedNode?1:0))
+      ;
+
       this.nodeIn
                 .append("circle")
                 .attr("class", "main")
@@ -310,9 +451,9 @@ export default {
                 .attr("cy", 0)
                 .attr("r", d=>{
                   if(d.type=='project'){
-                    return 15;
+                    return this.projectNodeRadius;
                   }else{
-                    return 6;
+                    return this.relationNodeRadius;
                   }
                 })
                 .attr("fill", d=>{
@@ -325,27 +466,49 @@ export default {
 
                 })
 
-     //           .on('mouseover', (d,i,nodes)=>{
-     //             this.setActiveNode(d.id, true);
-     //             this.currentNode = d;
-     //             this.tooltipX = d.x + 20;
-     //             this.tooltipY = d.y - 110;
-     //             this.tooltipFullactive = true;
+               .on('mouseover', (d,i,nodes)=>{
+                  this.setFocusedNode({id:d.id, flag:true});
+                  let clientRect = d3.select(nodes[i]).node().getBoundingClientRect()
+                  var currentZoom = d3.zoomTransform(this.svg.node()).k;
+                 
+                  let paneWidth = this.windowDims.width-this.vizWidth;
 
-     //             //d3.select(nodes[i]).select(".main").attr("fill","red");
-     //           })
-     //           .on('mouseout', (d,i,nodes)=>{
-     //             this.setActiveNode(d.id, false);
+                  let leftRight = clientRect.x > (paneWidth+this.vizWidth/2)?1:0;
+                  let topBottom = clientRect.y > (this.windowDims.height/2)?1:0;
+                 
+                  let radius = d.type=='project'?this.projectNodeRadius:this.relationNodeRadius;
+                  radius *= currentZoom;
+                  let centerX = clientRect.x - paneWidth + radius; 
+                  let centerY = clientRect.y + radius;
+
+                  let x0 = centerX + radius;
+                  let x1 = centerX - radius - this.tooltipDims.width;
+                  let x = leftRight==0?x0:x1;
+
+                  let y0 = centerY;
+                  let y1 = centerY - this.tooltipDims.height;
+                  let y = topBottom==0?y0:y1;
+                 
+                  this.tooltipX = x;
+                  this.tooltipY = y;
+                    
+                  this.currentNode = d;
+                  this.tooltipFullactive = true;
+                 
+
+                })
+                .on('mouseout', (d,i,nodes)=>{
+                 this.setFocusedNode({id:d.id, flag:false});
      //             //if(d.type=='project'){
      //             //d3.select(nodes[i]).select(".main").attr("fill","white");
      //             //}else{
      //             //d3.select(nodes[i]).select(".main").attr("fill","blue");
      //             //}
      //             //this.hideTooltip();
-     //             this.tooltipX = null;
-     //             this.tooltipY = null;
-     //             this.tooltipFullactive = false;
-     //           })
+                  this.tooltipX = null;
+                  this.tooltipY = null;
+                  this.tooltipFullactive = false;
+                })
      //           .on('click', (d,i,nodes)=>{
      //             if(d.type!='project'){
      //               console.log("clicked", d.id, d);
@@ -353,6 +516,11 @@ export default {
      //             }
      //           })
       ;
+
+
+
+
+
     //  this.nodeIn
     //            .append("circle")
     //            .attr("class", "activeRing")
@@ -406,6 +574,11 @@ export default {
         this.simulation.alpha(1).restart();
     //  }
 
+
+    },
+    updateGraphVisual(){
+
+      this.node.select(".focusRing").transition().duration(200).attr("opacity", d=>(this.focusedNode.includes(d.id)?1:0));
 
     },
     flatten(nestedData){
@@ -501,6 +674,11 @@ export default {
     dragged(d) {
       d.fx = d3.event.x;
       d.fy = d3.event.y;
+
+      // i have not fully tested if setting or rather reinforcing the focus here in 
+      // the dagging functions might confuse it elsewhere, but on first try it seems
+      // to work
+     this.setFocusedNode({id:d.id, flag:true});
     },
     dragended(d) {
       if (!d3.event.active) this.simulation.alphaTarget(0);
@@ -508,6 +686,11 @@ export default {
       
       d.fx = null;
       d.fy = null;
+
+      // i have not fully tested if setting or rather reinforcing the focus here in 
+      // the dagging functions might confuse it elsewhere, but on first try it seems
+      // to work
+     this.setFocusedNode({id:d.id, flag:false});
     },
     hideTooltip(){
       this.tooltipX = -500;
@@ -532,6 +715,21 @@ export default {
     height:100%;
     /**/
   }
+  .settings-button{
+    margin:0;
+    position:absolute;
+    font-family: sans-serif;
+    font-size:14px;
+    text-align: right;
+    right:10px;
+    top: 5px;
+    color: grey;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .settings-button:hover{
+    opacity: 0.8;
+  }
   .zoomNote{
     margin:0;
     position:absolute;
@@ -540,7 +738,8 @@ export default {
     text-align: right;
     right:10px;
     bottom: 5px;
-    color: grey;
+    color: white;
+    mix-blend-mode: difference;
   }
   /*
   #vizControl{

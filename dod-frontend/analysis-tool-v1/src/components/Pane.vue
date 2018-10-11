@@ -11,18 +11,20 @@
             gridRowGap: 8+'px',
            }" 
       >
-      <div v-for='(node, i) in (nodesWithExtrasReversed)'
+      <div v-for='(node, i) in (nodesBytTabAndDate)'
         :style="{minWidth: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
         :class="{item: true, extra: node.type=='extra'}"
         :key="node.id"
       >
-        <div class='insideItem'
+        <div 
+          :class='{insideItem: true, focused: focusedNode.includes(node.id)}'
           :style="{width: minPaneItemWidth + 'px', height: paneItemHeight+'px'}"
           >
           <pane-node
             :data=node
             :deleteNode='()=>deleteNode(node.id)'
             :toggleGraphSelect='()=>setNodeSelect(node.id, !node.selected)'
+            :visibleConnections='node.relationships.filter(rs=>activeSubnodeIds.includes(rs.id)).map(rs=>rs.id)'
             >
           </pane-node>
         </div>
@@ -54,6 +56,7 @@ export default {
     'nodes',
     'deleteNode',
     'setNodeSelect',
+    'activeSubnodeIds',
   ],
   computed:{
     ...mapGetters([
@@ -62,16 +65,23 @@ export default {
       'activeTab',
       'heightAllButPane',
       'windowDims',
+      'focusedNode',
     ]),
     nodesOfActiveTab: function(){
       if(this.activeTab.type == 'all'){
         return this.nodes;
+      }else if(this.activeTab.type == 'graph'){
+        return this.nodes.filter(node=>node.selected);
       }else{
         return this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==this.activeTab.type&&rs.value==this.activeTab.value)));
       }
     },
-    nodesWithExtrasReversed:function(){
-      return this.nodesOfActiveTab
+    nodesBytTabAndDate:function(){
+      return this.nodesOfActiveTab.sort(function(a,b){
+        // Turn your strings into dates, and then subtract them
+        // to get a value that is either negative, positive, or zero.
+        return new Date(b.filing_date) - new Date(a.filing_date);
+      });
     }
   },
   mounted(){
@@ -183,8 +193,8 @@ export default {
   }
   .insideItem{
     margin:auto;
-    box-shadow: 3px 3px;
-        outline: black 1px solid;
+    box-shadow: 3px 3px 3px;
+    outline: black 1px solid;
     outline-offset: -1px;
     /*
     outline: black dotted 1px;
@@ -192,6 +202,10 @@ export default {
     /**/
     overflow: hidden;
     background-color:white;
+  }
+  .focused{
+    transition: all 0.1s;
+    box-shadow: #e10000 5px 5px 3px;
   }
   .extra{
     background-color:red;

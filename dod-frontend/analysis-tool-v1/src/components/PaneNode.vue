@@ -1,20 +1,26 @@
 <template>
-  <div class="paneNode">
+  <div class="paneNode" @mouseover=mouseOver @mouseout=mouseOut>
     <div class='title'
+        title='Filing date of this press release'
         :style="{height: paneItemHeight + 'px', width: leftTitleWidth +'px'}"
-      ><p>{{data.id}}</p>
+      ><p>{{getDate(data.filing_date)}}</p>
     </div>
     <div class='paneNodeMain' 
        :style="{width: minPaneItemWidth - leftTitleWidth + 'px', height: paneItemHeight +'px'}"
       >
-        <a class='close' @click="deleteNode"></a>
+        <a class='close' title='Delete this press reslease from the pane and graph' @click="deleteNode"></a>
+
         <div class='paneNodeTopSection'
          :style="{width: minPaneItemWidth - leftTitleWidth + 'px'}"
          >
+         <p title='Number of subnodes currently on the graph that are connected to this filing.' class='visibleConnectionsCounter' v-show='visibleConnections.length>0'>
+          {{visibleConnections.length}}
+         </p>
 
         </div>
 
-        <div class='paneNodeOptions'
+        <div 
+          :class='{paneNodeOptions: true, focused: data.id==focusedNode}'
          :style="{width: paneNodeMainWidth + 'px', height: paneNodeOptionsHeight + 'px',
            }"
          >
@@ -119,15 +125,17 @@ export default {
   },
   data () {
     return {
-      leftTitleWidth: 12,
+      leftTitleWidth: 20,
       paneNodeOptionsMargin: 5,
       numOptions: 3,
+      unwatchFocus: undefined,
     }
   },
   props:[
     'data',
     'deleteNode',
     'toggleGraphSelect',
+    'visibleConnections',
   ],
   computed:{
     ...mapGetters([
@@ -136,6 +144,7 @@ export default {
       'readerMaxHeight',
       'readerHeightGoal',
       'currentReaderContent',
+      'focusedNode',
     ]),
     paneNodeMainWidth: function(){
       return this.minPaneItemWidth - this.leftTitleWidth;
@@ -155,15 +164,29 @@ export default {
     ...mapActions([
       'changeReaderContent',
       'changeReaderHeight',
+      'setFocusedNode',
     ]),
+    mouseOver(){
+      this.setFocusedNode({id: this.data.id, flag:true});
+    },
+    mouseOut(){
+      this.setFocusedNode({id: this.data.id, flag:false});
+    },
     changeReader: function(){
       if(this.currentReaderContent.id == this.data.id && this.readerHeightGoal == this.readerMaxHeight){
         this.changeReaderHeight(0);
-        this.changeReaderContent({id: undefined, text: undefined});
+        this.changeReaderContent({id: undefined, text: undefined, date: undefined});
       }else{
         this.changeReaderHeight(this.readerMaxHeight);
-        this.changeReaderContent({id: this.data.id, text: this.data.full_text});
+        this.changeReaderContent({id: this.data.id, text: this.data.full_text, date: this.data.filing_date});
       }
+    },
+    getDate(d){
+      d = new Date(d);
+      let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; 
+
+      return d.getFullYear() + " " + months[d.getMonth()]
+
     },
   }
 }
@@ -188,8 +211,8 @@ export default {
     margin: 0;
     font-family: sans-serif;
     transform: rotate(90deg);
-    font-size: 5.9px;
-    
+    font-size: 12px;
+    font-weight: bold; 
   }
 
   .paneNodeMain{
@@ -200,12 +223,9 @@ export default {
     top: 4px;
     width: 12px;
     height: 12px;
-    opacity: 0.3;
+    opacity: 0.05;
     position: absolute;
-  }
-  .close:hover{
-    opacity: 1;
-    cursor: pointer;
+    z-index:1;
   }
   .close:before, .close:after {
     position: absolute;
@@ -226,7 +246,18 @@ export default {
     /*
     outline: black 1px solid;
     /**/
-    height:  23px;
+    height:  24px;
+    padding-left:4px;
+    box-sizing: border-box;
+    opacity:0.15;
+  }
+  .visibleConnectionsCounter{
+    margin-top: 0;
+    font-family: sans-serif;
+    font-size: 12px;
+    font-weight: bold; 
+    cursor: default;
+    display:inline;
   }
 
   .paneNodeOptions{
@@ -254,7 +285,7 @@ export default {
     /**/
   }
   svg{
-    opacity: 0.2;
+    opacity: 0.05;
   }
   .paneNodeOptionItem:hover svg{
     opacity: 1;
@@ -262,9 +293,25 @@ export default {
   .paneNodeOptionItemInner{
     cursor: pointer;
   }
+  .focused .close{
+    opacity:0.4;
+  }
+  .focused svg{
+    opacity:0.4;
+  }
   .active svg{
     opacity: 1;
+    /*
     fill: #18ca18;
+    /**/
+    fill: red;
+  }
+  .focused .paneNodeTopSection{
+    opacity: 0.4;
+  }
+  .close:hover{
+    opacity: 1;
+    cursor: pointer;
   }
 </style>
 
