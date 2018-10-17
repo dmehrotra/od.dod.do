@@ -51,7 +51,60 @@ function search(req,res){
 
 	});
 }
+function dateSearch(req,res){
+	let sd=req.params.start_date;
+	let ed=req.params.end_date
+	let sql = 'select id from "Projects" where filing_date between \''+sd+'\'::date and \''+ed+'\'::date;'
+	db.sequelize.query(sql,{ model: Project }).then(function(projects){
+		if (projects){
+			ar = _.map(projects,function(a){ return a.id});
+			project_ar = _.map(ar,getProject);
+			Promise.all(project_ar).then(function(v){
+				node=_.compact(v)
+				if(node){
+					promises = _.map(node,processSearch)
+					Promise.all(promises).then(function(v){
+						res.json(v)
+					})
+				}
+				
+			})
+		}else{res.status(400).send("not a valid uuid")}
 
+	});
+}
+function findHash(req,res){
+	let hash=req.params.hash
+	let sql = 'select id from "Projects" where id = \''+hash+'\'';
+	db.sequelize.query(sql,{ model: Project }).then(function(projects){
+		if (projects){
+			ar = _.map(projects,function(a){ return a.id});
+			project_ar = _.map(ar,getProject);
+			Promise.all(project_ar).then(function(v){
+				node=_.compact(v)
+				if(node){
+					promises = _.map(node,processSearch)
+					Promise.all(promises).then(function(v){
+						res.json(v)
+					})
+				}
+				
+			})
+		}else{res.status(400).send("not a valid uuid")}
+
+	});
+}
+function recent(req,res){
+	let sql = 'select MAX(filing_date) from "Projects";';
+	db.sequelize.query(sql,{ model: Project }).then(function(recent){
+		if (recent){
+			date = recent[0].dataValues.max
+			res.json(date)
+		}else{
+			res.status(500).send("API error")
+		}
+	});
+}
 function processSearch(project){
 	
 	return new Promise(function(resolve, reject){
@@ -170,7 +223,10 @@ function find_department(dn){
 module.exports = {
 	create: create,
 	connected: connected,
-	search:search
+	search: search,
+	recent: recent,
+	findHash: findHash,
+	dateSearch: dateSearch
 };
 
 
