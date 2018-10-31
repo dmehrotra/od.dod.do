@@ -1,19 +1,27 @@
 <template>
-  <div id="search" :style="{height: searchBarHeight +'px'}" :class="{searching: searching}">
-    <input class='searchBar' v-on:keyup.13="submit" @keyup="keyup" placeholder='search' autofocus 
-       :style="{marginTop: searchBarHeight/2 - 16 + 'px'}">
-    <div class='message'>
-      <p>{{message}}</p>
-    </div>
+  <div id="datePicker" :style="{height: searchBarHeight +'px'}" :class="{searching: searching}">
+    <v-date-picker mode='range'>
+      <input 
+        slot-scope='{inputValue, updateValue}' 
+        readonly 
+        type='text' 
+        :value='inputValue' 
+        @change.native='updateValue($event.target.value)'
+        ></input>
+    </v-date-picker>
   </div>
 </template>
 
 <script>
+//import VueRangedatePicker from 'vue-rangedate-picker'
+//import AirbnbStyleDatepicker from 'vue-airbnb-style-datepicker'
 
 import {mapGetters, mapActions} from 'vuex';
 export default {
   name: 'search',
   components: {
+ //   VueRangedatePicker,
+  //    AirbnbStyleDatepicker,
   },
   data () {
     return {
@@ -69,13 +77,14 @@ export default {
     0%{background-position:51% 100%}
     100%{background-position:50% -100%}
 }
-  #search{
+  #datePicker{
     background: linear-gradient(0deg,#ffffff,#ffffff, #ffffff, #4c53ff, #ffffff);
     background-size: 100% 200%;
     background-position: 50% 100%;
 
+    /*
     text-align:center;
-    overflow:hidden;
+    /**/
   }
   .searching{
 

@@ -11,8 +11,15 @@
 
       <div class='main-col-1-row-1 main-col-1-row'
          :style="{height: searchBarHeight+'px'}">
+        <div class='main-col-1-row-1-col-1 main-col-1-row-1-col'
+         :style="{width: leftColWidth/2+'px'}">
+          <slot name="search"></slot>
+        </div>
+        <div class='main-col-1-row-1-col-1 main-col-1-row-1-col'
+         :style="{width: leftColWidth/2+'px'}">
 
-        <slot name="search"></slot>
+          <slot name="datePicker"></slot>
+        </div>
 
       </div>
 
@@ -199,6 +206,11 @@ export default {
   }
   .main-col-1-row-1{
     /*
+    outline: green 1px dotted;
+    /**/
+    display: flex;
+  }
+  .main-col-1-row-1-col{
     outline: green 1px dotted;
     /**/
   }

@@ -13,9 +13,13 @@
   "dependencies": {
     "d3": "^5.4.0",
     "d3-force-attract": "^0.1.1",
+    "date-fns": "^1.29.0",
     "gsap": "^2.0.2",
+    "v-calendar": "^0.9.7",
     "vue": "^2.5.2",
+    "vue-airbnb-style-datepicker": "^2.1.0",
     "vue-grid-layout": "^2.2.0",
+    "vue-rangedate-picker": "^0.3.4",
     "vue-resize": "^0.4.4",
     "vue-resource": "^1.5.1",
     "vue-router": "^3.0.1",

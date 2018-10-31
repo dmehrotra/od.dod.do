@@ -8,6 +8,13 @@
         </search>
       </template>
 
+      <template slot="datePicker">
+        <date-picker
+          :search=search
+        >
+        </date-picker>
+      </template>
+
       <template slot="tabs">
           <tabs
             :tabs=requestSources
@@ -95,6 +102,7 @@
 import Layout from '@/components/Layout'
 
 import Search from '@/components/Search'
+import DatePicker from '@/components/DatePicker'
 import Tabs from '@/components/Tabs'
 import Pane from '@/components/Pane'
 
@@ -109,6 +117,7 @@ export default {
   components: {
     Layout,
     Search,
+    DatePicker,
     Pane, 
     Tabs,
     Reader,

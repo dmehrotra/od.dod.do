@@ -61,6 +61,7 @@ todo:
 - tab with everything that currently on the graph
 
 
+
 maybe in the pane, for each node and steadily updating it should displayed how many of the relation nodes on viz curretnly they share...
 
 
@@ -72,4 +73,11 @@ timeout errors for big searches like "new York" - by ID i am pretty sure they wo
 the way subnodes fold out autimatically etc should be accessible in a little settings overlay
 
 
+
+TODO:
+
+-[ ] tooltip for projects and relations
+  -[ ] ...
+-[ ] date picker next to search bar
+-[ ] default to download most recent 
 
