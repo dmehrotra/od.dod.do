@@ -185,7 +185,7 @@ export default {
       d = new Date(d);
       let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; 
 
-      return d.getFullYear() + " " + months[d.getMonth()]
+      return d.getFullYear() + " " + months[d.getMonth()] + " " + d.getDate()
 
     },
   }

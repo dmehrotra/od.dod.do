@@ -200,6 +200,7 @@ export default {
       let domain;
       if(type == 'search'){
         domain = "https://quagga.club/api/search/" + encodeURIComponent(query.query);
+        //domain = "https://quagga.club/api/date-range/2018-4-2/2018-4-4"
       }
       console.log(domain);
       api.get(domain)

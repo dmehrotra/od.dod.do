@@ -1,14 +1,29 @@
 <template>
   <div id="datePicker" :style="{height: searchBarHeight +'px'}" :class="{searching: searching}">
-    <v-date-picker mode='range'>
-      <input 
-        slot-scope='{inputValue, updateValue}' 
-        readonly 
-        type='text' 
-        :value='inputValue' 
-        @change.native='updateValue($event.target.value)'
-        ></input>
+    <v-date-picker mode='range' :popoverVisibility="'hover'" popoverAlign='right' :attributes.popover="{visibility: 'hidden'}"
+       class="datePickerComponent"
+       :style="{paddingTop: searchBarHeight/2 - 30 + 'px'}"
+      show-popover="false"
+      v-model='myDate'
+      >
+      <div
+         class="datePickingBox"
+         slot-scope='{inputValue, updateValue}' 
+         :style="{}"
+         @click="togglePicker"
+         >
+         <p class="datePickingText"
+         
+            :style="{color: myDate?'black':'#757575'}"
+         >
+
+          {{myDate==undefined?'search by date': inputValue}}
+         </p>
+      </div>
     </v-date-picker>
+    <div class="searchByDateButton" v-show=myDate @click=searchByDate>
+      <p :class="{textShadow: searching}">{{searching?'searching':'click to search'}}</p>
+    </div>
   </div>
 </template>
 
@@ -27,6 +42,8 @@ export default {
     return {
       searching: false,
       message: '',
+      showPicker: true,
+      myDate: undefined,
     }
   },
   props:[
@@ -45,6 +62,12 @@ export default {
     ...mapActions([
       'changeActiveTab',
     ]),
+    togglePicker(){
+      this.showPicker=!this.showPicker;
+    },
+    searchByDate(){
+      this.searching = true;
+    },
     keyup(e){
       if(e.keyCode != 13){
         this.message = '';
@@ -103,5 +126,49 @@ export default {
     margin-top: 5px;
     font-family: sans-serif;
     font-size: 12px;
+  }
+
+
+  .datePickerComponent{
+    width: 80%;
+    margin: auto;
+  }
+  .datePickingBox{
+    text-align:center;
+    font-family: sans-serif;
+    width: 100%;
+    height: 25px;
+    font-size: 19px;
+    padding-top:3px;
+    
+    outline: #cbcbcb 1px solid;
+    white-space: nowrap;
+    overflow: hidden;
+    background-color:white;
+
+  }
+  .datePickingText{
+    margin:0;
+  }
+  .searchByDateButton{
+    text-align: center;
+    width:80%;
+    margin:auto;
+    cursor: pointer;
+  }
+  .searchByDateButton p{
+    margin:0;
+    text-align:center;
+    font-family: sans-serif;
+    height: 24px;
+    font-size: 17px;
+    padding-top:4px;
+    color: #f144ff;
+  }
+  .searchByDateButton:hover p{
+    text-shadow: 0 0 2px #f144ff;
+  }
+  .textShadow{
+    text-shadow: 0 0 2px #f144ff;
   }
 </style>

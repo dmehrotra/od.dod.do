@@ -76,8 +76,11 @@ the way subnodes fold out autimatically etc should be accessible in a little set
 
 TODO:
 
--[ ] tooltip for projects and relations
-  -[ ] ...
--[ ] date picker next to search bar
--[ ] default to download most recent 
+- [ ] tooltip for projects and relations
+  - [ ] relations on graph should have option to request all related to this, but also all from current pane related to it
+  - [ ] ...
+- [ ] date picker next to search bar
+- [ ] default to download most recent 
+- [ ] maybe the view window (left bottom) should list the relations, too for a quick glance
+- [ ] help page explaining the features
 

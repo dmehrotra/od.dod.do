@@ -1,7 +1,7 @@
 <template>
   <div id="search" :style="{height: searchBarHeight +'px'}" :class="{searching: searching}">
     <input class='searchBar' v-on:keyup.13="submit" @keyup="keyup" placeholder='search' autofocus 
-       :style="{marginTop: searchBarHeight/2 - 16 + 'px'}">
+       :style="{marginTop: searchBarHeight/2 - 30 + 'px'}">
     <div class='message'>
       <p>{{message}}</p>
     </div>

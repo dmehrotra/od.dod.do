@@ -211,6 +211,7 @@ export default {
     display: flex;
   }
   .main-col-1-row-1-col{
+    /*
     outline: green 1px dotted;
     /**/
   }

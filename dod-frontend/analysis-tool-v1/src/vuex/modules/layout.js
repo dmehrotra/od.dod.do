@@ -9,7 +9,7 @@ const state = {
   arrowWidth: 8,
   
   //search bar
-  searchBarHeight: 80,
+  searchBarHeight: 100,
 
   //tab bar
   tabBarHeight: 30,
