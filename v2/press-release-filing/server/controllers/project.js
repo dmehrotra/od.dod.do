@@ -31,17 +31,22 @@ function create(req,res){
 }
 function search(req,res){
 	let query = req.params.query;
-	let sql = 'SELECT id, full_text FROM(SELECT tsv,id, full_text FROM "Projects", plainto_tsquery(\''+query+'\') AS q WHERE (tsv @@ q)) AS t1 ORDER BY ts_rank_cd(t1.tsv, plainto_tsquery(\''+query+'\')) DESC;';
+	let sql = 'SELECT id FROM(SELECT tsv,id, full_text FROM "Projects", plainto_tsquery(\''+query+'\') AS q WHERE (tsv @@ q)) AS t1 ORDER BY ts_rank_cd(t1.tsv, plainto_tsquery(\''+query+'\')) DESC;';
 // I straight up cant figure out how to include associations in a raw query... so for now this is it
 	db.sequelize.query(sql,{ model: Project }).then(function(projects){
 		if (projects){
+			
 			ar = _.map(projects,function(a){ return a.id});
+
 			project_ar = _.map(ar,getProject);
 			Promise.all(project_ar).then(function(v){
 				prs=_.compact(v)
 				if(prs){
-					cleaned_projects = _.map(prs,clean)
-					res.json(cleaned_projects)					
+					cleaned_projects = _.map(prs,process)
+					Promise.all(cleaned_projects).then(function(v){
+						res.json(v)
+					})
+				
 				}
 				
 			})
@@ -58,9 +63,11 @@ function connected(req,res){
 		Promise.all([department,project,relationship]).then(function(v){
 			prs=_.compact(v)
 			if(prs){
-				cleaned_projects = _.map(prs,clean)
-				res.json(cleaned_projects)
-
+				cleaned_projects = _.map(prs,process)
+				Promise.all(cleaned_projects).then(function(v){
+					res.json(v)
+				})
+			
 			}
 		});
 	}else{res.status(400).send("not a valid uuid")}
@@ -78,9 +85,11 @@ function dateSearch(req,res){
 			Promise.all(project_ar).then(function(v){
 				prs=_.compact(v)
 				if(prs){
-					cleaned_projects = _.map(prs,clean)
-					res.json(cleaned_projects)
-
+					cleaned_projects = _.map(prs,process)
+					Promise.all(cleaned_projects).then(function(v){
+						res.json(v)
+					})
+				
 				}
 				
 			})
@@ -98,9 +107,11 @@ function findHash(req,res){
 			Promise.all(project_ar).then(function(v){
 				prs=_.compact(v)
 				if(prs){
-					cleaned_projects = _.map(prs,clean)
-					res.json(cleaned_projects)
-
+					cleaned_projects = _.map(prs,process)
+					Promise.all(cleaned_projects).then(function(v){
+						res.json(v)
+					})
+				
 				}
 				
 			})
@@ -108,22 +119,31 @@ function findHash(req,res){
 
 	});
 }
-function clean(node,callback){
+
+function clean_node(node,callback){
 	if (node.constructor.name == 'Department' || node.constructor.name == 'Relationship'){
 		obj = {}
 		obj.sourceType = node.constructor.name
 		obj.data = node.dataValues
 		obj.data.projects = standardize(node.dataValues.Projects,"P")
 		obj = _.omit(obj.data, ommit);
-		return obj
+		callback(obj)
 	}else{
 		obj = {}
 		obj.sourceType = node.constructor.name
 		obj.data = node.dataValues
 		obj.data.relationships = standardize(node.dataValues.Relationships,"DR")
 		obj = _.omit(obj.data, ommit);
-		return obj
+
+		callback(obj)
 	}
+}
+function process(project){
+	return new Promise(function(resolve, reject){
+				clean_node(project,function(obj){
+					resolve(obj)
+				})
+			})
 }
 function standardize(o,type){
  	if (type == "DR"){
