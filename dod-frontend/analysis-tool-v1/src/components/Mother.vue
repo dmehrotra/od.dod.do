@@ -206,7 +206,11 @@ export default {
         tabName = query.query;
       }else if(type == 'dateSearch'){
         domain = "https://quagga.club/api/date-range/" + encodeURIComponent(query.query.start) + "/" + encodeURIComponent(query.query.end);
-        tabName = query.query.start.replace(/-/g,"/") + "-" + query.query.end.replace(/-/g,"/");
+        if(query.query.tabName){
+          tabName = query.query.tabName;
+        }else{
+          tabName = query.query.start.replace(/-/g,"/") + "-" + query.query.end.replace(/-/g,"/");
+        }
       }
       console.log(domain);
       api.get(domain)

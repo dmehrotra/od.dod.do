@@ -1,17 +1,18 @@
 <template>
   <div id="datePicker" :style="{height: searchBarHeight +'px'}" :class="{searching: searching}">
-    <v-date-picker mode='range' :popoverVisibility="popoverVisibility" popoverAlign='right' 
+    <v-date-picker mode='range' :popoverVisibility="'hover'" popoverAlign='right' 
        class="datePickerComponent"
        :style="{paddingTop: searchBarHeight/2 - 25 + 'px'}"
-      v-model='myDate'
-      @input='newDate'
-      @popover-did-disappear="hidePicker"
+        v-model='myDate'
+        :max-date='new Date()'
+        @input="dateEntered"
+        @popover-did-appear="calAppeared"
+        @popover-did-disappear="calDisappeared"
       >
       <div
-      :class="{datePickingBox: true, pickingDate: showPicker}"
+      :class="{datePickingBox: true, pickingDate: pickingDate}"
          slot-scope='{inputValue, updateValue}' 
          :style="{}"
-         @click="togglePicker"
          >
          <p class="datePickingText"
          
@@ -22,7 +23,7 @@
          </p>
       </div>
     </v-date-picker>
-    <div class="searchByDateButton" v-show=myDate @click=submit>
+      <div class="searchByDateButton" v-show="message.length <1 && myDate" @click=submit>
       <p :class="{textShadow: searching}">{{searching?'searching':'click to search'}}</p>
     </div>
 
@@ -47,8 +48,10 @@ export default {
     return {
       searching: false,
       message: '',
-      showPicker: false,
       myDate: undefined,
+
+      pickingDate: false,
+      readyToSearch: false,
     }
   },
   props:[
@@ -67,6 +70,7 @@ export default {
     }
   },
   mounted(){
+    this.getTodaysData();
   },
   beforeDestroy: function () {
   },
@@ -74,48 +78,60 @@ export default {
     ...mapActions([
       'changeActiveTab',
     ]),
-    hidePicker(){
-      this.showPicker = false;
-      console.log("hide!");
+    calDisappeared(){
+      this.pickingDate = false;
     },
-    togglePicker(){
-      this.showPicker = true;
+    calAppeared(){
+      this.pickingDate = true;
+    },
+    dateEntered(){
+      console.log("yo!");
       this.message = '';
-      console.log("click truerue");
-      //this.showPicker=!this.showPicker;
+      //this.readyToSearch = true;
     },
-    newDate(){
-      //this.showPicker = false;
-      console.log("hide!");
-    },
+
+
     submit(){
       this.searching = true;
-      console.log(this.myDate);
+      
       let start = this.myDate.start.getFullYear() + "-" + (this.myDate.start.getMonth()+1) + "-" + this.myDate.start.getDate();
       let end = this.myDate.end.getFullYear() + "-" + (this.myDate.end.getMonth()+1) + "-" + this.myDate.end.getDate();
       console.log(start);
       let query = {'start': start, 'end': end};
-      //this.message = '';
-      //
       this.dateSearch(query, (res)=>{
         if(res.res == null){
+          console.log("daresearch null");
           this.message = "error when searching for '"+res.query+"'"
         }else{
+
+          console.log("daresearch sucess");
           if(res.res > 0){
             this.changeActiveTab({'type':'dateSearch', 'value':res.query, 'timestamp': res.timestamp});
           }
           this.message = String(res.res) + " results found for '"+res.query+"'"
-          this.myDate = undefined;
         }
         this.searching = false;
       });
     },
-    //keyup(e){
-    //  if(e.keyCode != 13){
-    //    this.message = '';
-    //    this.searching = false;
-    //  }
-    //},
+    getTodaysData(){
+      let today = new Date();
+      //let start = today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
+      //let end = today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
+
+      let start = '2018-08-01'
+      let end = '2018-08-01'
+
+      let query = {'start': start, 'end': end, 'tabName': 'today\'s contracts (ish lol)'};
+      this.dateSearch(query, (res)=>{
+        if(res.res == null){
+        }else{
+          if(res.res > 0){
+            this.changeActiveTab({'type':'dateSearch', 'value':res.query, 'timestamp': res.timestamp});
+          }
+        }
+      });
+
+    },
   }
 }
 </script>
