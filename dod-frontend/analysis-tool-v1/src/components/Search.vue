@@ -1,7 +1,7 @@
 <template>
   <div id="search" :style="{height: searchBarHeight +'px'}" :class="{searching: searching}">
     <input class='searchBar' v-on:keyup.13="submit" @keyup="keyup" placeholder='search' autofocus 
-       :style="{marginTop: searchBarHeight/2 - 30 + 'px'}">
+       :style="{marginTop: searchBarHeight/2 - 25 + 'px'}">
     <div class='message'>
       <p>{{message}}</p>
     </div>
@@ -52,7 +52,9 @@ export default {
         if(res.res == null){
           this.message = "error when searching for '"+res.query+"'"
         }else{
-          this.changeActiveTab({'type':'search', 'value':res.query, 'timestamp': res.timestamp});
+          if(res.res > 0){
+            this.changeActiveTab({'type':'search', 'value':res.query, 'timestamp': res.timestamp});
+          }
           this.message = String(res.res) + " results found for '"+res.query+"'"
         }
         this.searching = false;

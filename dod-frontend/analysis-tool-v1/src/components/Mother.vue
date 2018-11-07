@@ -10,7 +10,7 @@
 
       <template slot="datePicker">
         <date-picker
-          :search=search
+          :dateSearch=searchByDate
         >
         </date-picker>
       </template>
@@ -163,7 +163,8 @@ export default {
       let idValues = [];
       let sources = this.nodes.reduce((acc, node)=>{
               //return acc.concat(node.requestSource)
-              let searchSources = node.requestSource.filter(rs=>rs.type=='search')
+              //let searchSources = node.requestSource.filter(rs=>rs.type=='search')
+              let searchSources = node.requestSource;
               searchSources = searchSources.filter(rs=>(!searchValues.includes(rs.value)));
               searchValues = searchValues.concat(searchSources.map(rs=>rs.value))
               return acc.concat(searchSources);
@@ -198,9 +199,14 @@ export default {
     queryNodes(query, done){
       let type = query.type; 
       let domain;
+      let tabName;
       if(type == 'search'){
         domain = "https://quagga.club/api/search/" + encodeURIComponent(query.query);
         //domain = "https://quagga.club/api/date-range/2018-4-2/2018-4-4"
+        tabName = query.query;
+      }else if(type == 'dateSearch'){
+        domain = "https://quagga.club/api/date-range/" + encodeURIComponent(query.query.start) + "/" + encodeURIComponent(query.query.end);
+        tabName = query.query.start.replace(/-/g,"/") + "-" + query.query.end.replace(/-/g,"/");
       }
       console.log(domain);
       api.get(domain)
@@ -208,8 +214,8 @@ export default {
           console.log("nodes", response);
           let num = response.body.length;
           let timestamp = Date.now();
-          this.integrateNodes(response.body, {'type': 'search', 'value': query.query, 'timestamp': timestamp});
-          done(num, timestamp);
+          this.integrateNodes(response.body, {'type': query.type, 'value': tabName, 'timestamp': timestamp});
+          done(num, timestamp, tabName);
         })
         .catch((error) => {
           console.log("ERROR with API", error); 
@@ -217,12 +223,16 @@ export default {
         });
     },
     search(query, done){
-      this.queryNodes({'type': 'search', 'query': query}, (res,timestamp )=>{
-
-        done({'res': res, 'query': query, 'timestamp': timestamp});
+      this.queryNodes({'type': 'search', 'query': query}, (res,timestamp, tabName )=>{
+        done({'res': res, 'query': tabName, 'timestamp': timestamp});
       });
     },
+    searchByDate(query, done){
+      this.queryNodes({'type': 'dateSearch', 'query': query}, (res,timestamp, tabName )=>{
+        done({'res': res, 'query': tabName, 'timestamp': timestamp});
+      });
 
+    },
     integrateNodes(newNodes, requestSource){
       //first check which nodes exist already and brng them to the top,
       
