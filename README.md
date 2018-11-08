@@ -1,4 +1,4 @@
-# defense.fishing
+# defense.fishing [COMING SOON]
 > "The most defective method possible would be to approach warfare and the phenomena of armed violence in terms of the ends pursued and not by the nature of the means employed." -- Grégoire Chamayo
 
 ## Background
