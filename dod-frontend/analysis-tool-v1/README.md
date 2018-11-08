@@ -76,11 +76,15 @@ the way subnodes fold out autimatically etc should be accessible in a little set
 
 TODO:
 
-- [ ] tooltip for projects and relations
+- [ ] tooltip for projects and relations (should be priority right now)
+- [ ] flesh out settigs page, what will be no there apart from how many default unfolding relations?
   - [ ] relations on graph should have option to request all related to this, but also all from current pane related to it
   - [ ] ...
-- [ ] date picker next to search bar
-- [ ] default to download most recent 
+- [x] date picker next to search bar
+- [x] default to download most recent 
+  - [ ] just need to add in the right function once recent data exists.
 - [ ] maybe the view window (left bottom) should list the relations, too for a quick glance
+  - [ ] this should be elsewhere on hover of the paneNodes, maybe below the tabs, somewhere indescrete but visible
 - [ ] help page explaining the features
+- [ ] soltuion needed for tabs growing to large... -.-
 
