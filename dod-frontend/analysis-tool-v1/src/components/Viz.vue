@@ -10,6 +10,7 @@
       :yPos=tooltipY
       :fullactive=tooltipFullactive
       :currentNode=currentNode
+      :setNodeSelect=setNodeSelect
     >
     </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :height=windowDims.height>
@@ -79,6 +80,7 @@ export default {
   },
   props:[
     'nodeData',
+    'setNodeSelect',
     //'width',
     //'height',
     //'setActiveNode',

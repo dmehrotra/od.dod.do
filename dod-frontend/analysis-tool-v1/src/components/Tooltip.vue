@@ -1,15 +1,35 @@
 <template>
   <div id="tooltip" 
-       :style="{left: xPosition +'px', top: yPosition + 'px', opacity:opacity, width: tooltipDims.width+'px', height: tooltipDims.height+'px'}"
+       :style="{
+            left: xPosition +'px', top: yPosition + 'px', 
+            opacity:opacity, 
+            width: tooltipDims.width+'px', height: tooltipDims.height+'px'}"
        v-on:mouseover="mouseOver"
        v-on:mouseout="mouseOut"
     >
     <div class="bg"></div>
-      <!--:style="{width: width-2*padding+'px', height: height-2*padding+'px'}"-->
     <div class="tooltip-content"
-      >
-      <a @click=crossOutTooltip>close</a>
-      <p>Hello</p>
+         :style="{
+            width: (tooltipDims.width)-10+'px',
+            padding: 5+'px'
+         }">
+      
+      <!--
+        maybe we just don't need the close tooltip button.... because it's closing
+        in mouseout anyway
+        <a @click=crossOutTooltip>close</a>
+      -->
+      <projectTooltip v-if="currentNode.type=='project'"
+        :node=currentNode
+        :width=tooltipDims.width-10
+        :closeTooltip=crossOutTooltip
+        :toggleGraphSelect='()=>setNodeSelect(currentNode.id, !currentNode.selected)'
+
+        >
+      </projectTooltip>
+      
+      <p>{{currentNode.type}}</p>
+
       </div>
     </div>
 
@@ -20,8 +40,7 @@
 <script>
 
 
-//import ProjectTooltip from '@/components/ProjectTooltip'
-//import ConnectionTooltip from '@/components/ConnectionTooltip'
+import ProjectTooltip from '@/components/ProjectTooltip'
 import {TweenMax} from "gsap";
 
 import {mapGetters, mapActions} from 'vuex';
@@ -29,7 +48,7 @@ import {mapGetters, mapActions} from 'vuex';
 export default {
   name: 'tooltip',
   components: {
-    //ProjectTooltip,
+    ProjectTooltip,
     //ConnectionTooltip,
   },
   data () {
@@ -46,6 +65,7 @@ export default {
       hideAnimation: undefined,
       showAnimation: undefined,
       maxOpacity:1,
+
     }
   },
   props:[
@@ -53,6 +73,7 @@ export default {
     'yPos',
     'fullactive',
     'currentNode',
+    'setNodeSelect',
   ],
   computed:{
     ...mapGetters([
@@ -135,7 +156,7 @@ export default {
     //  this.setActiveNode(this.currentNode.id, true);
     },
     mouseOut: function(){
-      this.hideTooltipFast();
+      //this.hideTooltipFast();
       this.setFocusedNode({id:this.currentNode.id, flag:false});
     //  this.setActiveNode(this.currentNode.id, false);
     },
@@ -190,6 +211,5 @@ export default {
   }
   .tooltip-content{
     position:absolute;
-    padding:5px;
   }
 </style>

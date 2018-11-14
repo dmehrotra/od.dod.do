@@ -44,6 +44,7 @@
         <viz
           ref='vizComponent'
           :nodeData=selectedNodeData
+          :setNodeSelect=setNodeSelect
         >
         </viz>
       </template>
@@ -248,6 +249,7 @@ export default {
 
         node.selected = false;
         node.active = false;
+        node.fixed = true;
         node.marked = 'none';
 
         this.nodes.find((d, i)=>{
@@ -320,10 +322,18 @@ export default {
           this.deleteNode(id);
         });
       }else if(tab.type == 'graph'){
+        // graph should not really delete but rather unselect everynode
+        
         let ids = this.nodes.filter(d=>d.selected).map(d=>d.id);
         ids.forEach(id=>{
-          this.deleteNode(id);
+          this.setNodeSelect(id, false);
         });
+
+        // // this actually deletes
+        //let ids = this.nodes.filter(d=>d.selected).map(d=>d.id);
+        //ids.forEach(id=>{
+        //  this.deleteNode(id);
+        //});
       }else{
         let idsSingles =  this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==tab.type&&rs.value==tab.value))).filter(node=>node.requestSource.length==1).map(d=>d.id);
         idsSingles.forEach(id=>{
@@ -364,6 +374,10 @@ export default {
 
       if(flag==true && this.unfoldSharedRelationsByDefault){
         this.unfoldSharedRelationByThreshold();
+      }else if(flag==false){
+        // we should fold subnodes in when unselecting a node
+      this.nodes.find(d=>d.id==id).relationships.forEach(subnode=>subnode.visible=false);
+
       }
       this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
     },
@@ -493,6 +507,8 @@ export default {
       //this.nodes.find(d=>d.id==id).relationships.forEach(d=>d.visible = true);
       this.nodes.find(d=>d.id==id).relationships.forEach(d=>this.setSubnode(d.id, flag));
     },
+    
+
     setActiveNode(id, flag){
       if(flag){
         this.activeNode = id;

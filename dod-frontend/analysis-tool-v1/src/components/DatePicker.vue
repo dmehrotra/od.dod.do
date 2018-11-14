@@ -39,7 +39,7 @@
 
 import {mapGetters, mapActions} from 'vuex';
 export default {
-  name: 'search',
+  name: 'datePicker',
   components: {
  //   VueRangedatePicker,
   //    AirbnbStyleDatepicker,
@@ -93,11 +93,24 @@ export default {
 
     submit(){
       this.searching = true;
-      
-      let start = this.myDate.start.getFullYear() + "-" + (this.myDate.start.getMonth()+1) + "-" + this.myDate.start.getDate();
-      let end = this.myDate.end.getFullYear() + "-" + (this.myDate.end.getMonth()+1) + "-" + this.myDate.end.getDate();
-      console.log(start);
-      let query = {'start': start, 'end': end};
+
+      let sy = this.myDate.start.getFullYear();
+      let sm = this.myDate.start.getMonth()+1;
+      let sd = this.myDate.start.getDate();
+
+      let ey = this.myDate.end.getFullYear();
+      let em = this.myDate.end.getMonth()+1;
+      let ed = this.myDate.end.getDate();
+
+      let start = sy + "-" + sm + "-" + sd;
+      let end = ey + "-" + em + "-" + ed;
+      let tabName;
+      if(sy==ey&&sm==em&&sd==ed){
+        tabName = start.replace(/-/g,"/")
+      }else{
+        tabName = start.replace(/-/g,"/") + "-" + end.replace(/-/g,"/");
+      }
+      let query = {'start': start, 'end': end, 'tabName': tabName};
       this.dateSearch(query, (res)=>{
         if(res.res == null){
           console.log("daresearch null");
