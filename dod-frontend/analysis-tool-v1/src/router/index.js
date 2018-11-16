@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import About from '@/components/About'
 import Mother from '@/components/Mother'
 import Landing from '@/components/Landing'
 
@@ -16,6 +17,11 @@ export default new Router({
       path: '/',
       name: 'Landing',
       component: Landing
+    },
+    {
+      path: '/about',
+      name: 'About',
+      component: About
     },
     {
       path: '/app',
