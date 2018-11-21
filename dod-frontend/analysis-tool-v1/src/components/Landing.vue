@@ -110,7 +110,7 @@ p span{
 h1, p, ul li a {
   color: #fff;
   font-family: 'Roboto', sans-serif;
-  font-weight: 600;
+  font-weight: 300;
   text-transform: uppercase;
     font-size: 20px;
   line-height: 1.5em;
