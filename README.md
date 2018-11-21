@@ -7,8 +7,6 @@ supporting the hundreds of thousand DOD buildings and structures located on more
 
 A single release will never reveal conspiracy. Nor will it do too much work to clarify the trajectory of America's Global War on Terror &trade;.  However, our hope is that if taken in aggregate, the relationship between these contract announcements will help us to better understand the phenomena of modern warfare in the United States. 
 
-## Conspiracy Theories and Fever Research
-
 The constellation of press releases paints a picture of an industry thats knotted, tangled, and ultimately unknowable. To engage with this corpus is to chase leads, test conspiracies, and pull on threads until the whole system unravels. OD.DOD.DO is meant to allow researchers to invent, find, and test conspiracies in press releases.    
 ## About
 - ***what is this***: OD.DOD.DO is a tool that generates network maps of coporate entities, contract awards, and military technology based on daily Pentagon press releases.
