@@ -14,7 +14,7 @@
       <h1>Concept</h1>
       <p>The constellation of press releases paints a picture of an industry that’s knotted, tangled, and ultimately unknowable. To engage with this corpus is to chase leads, test conspiracies, and pull on threads until the whole system unravels. This is called fever research - searching urgently for what you know is there but that you can't name. defense.fish is meant to allow researchers to invent, find, and test conspiracies in press releases.</p>
       <h1>Credits</h1>
-      <p>Dhruv Mehrotra, Leon Eckert</p>
+      <p><a href="dhruvmehrotra.info">Dhruv Mehrotra</a>, <a href="http://leoneckert.com/">Leon Eckert</a></p>
     </div>
   </div>
 </template>
@@ -44,7 +44,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .nav{
-  width:100%;
+  width: 100%;
+  position: absolute;
+  top: 0px;
 }
 .main-nav{
   float:right;
@@ -84,14 +86,15 @@ ul li{
  margin:auto;
 }
 
-h1, p, ul li a {
+h1, p, ul li a, a {
   color: #fff;
   font-family: 'Roboto', sans-serif;
-  font-weight: 600;
   text-transform: uppercase;
   line-height: 1.4em;
+  font-weight: 300;
 
 }
+h1{font-weight: 600;}
 
 
 

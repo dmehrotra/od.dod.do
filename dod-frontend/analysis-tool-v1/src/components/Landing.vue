@@ -8,16 +8,16 @@
       </ul>
     </div> 
     <div id="header">
-    <p>[ OD.DOD.DO is ]
-    <p>[ an investigative ] [ an analytic ] [ a meddlesome ]</p>
-    <p>[ tool ] [ website ] [ means ] </p>
-    <p>[ to ] [ that ]</p>
-    <p>[ explore(s) ][ reveal(s) ] [ observe(s) ]  [ interrogate(s) ] [ generate(s) ] [ dissect(s) ] </p>
-    <p>[ connections ] [ relationships ] [ conspiracies ] [ networks ] [ hidden structures ]</p>
-    <p>[ using ] [ in ]</p>
-    <p>[ contract announcements ] [ Pentagon Press Filings ]</p>
+    <p><span class="selected">[ OD.DOD.DO is ]</span>
+    <p><span>[ an investigative ]</span> <span class="selected">[ an analytic ]</span> <span>[ a meddlesome ]</span></p>
+    <p><span class="selected">[ tool ]</span> <span>[ website ]</span> <span>[ means ]</span> </p>
+    <p><span >[ to ]</span> <span class="selected">[ that ]</span></p>
+    <p><span>[ explore(s) ]</span><span class="selected">[ reveal(s) ]</span> <span>[ observe(s) ]</span>  <span>[ interrogate(s) ]</span> <span>[ generate(s) ]</span> <span>[ dissect(s) ]</span> </p>
+    <p><span>[ connections ]</span> <span>[ relationships ]</span> <span class="selected">[ conspiracies ]</span> <span>[ networks ]</span> <span>[ hidden structures ]</span></p>
+    <p><span>[ using ]</span> <span class="selected">[ in ]</span></p>
+    <p><span class="selected">[ Department of Defense Contract Announcements ]</span> <span>[ Pentagon Press Filings ]</span></p>
 
-      <router-link tag="div" to="/app" id='button'>Search</router-link>
+      <router-link tag="div" to="/app" id='button'>Search the Database</router-link>
     </div>
   </div>
 </template>
@@ -42,12 +42,28 @@ export default {
   methods: {
   }
 }
+setInterval(function() {
+
+  var rows = document.querySelectorAll("#header p");
+  [].forEach.call(rows, function(row) {
+    var spans = row.querySelectorAll("span");
+    [].forEach.call(spans,function(span){
+      if (span.classList[0] == "selected"){
+        span.classList.remove("selected");
+      }
+    })
+    var select = spans[Math.floor(Math.random()*spans.length)];
+    select.classList.add("selected")
+  }); 
+},5000)
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .nav{
-  width:100%;
+  width: 100%;
+  position: absolute;
+  top: 0px;
 }
 .main-nav{
   float:right;
@@ -59,8 +75,19 @@ ul li{
   float:right;
   margin-right:10px;
 }
+.selected{
+  color:white;
+  opacity:1;
+}
+p span{
 
-
+  color:#767F91;
+  opacity:.5;
+    -webkit-transition: all 1s ease-out;
+    -moz-transition: all 1s ease-out;
+    -o-transition: all 1s ease-out;
+    transition: all 1s ease-out;
+}
 #landing{
  background: rgb(0,0,0);
   background: linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(31,38,87,1) 77%, rgba(65,59,91,1) 100%);  
@@ -74,8 +101,9 @@ ul li{
   margin: 0 auto;
   font-family: sans-serif;
 }
+
 #header {
- width:50%;
+ width:75%;
  margin:auto;
 }
 
@@ -84,7 +112,8 @@ h1, p, ul li a {
   font-family: 'Roboto', sans-serif;
   font-weight: 600;
   text-transform: uppercase;
-  line-height: 1.4em;
+    font-size: 20px;
+  line-height: 1.5em;
 
 }
 
@@ -97,6 +126,8 @@ h1, p, ul li a {
   text-align: center;
   border: 2px solid white;
   font-size: 15px;
+  max-width:300px;
+  margin:60px 0px;
   border-radius: 0px;
   transition: all .3s ease;
 }
@@ -105,13 +136,14 @@ h1, p, ul li a {
   background: white;
   color: black;  
 }
-@media (max-width: 600px) {
+@media (max-width: 1100px) {
   h1 {
       font-size: 40pt;
     }
   p {
-    font-size: 10pt;
+    font-size: 15pt;
     font-weight: 300;
+    line-height: 1em;
   }
 }
 
@@ -120,8 +152,9 @@ h1, p, ul li a {
       font-size: 30pt;
     }
   p {
-    font-size: 10pt;
+    font-size: 15pt;
     font-weight: 300;
+    line-height: 1em;
   }
 }
 
