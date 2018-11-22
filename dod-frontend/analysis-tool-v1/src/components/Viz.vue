@@ -11,6 +11,7 @@
       :fullactive=tooltipFullactive
       :currentNode=currentNode
       :setNodeSelect=setNodeSelect
+      :setSubnode=setSubnode
     >
     </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :height=windowDims.height>
@@ -92,7 +93,7 @@ export default {
     //'unfoldSharedRelationByThreshold',
     //
     //'deleteProject',
-    //'setSubnode',
+    'setSubnode',
 
     //'animateViz',
     //'setAnimateViz',
@@ -350,8 +351,15 @@ export default {
       this.node
         .attr("transform", d=>{
           let newPos = this.limit(d.x,d.y);
+          d.oldx = d.x;
+          d.oldy = d.y;
           d.x = newPos.x;
           d.y = newPos.y;
+          // experiment on only updating selected nodes... not so good
+          //if(d.id != '0fbaa9d2-834f-4588-8347-fb5b2e7c3999'){
+          //  d.x = d.oldx;
+          //  d.y = d.oldy;
+          //}
           return "translate("+d.x+","+d.y+")";
         })
       ;
@@ -625,9 +633,13 @@ export default {
               // case we get its current x and y position
               subnode.x = existingNode.x;
               subnode.y = existingNode.y;
+              subnode.oldx = existingNode.x;
+              subnode.oldy = existingNode.y;
             }else{
               subnode.x = 0;
               subnode.y = 0;
+              subnode.oldx = 0;
+              subnode.oldy = 0;
       //        subnode.x = this.vizWidth*0.5;
       //        subnode.y = this.windowDims.height*0.5;
 
@@ -642,6 +654,8 @@ export default {
         }else{
           node.x = 0;
           node.y = 0;
+          node.oldx = 0;
+          node.oldy = 0;
           //node.x = this.vizWidth*0.5;
           //node.y = this.windowDims.height*0.5;
           node.subnodes = subnodes;
@@ -686,8 +700,11 @@ export default {
       if (!d3.event.active) this.simulation.alphaTarget(0);
       // comment next two lines to fix nodes after dragging
       
-      d.fx = null;
-      d.fy = null;
+      console.log("fix", d.fixed);
+      if(d.fixed ==undefined || !d.fixed){
+        d.fx = null;
+        d.fy = null;
+      }
 
       // i have not fully tested if setting or rather reinforcing the focus here in 
       // the dagging functions might confuse it elsewhere, but on first try it seems
@@ -697,7 +714,7 @@ export default {
     hideTooltip(){
       this.tooltipX = -500;
       this.tooltipY = -500;
-    }
+    },
   }
 }
 </script>

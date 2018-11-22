@@ -8,7 +8,9 @@
        v-on:mouseout="mouseOut"
     >
     <div class="bg"></div>
-    <div class="tooltip-content"
+    <div 
+         v-if="currentNode != undefined"
+         class="tooltip-content"
          :style="{
             width: (tooltipDims.width)-10+'px',
             padding: 5+'px'
@@ -21,14 +23,15 @@
       -->
       <projectTooltip v-if="currentNode.type=='project'"
         :node=currentNode
-        :width=tooltipDims.width-10
+        :width=(tooltipDims.width-10)
         :closeTooltip=crossOutTooltip
         :toggleGraphSelect='()=>setNodeSelect(currentNode.id, !currentNode.selected)'
+        :setSubnode=setSubnode
 
         >
       </projectTooltip>
+      <p v-if="currentNode.type!='project'">{{currentNode.title}}</p>
       
-      <p>{{currentNode.type}}</p>
 
       </div>
     </div>
@@ -74,6 +77,7 @@ export default {
     'fullactive',
     'currentNode',
     'setNodeSelect',
+    'setSubnode',
   ],
   computed:{
     ...mapGetters([
@@ -156,7 +160,10 @@ export default {
     //  this.setActiveNode(this.currentNode.id, true);
     },
     mouseOut: function(){
-      //this.hideTooltipFast();
+      // // i comment the next line out while working in the tooltip
+      this.hideTooltipFast();
+
+
       this.setFocusedNode({id:this.currentNode.id, flag:false});
     //  this.setActiveNode(this.currentNode.id, false);
     },
@@ -190,7 +197,7 @@ export default {
 <style scoped>
   #tooltip{
     position: absolute;
-    border: 1px red solid;
+    border: 1px black solid;
     border-radius: 4px;
     /*
     padding: 5px;

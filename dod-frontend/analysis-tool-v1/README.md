@@ -87,4 +87,6 @@ TODO:
   - [ ] this should be elsewhere on hover of the paneNodes, maybe below the tabs, somewhere indescrete but visible
 - [ ] help page explaining the features
 - [ ] soltuion needed for tabs growing to large... -.-
-
+- [ ] i love the little numbers in the paneNodes and want to highlight them/their function better
+- [ ] fix function not yet working but postponing to later
+- [ ] should we do somthing on the server about duplicate subnodes (same name, different type)?

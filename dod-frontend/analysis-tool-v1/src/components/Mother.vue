@@ -45,6 +45,7 @@
           ref='vizComponent'
           :nodeData=selectedNodeData
           :setNodeSelect=setNodeSelect
+          :setSubnode=setSubnode
         >
         </viz>
       </template>
@@ -249,8 +250,9 @@ export default {
 
         node.selected = false;
         node.active = false;
-        node.fixed = true;
         node.marked = 'none';
+
+        node.relationships.forEach(d=>d.visible = false);
 
         this.nodes.find((d, i)=>{
 
@@ -359,6 +361,7 @@ export default {
     },
 
     setNodeSelect(id, flag){
+      //this.nodes.find(d=>d.id==id).fixed = false;
       this.nodes.find(d=>d.id==id).selected = flag;
       //this.$refs.vizComponent.integrateNewNodes();
 
@@ -376,7 +379,11 @@ export default {
         this.unfoldSharedRelationByThreshold();
       }else if(flag==false){
         // we should fold subnodes in when unselecting a node
-      this.nodes.find(d=>d.id==id).relationships.forEach(subnode=>subnode.visible=false);
+        this.nodes.find(d=>d.id==id).relationships.forEach(subnode=>{
+          subnode.visible=false
+          //subnode.fixed=false
+        });
+
 
       }
       this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
@@ -496,12 +503,14 @@ export default {
 
     },
     setSubnode(id, flag){
+      console.log("set subnode", id, flag);
       this.nodes.forEach(d=>{
         let subnode = d.relationships.find(dd=>dd.id==id);
         if(subnode){
           subnode.visible = flag
         }
       });
+      this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
     },
     setAllSubnodes(id, flag){
       //this.nodes.find(d=>d.id==id).relationships.forEach(d=>d.visible = true);

@@ -28,10 +28,18 @@ export default {
   ],
   computed:{
     wrapperWidth(){
-      return Math.max(0, this.textWidth-this.width);
+      return Math.max(0, this.textWidth-this.width+5);
     }
   },
 	watch: {
+    '$props.text':{
+      handler: function (val, oldVal) { 
+        setTimeout(()=>{
+          this.textWidth = this.$refs.text.clientWidth;
+        }, 50);
+      },
+      deep: true
+    },
   },
   mounted(){
     this.textWidth = this.$refs.text.clientWidth;
@@ -52,6 +60,9 @@ export default {
   .boundingBox{
     overflow:hidden;
     white-space: nowrap;
+    /*
+    outline: 1px solid black;
+    /**/
   }
 
   .shouldScroll{
@@ -60,8 +71,8 @@ export default {
   /* Make it move */
   @keyframes marquee {
       0%   { transform: translate(0, 0); }
-      30%   { transform: translate(0, 0); }
-      70% { transform: translate(-100%, 0); }
+      20%   { transform: translate(0, 0); }
+      60% { transform: translate(-100%, 0); }
       80% { transform: translate(-100%, 0); }
   }
 </style>

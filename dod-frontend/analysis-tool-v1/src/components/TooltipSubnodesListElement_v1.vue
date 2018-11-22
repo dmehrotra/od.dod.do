@@ -1,37 +1,22 @@
 <template>
-  <li class="tooltip-subnodes-list-element" @click="toggle"
-      :style="{height: height + 'px', width: width-2 + 'px'}" 
-    >
-
-    <!--<p>{{name}}</p>-->
-    <TooltipScrollingLine
-      :width=width-2-height-3
-      :text=name
-      :fontSize=12
-      :style="{height: height + 'px', display: 'inline-block', float:'left', paddingLeft: '3px'}"
-     />
-    <div class='toggleBox'
-      :style="{width: height + 'px', height: height+'px'}" 
-      >
+  <div class="tooltip-subnodes-list-element" @click="toggle">
+    <div class='subnode-name'>
+      <p :class="{shouldScroll: name.length>16}">{{name}}</p>
+    </div>
+    <div class='subnode-toggle'>
       <span :class="{dot: true, isVisible: visible, isInVisible: !visible}"></span>
-     </div>
-    <!--<div class='subnode-name'>-->
-      <!--<p :class="{shouldScroll: name.length>16}">{{name}}</p>-->
-    <!--</div>-->
-    <!--<div class='subnode-toggle'>-->
-      <!--<span :class="{dot: true, isVisible: visible, isInVisible: !visible}"></span>-->
-    <!--</div>-->
-  </li>
+    </div>
+  </div>
 </template>
 
 <script>
 
-import TooltipScrollingLine from '@/components/TooltipScrollingLine'
+
+
 
 export default {
   name: 'tooltipSubnodesListElement',
   components: {
-    TooltipScrollingLine
   },
   data () {
     return {
@@ -40,11 +25,8 @@ export default {
   props:[
     'idArray',
     'name',
-    'width',
-    'height',
-    'isVisible',
     'setSubnode',
-    'backgroundColor',
+    'isVisible',
   ],
   computed:{
     visible: function(){
@@ -58,7 +40,6 @@ export default {
     }
   },
 	watch: {
-
   },
   mounted(){
     
@@ -76,43 +57,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
-  p{
-    color: black;
-    font-size: 0.7em;
-    font-family: sans-serif;
-    margin:0;
-    line-height:17px;
-  }
-  .tooltip-subnodes-list-element{
-    cursor:pointer;
-  }
-  .tooltip-subnodes-list-element:hover{
-    background-color:#bfbfbf;
-  }
-  .toggleBox{
-    display: inline-block;
-    /*
-    outline: black 1px solid; 
-    /**/
-  }
-
-  .dot {
-    margin-top:3px;
-    margin-left:3px;
-    height: 13px;
-    width: 13px;
-    border-radius: 50%;
-    display: inline-block;
-  }
-  .isVisible{
-    border: none;
-    background-color: black;
-  }
-  .isInVisible{
-  }
-
-/*
   .tooltip-subnodes-list-element{
     display:flex;
     flex-direction: row;
@@ -152,7 +96,6 @@ export default {
     animation: marquee 5s linear infinite;
   }
   /* Make it move */
-  /*
   @keyframes marquee {
       0%   { transform: translate(0, 0); }
       30%   { transform: translate(0, 0); }
@@ -160,5 +103,17 @@ export default {
       80% { transform: translate(-100%, 0); }
   }
 
-*/
+  .dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .isVisible{
+    border: none;
+    background-color: blue;
+  }
+  .isInVisible{
+    border: 1px solid #e5e5e5;
+  }
 </style>
