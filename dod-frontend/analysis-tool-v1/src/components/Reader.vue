@@ -1,11 +1,10 @@
 <template>
   <div id="reader" @mouseover=mouseOver @mouseout=mouseOut>
-    <div class='readerContentWrapper'
+      <div :class="{readerContentWrapper: true, newText: animationFlip }"
        :style="{height: readerMaxHeight -resizeElementWidth/2 + 'px'}"
       >
 
-      <div class='readerTextWrapper'>
-
+      <div :class="{readerTextWrapper: true }" v-if='currentReaderContent.id != undefined'>
         <p class='readerTitle'>{{getDate(currentReaderContent.date)}}</p>
         <p class='readerContent'>{{currentReaderContent.text}}</p>
       </div>
@@ -24,6 +23,8 @@ export default {
   },
   data () {
     return {
+      unwatchReaderContent: undefined,
+      animationFlip: false
     }
   },
   props:[
@@ -36,8 +37,19 @@ export default {
     ]),
   },
   mounted(){
+    this.unwatchReaderContent = this.$store.watch(this.$store.getters.readerContentWatcher, _ => {
+      console.log('readerContent changed', _);
+      if(_.id != undefined){
+        this.animationFlip = true;
+        setTimeout(()=>{
+        this.animationFlip = false;
+        }, 1200);
+      }
+
+    });
   },
-  beforeDestroy: function () {
+  beforeDestroy () {
+    this.unwatchReaderContent();
   },
   methods: {
     ...mapActions([
@@ -71,7 +83,18 @@ export default {
     padding-left: 20px;
     padding-right: 20px;
     padding-top: 10px;
+  }
+  .newText{
+    animation: blacktowhite 1s;
+  }
+  @keyframes blacktowhite
+    {
+      0%   {background-color: black;}
+      100% {background-color: white;}
+    }
 
+  .readerTextWrapper p{
+    color: black;
   }
   .readerTitle{
      font-family:sans-serif;

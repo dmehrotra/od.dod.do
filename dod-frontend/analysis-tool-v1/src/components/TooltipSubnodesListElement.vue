@@ -1,5 +1,8 @@
 <template>
-  <li class="tooltip-subnodes-list-element" @click="toggle"
+  <li class="tooltip-subnodes-list-element" @click="toggle" 
+      :title="visible?
+      'click to hide this node from the graph':
+      'click to show this node on the graph'"
       :style="{height: height + 'px', width: width-2 + 'px'}" 
     >
 

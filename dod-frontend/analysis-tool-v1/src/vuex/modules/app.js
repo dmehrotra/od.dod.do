@@ -26,6 +26,7 @@ const getters = {
 
   //reader
   currentReaderContent: state => state.currentReaderContent,
+  readerContentWatcher: state => () => state.currentReaderContent,
 
   //viz Settings
   showVizSettings: state => state.showVizSettings,
