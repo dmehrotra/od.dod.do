@@ -10,7 +10,7 @@ const state = {
   //viz Settings
   showVizSettings: false,
   unfoldSharedRelationsByDefault: true,
-  sharedRelationsThreshold: 3,
+  sharedRelationsThreshold: 2,
   focusedNode:[],
   
   //tooltip
