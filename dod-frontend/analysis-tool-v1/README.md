@@ -89,4 +89,15 @@ TODO:
 - [ ] soltuion needed for tabs growing to large... -.-
 - [ ] i love the little numbers in the paneNodes and want to highlight them/their function better
 - [ ] fix function not yet working but postponing to later
-- [ ] should we do somthing on the server about duplicate subnodes (same name, different type)?
+- [x] should we do somthing on the server about duplicate subnodes (same name, different type)? (( 12-5-2018 - I think I fixed this, but its a bit tricky. Working on a command line tool for us. ))
+- [ ] Hover over a node should light up the paths connected to it. 
+- [ ] Nodes of a type hsould be colored similarly ie; cities
+- [ ] I want to be able to remove nodes of a certain type
+- [ ] When i drag a node and its connections it would be cool if it was fixed to the spot where I dragged it.  Sometimes the gravity makes seeing connections difficult. 
+
+COMMENT:
+
+I find that the best way to find cool shit is to show a lot of connections and then slowly delete all the things that are bullshit.  I like that work flow.  
+
+
+
