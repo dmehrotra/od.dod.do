@@ -24,6 +24,10 @@ module.exports = {
       contract_numbers: {
         type: Sequelize.TEXT
       },
+      dhs: {
+        type: Sequelize.BOOLEAN,
+        defaultValue:false
+      },
 
       DepartmentId: {
         type: Sequelize.UUID,

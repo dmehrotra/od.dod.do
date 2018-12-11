@@ -16,6 +16,11 @@ module.exports = function(sequelize, DataTypes){
         allowNull: false,
         defaultValue: false
     },
+    dhs: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: false
+    },
     filing_date:{
       type: DataTypes.DATE,
       allowNull: false
