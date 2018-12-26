@@ -21,6 +21,11 @@ npm run build --report
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
 
 
+nvm: 
+- rare blogpost that seems to handle vue+d3 the same way I do: [http://www.eikospartners.com/blog/integrating-complex-d3-visualizations-into-vue](http://www.eikospartners.com/blog/integrating-complex-d3-visualizations-into-vue)
+- this, too. okay this calms me down a little [https://zhuanlan.zhihu.com/p/36799963](https://zhuanlan.zhihu.com/p/36799963)
+- mainly my whole questioning is about what exactly vue thinks of d3 manipulating the dom...because vue really wants to be in charge of this as far as I understand
+
 todo:
 
 - tooltip 

@@ -11,6 +11,7 @@
       <template slot="datePicker">
         <date-picker
           :dateSearch=searchByDate
+          :recentUpdate=lastUpdateDate
         >
         </date-picker>
       </template>
@@ -198,6 +199,17 @@ export default {
       'changeReaderHeight',
       'changeReaderContent',
     ]),
+    lastUpdateDate(done){
+      let domain = "https://quagga.club/api/recent/" ;
+      api.get(domain)
+        .then((response) => {
+          done(response);
+        })
+        .catch((error) => {
+          console.log("ERROR with API", error); 
+          done(null);
+        });
+    },
     queryNodes(query, done){
       let type = query.type; 
       let domain;

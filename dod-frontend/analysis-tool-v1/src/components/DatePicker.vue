@@ -56,6 +56,7 @@ export default {
   },
   props:[
     'dateSearch',
+    'recentUpdate',
   ],
   computed:{
     ...mapGetters([
@@ -127,22 +128,40 @@ export default {
       });
     },
     getTodaysData(){
-      let today = new Date();
+      this.recentUpdate(resp =>{
+        let d = new Date(resp.body);
+        d.setDate(d.getDate() + 1);
+        let dateString =  d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate()
+        let start = dateString;
+        let end = dateString;
+
+        let query = {'start': start, 'end': end, 'tabName': 'most recent'};
+        this.dateSearch(query, (res)=>{
+          if(res.res == null){
+          }else{
+            if(res.res > 0){
+              this.changeActiveTab({'type':'dateSearch', 'value':res.query, 'timestamp': res.timestamp});
+            }
+          }
+        });
+      });
+
+      //let today = new Date();
       //let start = today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
       //let end = today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
 
-      let start = '2018-08-01'
-      let end = '2018-08-01'
+      //let start = '2018-8-01'
+      //let end = '2018-8-01'
 
-      let query = {'start': start, 'end': end, 'tabName': 'today\'s contracts (ish lol)'};
-      this.dateSearch(query, (res)=>{
-        if(res.res == null){
-        }else{
-          if(res.res > 0){
-            this.changeActiveTab({'type':'dateSearch', 'value':res.query, 'timestamp': res.timestamp});
-          }
-        }
-      });
+      //let query = {'start': start, 'end': end, 'tabName': 'today\'s contracts (ish lol)'};
+      //this.dateSearch(query, (res)=>{
+      //  if(res.res == null){
+      //  }else{
+      //    if(res.res > 0){
+      //      this.changeActiveTab({'type':'dateSearch', 'value':res.query, 'timestamp': res.timestamp});
+      //    }
+      //  }
+      //});
 
     },
   }
