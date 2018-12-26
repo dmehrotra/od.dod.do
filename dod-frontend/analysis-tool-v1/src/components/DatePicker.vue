@@ -4,7 +4,7 @@
        class="datePickerComponent"
        :style="{paddingTop: searchBarHeight/2 - 25 + 'px'}"
         v-model='myDate'
-        :max-date='new Date()'
+        :max-date='recent'
         @input="dateEntered"
         @popover-did-appear="calAppeared"
         @popover-did-disappear="calDisappeared"
@@ -52,6 +52,8 @@ export default {
 
       pickingDate: false,
       readyToSearch: false,
+
+      recent: new Date(),
     }
   },
   props:[
@@ -68,10 +70,15 @@ export default {
       }else{ 
         return 'hidden';
       }
-    }
+    },
   },
   mounted(){
-    this.getTodaysData();
+    this.recentUpdate(resp =>{
+      let d = new Date(resp.body);
+      d.setDate(d.getDate() + 1);
+      this.recent = d;
+      this.getTodaysData();
+    });
   },
   beforeDestroy: function () {
   },
@@ -90,8 +97,6 @@ export default {
       this.message = '';
       //this.readyToSearch = true;
     },
-
-
     submit(){
       this.searching = true;
 
@@ -128,9 +133,8 @@ export default {
       });
     },
     getTodaysData(){
-      this.recentUpdate(resp =>{
-        let d = new Date(resp.body);
-        d.setDate(d.getDate() + 1);
+      //this.recentUpdate(resp =>{
+        let d = this.recent;
         let dateString =  d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate()
         let start = dateString;
         let end = dateString;
@@ -144,7 +148,7 @@ export default {
             }
           }
         });
-      });
+      //});
 
       //let today = new Date();
       //let start = today.getFullYear() + "-" + (today.getMonth()+1) + "-" + today.getDate();
