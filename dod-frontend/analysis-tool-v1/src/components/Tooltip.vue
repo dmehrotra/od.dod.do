@@ -30,7 +30,17 @@
 
         >
       </projectTooltip>
-      <p v-if="currentNode.type!='project'">{{currentNode.title}}</p>
+      <connectionTooltip v-if="currentNode.type!='project'"
+        :node=currentNode
+        :width=(tooltipDims.width-10)
+        :closeTooltip=crossOutTooltip
+        :setSubnode=setSubnode
+        :createTabBySubnode=createTabBySubnode
+        :selectNodesBySubnode=selectNodesBySubnode
+
+        >
+      </connectionTooltip>
+      <!--<p v-if="currentNode.type!='project'">{{currentNode.title}}</p>-->
       
 
       </div>
@@ -44,6 +54,7 @@
 
 
 import ProjectTooltip from '@/components/ProjectTooltip'
+import ConnectionTooltip from '@/components/ConnectionTooltip'
 import {TweenMax} from "gsap";
 
 import {mapGetters, mapActions} from 'vuex';
@@ -52,7 +63,7 @@ export default {
   name: 'tooltip',
   components: {
     ProjectTooltip,
-    //ConnectionTooltip,
+    ConnectionTooltip,
   },
   data () {
     return {
@@ -78,6 +89,8 @@ export default {
     'currentNode',
     'setNodeSelect',
     'setSubnode',
+    'createTabBySubnode', 
+    'selectNodesBySubnode',
   ],
   computed:{
     ...mapGetters([
@@ -161,7 +174,7 @@ export default {
     },
     mouseOut: function(){
       // // i comment the next line out while working in the tooltip
-      this.hideTooltipFast();
+      //this.hideTooltipFast();
 
 
       this.setFocusedNode({id:this.currentNode.id, flag:false});

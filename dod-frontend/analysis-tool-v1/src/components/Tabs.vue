@@ -126,6 +126,7 @@ export default {
 <style scoped>
   #tabsWrapper{
     width:100%;
+    overflow-y: scroll;
   }
   #tabs{
     width:100%;

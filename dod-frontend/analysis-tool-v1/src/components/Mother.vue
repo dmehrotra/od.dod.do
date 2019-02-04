@@ -47,6 +47,8 @@
           :nodeData=selectedNodeData
           :setNodeSelect=setNodeSelect
           :setSubnode=setSubnode
+          :createTabBySubnode=createTabBySubnode
+          :selectNodesBySubnode=selectNodesBySubnode
         >
         </viz>
       </template>
@@ -370,6 +372,29 @@ export default {
 
 
       //console.log(this.nodes.filter(node => node.requestSource.filter(rs => rs.timestamp==tab.timestamp)) )
+    },
+    createTabBySubnode(id, tabName){
+      let timestamp = Date.now();
+      let newSource = {type:'subnode', value:tabName, timestamp:timestamp}
+      this.nodes.forEach(d=>{
+        let subnode = d.relationships.find(dd=>dd.id==id);
+        if(subnode){
+          d.requestSource.push(newSource);
+        }
+      });
+      setTimeout(()=>{
+        this.changeActiveTab(newSource)
+      }, 600);
+
+    },
+    selectNodesBySubnode(id){
+      this.nodes.forEach(d=>{
+        let subnode = d.relationships.find(dd=>dd.id==id);
+        if(subnode){
+          d.selected = true;
+        }
+      });
+      this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
     },
 
     setNodeSelect(id, flag){

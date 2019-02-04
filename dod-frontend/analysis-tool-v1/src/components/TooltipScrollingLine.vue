@@ -1,11 +1,16 @@
 <template>
   <div class="tooltip-scrolling-line boundingBox"
+       @mouseover="isHovering = true"
+      @mouseout="isHovering = false"
    :style="{width: width+'px', outline: ''}"
    >
-    <div class='scrolling-wrapper shouldScroll'
-       :style="{width: wrapperWidth +'px'}"
+    <div 
+       :class="{shouldScroll: isHovering, scrollingWrapper: true}"
+       :style="{width: wrapperWidth +'px',
+          animation: (isHovering||alwaysScroll)?'tooltipScrollingLineMarquee '+ (0.5+wrapperWidth*0.03) +'s linear infinite':'none'
+       }"
        >
-     <p ref='text' :style="{fontSize: fontSize +'px', display: 'inline-block'}">{{text}}</p>
+       <p ref='text' :style="{fontSize: fontSize +'px', display: 'inline-block'}">{{text}}</p>
 
     </div>
   </div>
@@ -19,12 +24,14 @@ export default {
   data () {
     return {
       textWidth: 0,
+      isHovering: false,
     }
   },
   props:[
     'width',
     'text',
-    'fontSize'
+    'fontSize',
+    'alwaysScroll'
   ],
   computed:{
     wrapperWidth(){
@@ -66,13 +73,19 @@ export default {
   }
 
   .shouldScroll{
-    animation: marquee 5s linear infinite;
+    /*
+    animation: marquee 2s linear infinite;
+    */
   }
+</style>
+<style>
+
   /* Make it move */
-  @keyframes marquee {
+  @keyframes tooltipScrollingLineMarquee {
       0%   { transform: translate(0, 0); }
-      20%   { transform: translate(0, 0); }
+      40% { transform: translate(-100%, 0); }
       60% { transform: translate(-100%, 0); }
-      80% { transform: translate(-100%, 0); }
+      80%   { transform: translate(0, 0); }
   }
+
 </style>

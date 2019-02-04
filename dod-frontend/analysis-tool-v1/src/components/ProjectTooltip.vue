@@ -8,6 +8,7 @@
           :width=width
           :text=getDate(node.filing_date)
           :fontSize=12
+          :alwaysScroll=false
           :style='{fontWeight:"bold"}'
          />
         <p class='moneyValue'>{{'$'+formatThousands(node.amount)}}</p>
@@ -196,7 +197,7 @@ export default {
     text-align:center;
   }
   .iconHolder{
-    width:35%;
+    width:29%;
     margin: auto;
   }
   .mainButton:hover{
