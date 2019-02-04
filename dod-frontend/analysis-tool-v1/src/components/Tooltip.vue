@@ -174,7 +174,7 @@ export default {
     },
     mouseOut: function(){
       // // i comment the next line out while working in the tooltip
-      //this.hideTooltipFast();
+      this.hideTooltipFast();
 
 
       this.setFocusedNode({id:this.currentNode.id, flag:false});
