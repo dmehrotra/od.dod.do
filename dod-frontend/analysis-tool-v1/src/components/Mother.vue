@@ -312,7 +312,8 @@ export default {
         }
         //update viz
         if(upadetVizNeeded){
-          this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
+          console.log('integrating');
+          this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected), {speed: 0.99});
         }
         //update tabs
         let tabShouldStillExist = this.requestSources.find(rs=>(rs.timestamp == this.activeTab.timestamp));
@@ -423,7 +424,12 @@ export default {
 
 
       }
-      this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
+      if(flag){
+        this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
+      }else{
+        console.log("slooooow");
+        this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected), {speed:0.95});
+      }
     },
     unfoldSharedRelationByThreshold(){
       let sharedSubnodes = this.nodes.reduce((acc, d)=>{
@@ -547,7 +553,13 @@ export default {
           subnode.visible = flag
         }
       });
-      this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
+
+      if(flag){
+        this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected));
+      }else{
+        console.log("slooooow");
+        this.$refs.vizComponent.integrateNewNodes(this.nodes.filter(d=>d.selected), {speed: 0.95});
+      }
     },
     setAllSubnodes(id, flag){
       //this.nodes.find(d=>d.id==id).relationships.forEach(d=>d.visible = true);

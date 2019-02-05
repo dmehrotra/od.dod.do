@@ -317,6 +317,11 @@ export default {
           .force("link", d3.forceLink().id(d=> d.id))
 
           .on("tick", this.ticked)
+        .on("end", ()=>{
+          //console.log("done");
+          //this.simulation.velocityDecay(0.8)
+          // -doing this in the drag functiuon instead)
+        })
       ;
 
       this.node = this.nodeLayer.selectAll(".node").attr("class", "node");
@@ -386,7 +391,7 @@ export default {
             y2 = dot2[1];
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     },
-    updateGraph(){
+    updateGraph(options){
       this.simulation.nodes(this.data.nodes, d => d.id);
       this.simulation.force("link").links(this.data.links);
 
@@ -574,7 +579,17 @@ export default {
         this.adjustZoom();
 
       // this is a test to slow the animtaion down, and dont make it jummp around so disorienting
-        this.simulation.velocityDecay(0.99);
+        if(typeof options === "undefined") {
+          this.simulation.velocityDecay(0.70);
+        }else{
+          if(typeof options.speed === "undefined"){
+            this.simulation.velocityDecay(0.70);
+          }else{
+            this.simulation.velocityDecay(options.speed);
+          }
+
+
+        }
         //this.simulation.alphaDecay(0.1);
 
 
@@ -601,7 +616,7 @@ export default {
 
       }, []);
     },
-    integrateNewNodes(newData){
+    integrateNewNodes(newData, options){
       //let newData = this.nodeData;
       let allVisibleSubnodeIds = [];
       newData = newData.map(node=>{
@@ -671,7 +686,7 @@ export default {
       });
 
       this.data.nodes = this.flatten(newData);
-      this.updateGraph();
+      this.updateGraph(options);
     },
     //zoomed() {
     //  centerLayer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -683,6 +698,8 @@ export default {
       d.fy = d.y;
     },
     dragged(d) {
+
+        this.simulation.velocityDecay(0.4)
       d.fx = d3.event.x;
       d.fy = d3.event.y;
 
