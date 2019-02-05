@@ -23,7 +23,7 @@
        :width="{width: width + 'px'}"
       >
       <div>
-        <a href="#" @click="setSubnode(node.id, false)">unfold this subnode</a>
+        <a href="#" @click="foldNodeIn">unfold this subnode</a>
         <br></br>
         <a href="#" @click="createTabBySubnode(node.id, node.title)">create new Tab with nodes (from pane) connected to this one</a>
         <br></br>
@@ -88,9 +88,9 @@ export default {
       'changeReaderHeight',
       'changeActiveTab',
     ]),
-    unselectFromGraph(){
+    foldNodeIn(){
       this.closeTooltip();
-      this.toggleGraphSelect();
+      this.setSubnode(this.node.id, false)
     },
     getDate(d){
       d = new Date(d);

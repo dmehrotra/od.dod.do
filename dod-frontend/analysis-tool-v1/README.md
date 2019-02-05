@@ -99,6 +99,7 @@ TODO:
 - [ ] Nodes of a type hsould be colored similarly ie; cities
 - [ ] I want to be able to remove nodes of a certain type
 - [ ] When i drag a node and its connections it would be cool if it was fixed to the spot where I dragged it.  Sometimes the gravity makes seeing connections difficult. 
+- [ ] fix most recent nodes (there is still some data confusion, at least when doing it here fro china....)
 
 COMMENT:
 

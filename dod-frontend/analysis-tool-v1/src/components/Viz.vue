@@ -84,25 +84,11 @@ export default {
   props:[
     'nodeData',
     'setNodeSelect',
-    //'width',
-    //'height',
-    //'setActiveNode',
-    //'activeNode',
-    //'requestRelatedToId',
-    //'unfoldSharedRelationsByDefault',
-    //'toggleUnfoldSharedRelationsByDefault',
-    //'changeThreshold',
-    //'unfoldSharedRelationByThreshold',
-    //
-    //'deleteProject',
+
     'setSubnode',
 
-    //'animateViz',
-    //'setAnimateViz',
-    //'unselectProject',
     'createTabBySubnode',
     'selectNodesBySubnode',
-
   ],
   computed:{
     ...mapGetters([
@@ -287,7 +273,8 @@ export default {
       forceManyBodyNew.initialize = (nodes)=>{
         forceManyBodyNewInit(nodes.filter(d => d.type=='project'));
       }
-      let forceManyBodySubnodes = d3.forceManyBody().strength(-800).distanceMin(100);
+      // this force used to be -800 recently (2019/2/05)
+      let forceManyBodySubnodes = d3.forceManyBody().strength(-3500).distanceMin(100);
       let forceManyBodySubnodesInit = forceManyBodySubnodes.initialize;
       forceManyBodySubnodes.initialize = (nodes)=>{
         forceManyBodySubnodesInit(nodes.filter(d => d.type!='project'));
@@ -585,15 +572,19 @@ export default {
     //    this.setAnimateViz(true);
     //  }else{
         this.adjustZoom();
+
+      // this is a test to slow the animtaion down, and dont make it jummp around so disorienting
+        this.simulation.velocityDecay(0.99);
+        //this.simulation.alphaDecay(0.1);
+
+
         this.simulation.alpha(1).restart();
     //  }
 
 
     },
     updateGraphVisual(){
-
       this.node.select(".focusRing").transition().duration(200).attr("opacity", d=>(this.focusedNode.includes(d.id)?1:0));
-
     },
     flatten(nestedData){
       return nestedData.reduce((acc, d)=>{
