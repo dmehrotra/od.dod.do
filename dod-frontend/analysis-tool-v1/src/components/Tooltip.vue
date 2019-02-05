@@ -37,7 +37,7 @@
         :setSubnode=setSubnode
         :createTabBySubnode=createTabBySubnode
         :selectNodesBySubnode=selectNodesBySubnode
-
+        :searchConnectedNodes=searchConnectedNodes
         >
       </connectionTooltip>
       <!--<p v-if="currentNode.type!='project'">{{currentNode.title}}</p>-->
@@ -91,6 +91,7 @@ export default {
     'setSubnode',
     'createTabBySubnode', 
     'selectNodesBySubnode',
+    'searchConnectedNodes',
   ],
   computed:{
     ...mapGetters([
@@ -112,8 +113,6 @@ export default {
     },
     '$props.yPos':{
       handler: function (val, oldVal) { 
-        console.log("[Tooltip] yPos changed");
-        console.log(val);
         if(this.opacity>0 && this.yPosition != -500){
           TweenLite.to(this.$data, 0.5, { yPosition: val });
         }else if(val != null){
@@ -124,8 +123,6 @@ export default {
     },
     '$props.fullactive':{
       handler: function (val, oldVal) { 
-        console.log("[Tooltip] fullactive changed");
-        console.log(val);
         if(val){
           this.showAnimation = TweenLite.to(this.$data, 0.2, { opacity: this.maxOpacity });
         }else{

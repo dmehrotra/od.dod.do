@@ -13,6 +13,9 @@ const state = {
   sharedRelationsThreshold: 2,
   focusedNode:[],
   
+  //delete mode
+  deleteMode: false,
+  
   //tooltip
   //tooltipDims: {width: 130, height:240},
   tooltipDims: {width: 160, height:240},

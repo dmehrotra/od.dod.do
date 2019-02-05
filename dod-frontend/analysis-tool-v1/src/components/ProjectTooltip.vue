@@ -167,9 +167,7 @@ export default {
     },
     isVisible: function(id){
       let relationship = this.node.relationships.find(r=>r.id ==id);
-      console.log("checking isVisible");
       if(relationship){
-        console.log(relationship);
         return relationship.visible;
       }else{
         return false;

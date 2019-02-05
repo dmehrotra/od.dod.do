@@ -29,7 +29,7 @@
         <br></br>
         <a href="#" @click="selectNodesBySubnode(node.id)">show connected projects from pane on graph</a>
         <br></br>
-        <a href="#">query all nodes connected to this (put into tab, graph those with min connections)</a>
+        <a href="#" @click="searchConnectedNodes(node.id, node.title)">query all nodes connected to this (put into tab, graph those with min connections)</a>
         <br></br>
         <a href="#">toggle name display</a>
         <br></br>
@@ -67,6 +67,7 @@ export default {
     'setSubnode',
     'createTabBySubnode',
     'selectNodesBySubnode',
+    'searchConnectedNodes',
   ],
   computed:{
     ...mapGetters([

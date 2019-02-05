@@ -6,6 +6,7 @@
     <!--<svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :width=vizWidth :height=windowDims.height>-->
 
     <tooltip
+             ref='tooltip'
       :xPos=tooltipX
       :yPos=tooltipY
       :fullactive=tooltipFullactive
@@ -14,6 +15,7 @@
       :setSubnode=setSubnode
       :createTabBySubnode=createTabBySubnode
       :selectNodesBySubnode=selectNodesBySubnode
+      :searchConnectedNodes=searchConnectedNodes
     >
     </tooltip>
     <svg xmlns="http://www.w3.org/2000/svg" id='vizsvg' :height=windowDims.height>
@@ -22,6 +24,8 @@
     </svg>
     <p class="zoomNote" v-show=zoomable
        :style="">scroll to zoom</p>
+    <p class="deleteNote" v-show=focusedNodesOnGraph.length
+       :style="">press 'h' to hide highlighted {{focusedNodesOnGraph.length==1?'node':'nodes'}} from graph</p>
     <viz-settings v-if=showVizSettings
        :vizWidth=vizWidth
       >
@@ -79,6 +83,8 @@ export default {
       projectNodeRadius: 20,
       relationNodeRadius: 10,
       unwatchFocus: undefined,
+
+      dragging: false,
     }
   },
   props:[
@@ -89,6 +95,7 @@ export default {
 
     'createTabBySubnode',
     'selectNodesBySubnode',
+    'searchConnectedNodes',
   ],
   computed:{
     ...mapGetters([
@@ -98,6 +105,7 @@ export default {
       'showVizSettings',
       'focusedNode',
       'tooltipDims',
+      'deleteMode',
     ]),
     vizWidth: function(){
       let w = (1.0-this.leftColPercGoal)*this.windowDims.width-this.resizeElementWidth/2;
@@ -116,6 +124,11 @@ export default {
     //dataIds: function(){
     //  return this.data.map(d=>d.id);
     //}
+    focusedNodesOnGraph(){
+
+      return this.data.nodes.filter(d => this.focusedNode.includes(d.id));
+
+    },
   },
 	watch: {
   },
@@ -128,8 +141,13 @@ export default {
     this.unwatchFocus = this.$store.watch(this.$store.getters.focusedNodeWatcher, _ => {
       this.updateGraphVisual();
     });
+
+    window.addEventListener('keydown', this.onKey)
   },
   beforeDestroy: function () {
+
+    window.removeEventListener('keydown', this.onKey)
+
     this.unwatchFocus();
   },
   methods: {
@@ -474,6 +492,8 @@ export default {
 
                .on('mouseover', (d,i,nodes)=>{
                   this.setFocusedNode({id:d.id, flag:true});
+
+                 if(!this.dragging){
                   let clientRect = d3.select(nodes[i]).node().getBoundingClientRect()
                   var currentZoom = d3.zoomTransform(this.svg.node()).k;
                  
@@ -500,7 +520,7 @@ export default {
                     
                   this.currentNode = d;
                   this.tooltipFullactive = true;
-                 
+                  } 
 
                 })
                 .on('mouseout', (d,i,nodes)=>{
@@ -515,12 +535,29 @@ export default {
                   this.tooltipY = null;
                   this.tooltipFullactive = false;
                 })
-     //           .on('click', (d,i,nodes)=>{
-     //             if(d.type!='project'){
-     //               console.log("clicked", d.id, d);
-     //               this.requestRelatedToId({type: 'relation', value: d.title}, d.id);
-     //             }
-     //           })
+                .on('click', (d,i,nodes)=>{
+                  if(this.deleteMode){
+
+                    this.setFocusedNode({id:d.id, flag:false});
+
+                    //this.tooltipX = null;
+                    //this.tooltipY = null;
+                    //this.tooltipFullactive = false;
+                    this.$refs.tooltip.hideTooltipFast();
+                    setTimeout(()=>{
+                      this.tooltipFullactive = false;
+                    }, 0.1);
+
+                    if(d.type=='project'){
+
+                      this.setNodeSelect(d.id, false);
+
+                    }else{
+
+                      this.setSubnode(d.id, false);
+                    }
+                  }
+                })
       ;
 
 
@@ -580,10 +617,10 @@ export default {
 
       // this is a test to slow the animtaion down, and dont make it jummp around so disorienting
         if(typeof options === "undefined") {
-          this.simulation.velocityDecay(0.70);
+          this.simulation.velocityDecay(0.80);
         }else{
           if(typeof options.speed === "undefined"){
-            this.simulation.velocityDecay(0.70);
+            this.simulation.velocityDecay(0.80);
           }else{
             this.simulation.velocityDecay(options.speed);
           }
@@ -699,9 +736,14 @@ export default {
     },
     dragged(d) {
 
-        this.simulation.velocityDecay(0.4)
+      this.simulation.velocityDecay(0.6)
+      this.dragging = true;
+
       d.fx = d3.event.x;
       d.fy = d3.event.y;
+
+
+      this.$refs.tooltip.hideTooltipFast();
 
       // i have not fully tested if setting or rather reinforcing the focus here in 
       // the dagging functions might confuse it elsewhere, but on first try it seems
@@ -711,6 +753,8 @@ export default {
     dragended(d) {
       if (!d3.event.active) this.simulation.alphaTarget(0);
       // comment next two lines to fix nodes after dragging
+
+      this.dragging = false;
       
       console.log("fix", d.fixed);
       if(d.fixed ==undefined || !d.fixed){
@@ -726,7 +770,36 @@ export default {
     hideTooltip(){
       this.tooltipX = -500;
       this.tooltipY = -500;
+
     },
+
+    onKey(e){
+      if(e.key=="h"){
+        this.data.nodes.filter(d => this.focusedNode.includes(d.id)).forEach(d => {
+            this.setFocusedNode({id:d.id, flag:false});
+
+            //this.tooltipX = null;
+            //this.tooltipY = null;
+            //this.tooltipFullactive = false;
+            this.$refs.tooltip.hideTooltipFast();
+            setTimeout(()=>{
+              this.tooltipFullactive = false;
+            }, 0.2);
+
+            if(d.type=='project'){
+
+              this.setNodeSelect(d.id, false);
+
+            }else{
+
+              this.setSubnode(d.id, false);
+            }
+        });
+
+
+      }
+    },
+
   }
 }
 </script>
@@ -760,6 +833,17 @@ export default {
   }
   .settings-button:hover{
     opacity: 0.8;
+  }
+  .deleteNote{
+    margin:0;
+    position:absolute;
+    font-family: sans-serif;
+    font-size:14px;
+    text-align: right;
+    left:10px;
+    bottom: 5px;
+    color: white;
+    mix-blend-mode: difference;
   }
   .zoomNote{
     margin:0;

@@ -41,7 +41,7 @@
         </reader>
       </template>
 
-      <template slot="viz">
+      <template slot="viz" >
         <viz
           ref='vizComponent'
           :nodeData=selectedNodeData
@@ -49,6 +49,7 @@
           :setSubnode=setSubnode
           :createTabBySubnode=createTabBySubnode
           :selectNodesBySubnode=selectNodesBySubnode
+          :searchConnectedNodes=searchConnectedNodes
         >
         </viz>
       </template>
@@ -200,6 +201,7 @@ export default {
       'changeActiveTab',
       'changeReaderHeight',
       'changeReaderContent',
+      'setDeleteMode',
     ]),
     lastUpdateDate(done){
       let domain = "https://quagga.club/api/recent/" ;
@@ -227,6 +229,9 @@ export default {
         }else{
           tabName = query.query.start.replace(/-/g,"/") + "-" + query.query.end.replace(/-/g,"/");
         }
+      }else if(type == 'connected'){
+        domain = "https://quagga.club/api/connected/" + query.id;
+        tabName = query.tabName;
       }
       console.log(domain);
       api.get(domain)
@@ -234,7 +239,11 @@ export default {
           console.log("nodes", response);
           let num = response.body.length;
           let timestamp = Date.now();
-          this.integrateNodes(response.body, {'type': query.type, 'value': tabName, 'timestamp': timestamp});
+          if(type == 'connected'){
+            this.integrateNodes(response.body[0].projects, {'type': query.type, 'value': tabName, 'timestamp': timestamp});
+          }else{
+            this.integrateNodes(response.body, {'type': query.type, 'value': tabName, 'timestamp': timestamp});
+          }
           done(num, timestamp, tabName);
         })
         .catch((error) => {
@@ -251,7 +260,12 @@ export default {
       this.queryNodes({'type': 'dateSearch', 'query': query}, (res,timestamp, tabName )=>{
         done({'res': res, 'query': tabName, 'timestamp': timestamp});
       });
-
+    },
+    searchConnectedNodes(id, tabName){
+      this.queryNodes({'type': 'connected', 'id': id, 'tabName': tabName }, (res,timestamp, tabName )=>{
+        console.log("done")
+        this.changeActiveTab({'res': res, 'query': tabName, 'timestamp': timestamp});
+      });
     },
     integrateNodes(newNodes, requestSource){
       //first check which nodes exist already and brng them to the top,
@@ -419,6 +433,7 @@ export default {
         // we should fold subnodes in when unselecting a node
         this.nodes.find(d=>d.id==id).relationships.forEach(subnode=>{
           subnode.visible=false
+
           //subnode.fixed=false
         });
 
@@ -616,7 +631,6 @@ export default {
     setAnimateViz(flag){
       this.animateViz=flag;
     },
-
 
 
 
