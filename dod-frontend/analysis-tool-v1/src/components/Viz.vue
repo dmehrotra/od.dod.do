@@ -106,6 +106,9 @@ export default {
       'focusedNode',
       'tooltipDims',
       'deleteMode',
+      'currentReaderContent',
+      'readerMaxHeight',
+      'readerHeightGoal',
     ]),
     vizWidth: function(){
       let w = (1.0-this.leftColPercGoal)*this.windowDims.width-this.resizeElementWidth/2;
@@ -153,7 +156,10 @@ export default {
   methods: {
     ...mapActions([
      'toggleVizSettings',
-      'setFocusedNode'
+      'setFocusedNode',
+      'changeReaderContent',
+      'changeReaderHeight',
+      'changeActiveTab',
     ]),
     vizResized(){
       if(this.ready)
@@ -274,8 +280,6 @@ export default {
                 return acc 
               }
             }, 0)
-            console.log("final xs", xs);
-            console.log("final ys", ys);
             
             
             return [xs,ys];
@@ -536,27 +540,15 @@ export default {
                   this.tooltipFullactive = false;
                 })
                 .on('click', (d,i,nodes)=>{
-                  if(this.deleteMode){
-
-                    this.setFocusedNode({id:d.id, flag:false});
-
-                    //this.tooltipX = null;
-                    //this.tooltipY = null;
-                    //this.tooltipFullactive = false;
-                    this.$refs.tooltip.hideTooltipFast();
-                    setTimeout(()=>{
-                      this.tooltipFullactive = false;
-                    }, 0.1);
 
                     if(d.type=='project'){
 
-                      this.setNodeSelect(d.id, false);
+                      this.changeReader(d);
 
-                    }else{
-
-                      this.setSubnode(d.id, false);
                     }
-                  }
+                  
+                    this.setFocusedNode({id:d.id, flag:true});
+
                 })
       ;
 
@@ -641,7 +633,6 @@ export default {
     flatten(nestedData){
       return nestedData.reduce((acc, d)=>{
         if(!acc.map(node=>node.id).includes(d.id)){
-          console.log("checking", d);
           acc.push(d); 
         }
         d.subnodes.forEach(subnode=>{
@@ -756,7 +747,6 @@ export default {
 
       this.dragging = false;
       
-      console.log("fix", d.fixed);
       if(d.fixed ==undefined || !d.fixed){
         d.fx = null;
         d.fy = null;
@@ -797,6 +787,22 @@ export default {
         });
 
 
+      }
+    },
+    changeReader: function(node){
+      // here should be a function to navigate autimatically to the node in the pane when this is clicked
+      //
+      //
+      //
+      this.changeActiveTab({type:'graph', value:'graph', timestamp:0})
+      //
+      //
+      if(this.currentReaderContent.id == node.id && this.readerHeightGoal == this.readerMaxHeight){
+        this.changeReaderHeight(0);
+        this.changeReaderContent({id: undefined, text: undefined, date: undefined});
+      }else{
+        this.changeReaderHeight(this.readerMaxHeight);
+        this.changeReaderContent({id: node.id, text: node.full_text, date: node.filing_date});
       }
     },
 

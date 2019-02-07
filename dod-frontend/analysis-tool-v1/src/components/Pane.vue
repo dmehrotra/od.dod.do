@@ -54,6 +54,7 @@ export default {
   },
   props:[
     'nodes',
+    'nodesOfActiveTab',
     'deleteNode',
     'setNodeSelect',
     'activeSubnodeIds',
@@ -67,15 +68,15 @@ export default {
       'windowDims',
       'focusedNode',
     ]),
-    nodesOfActiveTab: function(){
-      if(this.activeTab.type == 'all'){
-        return this.nodes;
-      }else if(this.activeTab.type == 'graph'){
-        return this.nodes.filter(node=>node.selected);
-      }else{
-        return this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==this.activeTab.type&&rs.value==this.activeTab.value)));
-      }
-    },
+    //nodesOfActiveTab: function(){
+    //  if(this.activeTab.type == 'all'){
+    //    return this.nodes;
+    //  }else if(this.activeTab.type == 'graph'){
+    //    return this.nodes.filter(node=>node.selected);
+    //  }else{
+    //    return this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==this.activeTab.type&&rs.value==this.activeTab.value)));
+    //  }
+    //},
     nodesBytTabAndDate:function(){
       return this.nodesOfActiveTab.sort(function(a,b){
         // Turn your strings into dates, and then subtract them
@@ -87,7 +88,6 @@ export default {
   mounted(){
     this.calculateExtras();
     this.unwatchActiveTab = this.$store.watch(this.$store.getters.activeTabWatcher, _ => {
-      console.log('atcive tab changed', _);
       this.calculateExtras();
     });
   },

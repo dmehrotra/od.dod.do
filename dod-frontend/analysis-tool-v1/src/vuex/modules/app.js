@@ -45,7 +45,6 @@ const getters = {
 
 const mutations = {
   [types.CHANGE_ACTIVE_TAB] (state, data){
-    console.log('changin tab', data);
     state.activeTab = data;
   },
   [types.CHANGE_READER_CONTENT] (state, data){

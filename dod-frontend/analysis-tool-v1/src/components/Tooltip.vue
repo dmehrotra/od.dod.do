@@ -101,8 +101,6 @@ export default {
 	watch: {
     '$props.xPos':{
       handler: function (val, oldVal) { 
-        console.log("[Tooltip] xPos changed");
-        console.log(val);
         if(this.opacity>0 && this.xPosition != -500){
           TweenLite.to(this.$data, 0.5, { xPosition: val });
         }else if(val != null){

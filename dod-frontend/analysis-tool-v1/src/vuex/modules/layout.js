@@ -15,6 +15,9 @@ const state = {
   tabBarHeight: 30,
   tabHeight: 20,
 
+  //top subnode bar
+  topSubnodeBarHeight: 94,
+
   //reader
   readerMaxHeight: 250,
   readerHeightGoal: 0,
@@ -46,6 +49,9 @@ const getters = {
   tabBarHeight: state => state.tabBarHeight,
   tabHeight: state => state.tabHeight,
 
+  //top subnode bar
+  topSubnodeBarHeight: state => state.topSubnodeBarHeight,
+
   //reader
   readerMaxHeight: state => state.readerMaxHeight,
   readerHeightGoal: state => state.readerHeightGoal,
@@ -54,7 +60,7 @@ const getters = {
   //pane
   minPaneItemWidth: state => state.minPaneItemWidth,
   paneItemHeight: state => state.paneItemHeight,
-  heightAllButPane: state => state.readerHeightGoal+state.searchBarHeight+state.tabBarHeight+state.resizeElementWidth/2,
+  heightAllButPane: state => state.readerHeightGoal+state.searchBarHeight+state.tabBarHeight+state.topSubnodeBarHeight+state.resizeElementWidth/2,
 
 
 }

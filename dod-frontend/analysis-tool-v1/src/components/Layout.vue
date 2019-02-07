@@ -29,7 +29,12 @@
       </div>
 
       <div class='main-col-1-row-3 main-col-1-row'
-              :style="{height: height-readerHeight-searchBarHeight-tabBarHeight-resizeElementWidth/2+'px', overflow:'scroll'}">
+         :style="{height: topSubnodeBarHeight+'px'}">
+        <slot name="topSubnodes"></slot>
+      </div>
+
+      <div class='main-col-1-row-3 main-col-1-row'
+              :style="{height: height-readerHeight-searchBarHeight-tabBarHeight-topSubnodeBarHeight-resizeElementWidth/2+'px', overflow:'scroll'}">
 
         <slot name="pane"></slot>
 
@@ -111,6 +116,8 @@ export default {
       'readerMaxHeight',
       'tabBarHeight',
       'tabHeight',
+      'topSubnodeBarHeight',
+      
 
       'currentReaderContent',
     ]),

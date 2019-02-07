@@ -5,6 +5,14 @@
 </template>
 
 <script>
+
+// helper function:
+// learned here: https://gist.github.com/xposedbones/75ebaef3c10060a3ee3b246166caab56
+Number.prototype.map = function (in_min, in_max, out_min, out_max) {
+  return (this - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+
 export default {
   name: 'App'
 }

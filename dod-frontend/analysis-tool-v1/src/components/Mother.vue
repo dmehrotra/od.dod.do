@@ -26,9 +26,18 @@
           </tabs>
       </template>
 
+      <template slot="topSubnodes">
+        <top-subnodes
+          :topSubnodes=topSubnodesInActiveTab
+          :focusNodeBySubnode=focusNodeBySubnode
+          >
+        </top-subnodes>
+      </template>
+
       <template slot="pane">
         <pane
           :nodes=nodes
+          :nodesOfActiveTab=nodesOfActiveTab
           :deleteNode=deleteNode
           :setNodeSelect=setNodeSelect
           :activeSubnodeIds=activeSubnodeIds
@@ -110,6 +119,7 @@ import Layout from '@/components/Layout'
 import Search from '@/components/Search'
 import DatePicker from '@/components/DatePicker'
 import Tabs from '@/components/Tabs'
+import TopSubnodes from '@/components/TopSubnodes'
 import Pane from '@/components/Pane'
 
 import Viz from '@/components/Viz'
@@ -126,6 +136,7 @@ export default {
     DatePicker,
     Pane, 
     Tabs,
+    TopSubnodes,
     Reader,
     Viz,
   },
@@ -186,6 +197,43 @@ export default {
         return acc.concat(node.relationships.filter(subnode=>(subnode.visible&&!acc.includes(subnode.id))).map(subnode=>subnode.id));
       }, []);
     },
+    nodesOfActiveTab: function(){
+      if(this.activeTab.type == 'all'){
+        return this.nodes;
+      }else if(this.activeTab.type == 'graph'){
+        return this.nodes.filter(node=>node.selected);
+      }else{
+        return this.nodes.filter(node=>node.requestSource.find(rs=>(rs.type==this.activeTab.type&&rs.value==this.activeTab.value)));
+      }
+    },
+    topSubnodesInActiveTab: function(){
+      let arr = Object.keys(this.subNodeCountInActiveTab).map(key=>{
+        let n = this.subNodeCountInActiveTab[key];
+        return [key, n[0], n[1]];
+      })
+      arr.sort((a,b)=>b[1]-a[1]);
+      //return arr
+      return {nodes: arr, more: false, min: arr.length?arr[arr.length-1][1]:0, max: arr.length?arr[0][1]:0}
+      // // only top five:
+      //let maxnum = 5;
+      //let top = arr.filter(i=>i[1]>1).slice(0,maxnum);
+      //return {topnodes: top, more: top[top.length-1][1] == arr[maxnum][1], min: top[top.length-1][1], max: top[0][1]}
+    },
+    subNodeCountInActiveTab: function(){
+      return this.currentTabSubnodesFlat.reduce((acc, item)=>{
+        let id = item[0]
+        if(acc[id] == undefined){
+          acc[id] = [1, item[1]];
+        }else{
+          acc[id][0]++;
+        }
+        return acc;
+      }, {});
+    },
+    currentTabSubnodesFlat: function(){
+      return this.nodesOfActiveTab.map(node=>node.relationships.map(subnode=>[subnode.id, subnode.title])).flat();
+    },
+
   },
   mounted(){
     this.nodes.forEach(d=>{
@@ -202,6 +250,7 @@ export default {
       'changeReaderHeight',
       'changeReaderContent',
       'setDeleteMode',
+      'setFocusedNode',
     ]),
     lastUpdateDate(done){
       let domain = "https://quagga.club/api/recent/" ;
@@ -461,7 +510,6 @@ export default {
         }
         return acc;
       }, {});
-      console.log(sharedSubnodes);
       Object.keys(sharedSubnodes).forEach(d=>{
         if(sharedSubnodes[d] >= this.sharedRelationsThreshold){
           this.setSubnode(d, true);
@@ -561,7 +609,6 @@ export default {
 
     },
     setSubnode(id, flag){
-      console.log("set subnode", id, flag);
       this.nodes.forEach(d=>{
         let subnode = d.relationships.find(dd=>dd.id==id);
         if(subnode){
@@ -580,14 +627,24 @@ export default {
       //this.nodes.find(d=>d.id==id).relationships.forEach(d=>d.visible = true);
       this.nodes.find(d=>d.id==id).relationships.forEach(d=>this.setSubnode(d.id, flag));
     },
+   
+    focusNodeBySubnode(id, flag){
+      this.nodes.filter(node=>{
+        return node.relationships.map(subnode=>subnode.id).findIndex(sid=>sid==id) > -1;
+      }).map(node=>node.id).forEach(id=>{
+        this.setFocusedNode({id:id, flag: flag});
+      });
+
+    },
+
     
 
-    setActiveNode(id, flag){
-      if(flag){
-        this.activeNode = id;
-      }else{
-        this.activeNode = undefined;
-      }
+    //setActiveNode(id, flag){
+    //  if(flag){
+    //    this.activeNode = id;
+    //  }else{
+    //    this.activeNode = undefined;
+    //  }
       //let b = false;
       //for(let i = 0; i< this.nodes.length; i++){
       //  if(this.nodes[i].id == id){
@@ -603,7 +660,7 @@ export default {
       //  }
       //  if(b) break;
       //}
-    },
+    //},
     markProject(id, color){
       this.setAnimateViz(false);
       let project = this.nodes.find(d=>d.id==id);
